@@ -14,12 +14,13 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
 RANGE_NAME = "Scores!B2:C"  # Adjust based on your sheet structure
 
+# Constants
+REFRESH_INTERVAL_HOURS = 4  # Refresh interval in hours
+MIN_REFRESH_INTERVAL_SECONDS = 30  # Minimum time between forced refreshes
+
 # Global variables to store the score mappings and last refresh time
 score_mappings = {}
 last_refresh_time = None
-
-# Refresh interval in hours
-REFRESH_INTERVAL_HOURS = 4
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
@@ -62,43 +63,6 @@ def fetch_all_scores_from_sheet():
     except Exception as e:
         print(f"Error fetching scores from sheet: {e}")
         return {}  # Return empty dict on error
-
-
-def get_scores_from_sheet(nicknames_to_find):
-    """
-    Get scores for specific nicknames from the global score_mappings.
-    If score_mappings is empty or it's been more than REFRESH_INTERVAL_HOURS since the last refresh,
-    fetch all scores first.
-
-    Args:
-        nicknames_to_find (list): List of nicknames to find scores for
-
-    Returns:
-        dict: Dictionary mapping requested nicknames to scores
-    """
-    global score_mappings, last_refresh_time
-
-    # Check if we need to refresh the data
-    current_time = datetime.now()
-    refresh_interval = timedelta(hours=REFRESH_INTERVAL_HOURS)
-
-    if (
-        not score_mappings
-        or last_refresh_time is None
-        or (current_time - last_refresh_time) > refresh_interval
-    ):
-        score_mappings = fetch_all_scores_from_sheet()
-        last_refresh_time = current_time
-        print(f"Auto-refreshed score mappings at {current_time}")
-
-    # Create result dictionary with scores for requested nicknames
-    result_scores = {}
-    for nickname in nicknames_to_find:
-        result_scores[nickname] = score_mappings.get(
-            nickname, 0
-        )  # Default to 0 if not found
-
-    return result_scores
 
 
 def balance_teams(user_scores):
@@ -150,58 +114,74 @@ def hello():
     return jsonify({"message": "Hello from Team Balancer Backend!"})
 
 
-@app.route("/api/refresh", methods=["GET"])
-def refresh():
-    """
-    Endpoint to refresh the score mappings from Google Sheet.
-
-    Returns: {'success': True/False, 'message': '...', 'count': number_of_scores}
-    """
-    try:
-        global score_mappings, last_refresh_time
-        score_mappings = fetch_all_scores_from_sheet()
-        last_refresh_time = datetime.now()
-
-        return jsonify(
-            {
-                "success": True,
-                "message": "Score mappings refreshed successfully",
-                "count": len(score_mappings),
-            }
-        )
-
-    except Exception as e:
-        return jsonify(
-            {"success": False, "message": f"An error occurred: {str(e)}", "count": 0}
-        ), 500
-
-
 @app.route("/api/get_mappings", methods=["GET"])
 def get_mappings():
     """
     Endpoint to get the last fetched score mappings.
     Auto-refreshes the data every REFRESH_INTERVAL_HOURS hours.
 
-    Returns: {'scores': {nickname: score, ...}}
+    Query parameters:
+        force_refresh (bool): If 'true', forces a refresh of the data if at least MIN_REFRESH_INTERVAL_SECONDS
+                             have passed since the last refresh
+
+    Returns: {
+        'scores': {nickname: score, ...},
+        'refreshed': True/False,
+        'force_refresh_prevented': True/False,
+        'seconds_until_next_refresh': int (seconds remaining until a forced refresh is allowed)
+    }
     """
     try:
         global score_mappings, last_refresh_time
 
-        # If score_mappings is empty or it's been more than REFRESH_INTERVAL_HOURS since the last refresh,
-        # fetch the data again
+        # Check if force_refresh is set to true in the query parameters
+        force_refresh = request.args.get("force_refresh", "").lower() == "true"
+        refreshed = False
+
+        # Get current time for refresh check
         current_time = datetime.now()
         refresh_interval = timedelta(hours=REFRESH_INTERVAL_HOURS)
+        min_refresh_interval = timedelta(seconds=MIN_REFRESH_INTERVAL_SECONDS)
 
+        # Check if we can do a forced refresh (at least MIN_REFRESH_INTERVAL_SECONDS since last refresh)
+        can_force_refresh = (
+            last_refresh_time is None
+            or (current_time - last_refresh_time) > min_refresh_interval
+        )
+
+        # Refresh if auto-refresh conditions are met or if forced and minimum interval has passed
         if (
-            not score_mappings
+            (force_refresh and can_force_refresh)
+            or not score_mappings
             or last_refresh_time is None
             or (current_time - last_refresh_time) > refresh_interval
         ):
             score_mappings = fetch_all_scores_from_sheet()
             last_refresh_time = current_time
-            print(f"Auto-refreshed score mappings at {current_time}")
+            refreshed = True
+            refresh_type = "auto"
+            if force_refresh:
+                if can_force_refresh:
+                    refresh_type = "forced"
+                else:
+                    refresh_type = "forced (prevented - too soon)"
 
-        return jsonify({"scores": score_mappings})
+            print(f"Refreshed score mappings at {current_time} ({refresh_type})")
+
+        # Add information about whether a forced refresh was prevented due to time constraints
+        force_refresh_prevented = force_refresh and not can_force_refresh
+
+        return jsonify(
+            {
+                "scores": score_mappings,
+                "refreshed": refreshed,
+                "force_refresh_prevented": force_refresh_prevented,
+                "seconds_until_next_refresh": MIN_REFRESH_INTERVAL_SECONDS
+                - (current_time - last_refresh_time).total_seconds()
+                if force_refresh_prevented
+                else 0,
+            }
+        )
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500

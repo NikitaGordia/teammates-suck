@@ -36,6 +36,8 @@ Returns a hello message from the backend.
 ### GET /api/refresh
 Refreshes the internal score mappings from the Google Sheet.
 
+**Note:** This endpoint is maintained for backward compatibility. It's recommended to use `/api/get_mappings?force_refresh=true` instead.
+
 Response:
 ```json
 {
@@ -46,7 +48,10 @@ Response:
 ```
 
 ### GET /api/get_mappings
-Returns the last fetched score mappings.
+Returns the last fetched score mappings. Auto-refreshes the data every REFRESH_INTERVAL_HOURS hours.
+
+Query parameters:
+- `force_refresh` (boolean): If set to `true`, forces a refresh of the data if at least MIN_REFRESH_INTERVAL_SECONDS (30 seconds) have passed since the last refresh
 
 Response:
 ```json
@@ -56,17 +61,29 @@ Response:
     "Player2": 8,
     "Player3": 5,
     "Player4": 7
-  }
+  },
+  "refreshed": true,
+  "force_refresh_prevented": false,
+  "seconds_until_next_refresh": 0
 }
 ```
 
+If a forced refresh is prevented due to the minimum interval not being met, the response will include:
+- `force_refresh_prevented`: true
+- `seconds_until_next_refresh`: number of seconds until a forced refresh is allowed
+
 ### POST /api/balance
-Balances players into two teams based on their scores from the internal mappings.
+Balances players into two teams based on their scores.
 
 Request body:
 ```json
 {
-  "nicknames": ["Player1", "Player2", "Player3", "Player4"]
+  "users": {
+    "Player1": 10,
+    "Player2": 8,
+    "Player3": 5,
+    "Player4": 7
+  }
 }
 ```
 
