@@ -1,0 +1,126 @@
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 30px; /* Add padding at the bottom */
+  background-color: #f5f5f5;
+}
+
+/* Title styling */
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Fancy styling for the 'Balancer' part */
+.fancy-title {
+  background: linear-gradient(45deg, #2196F3, #673AB7, #4CAF50, #FF9800);
+  background-size: 300% 300%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  font-style: italic;
+  position: relative;
+  padding: 0 5px;
+  animation: gradient-shift 5s ease infinite, glow 2s ease-in-out infinite alternate;
+  font-size: 110%;
+  transition: transform 0.3s ease;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+}
+
+.fancy-title:hover {
+  transform: scale(1.05);
+}
+
+.fancy-title::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(45deg, #2196F3, #673AB7, #4CAF50, #FF9800);
+  background-size: 300% 300%;
+  border-radius: 3px;
+  animation: gradient-shift 5s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 5px rgba(33, 150, 243, 0.3), 0 0 10px rgba(103, 58, 183, 0.2);
+  }
+  to {
+    text-shadow: 0 0 10px rgba(33, 150, 243, 0.5), 0 0 20px rgba(103, 58, 183, 0.3);
+  }
+}
+
+h2 {
+  margin-bottom: 15px;
+  color: #444;
+}
+
+/* Main container with two-column layout */
+.main-container {
+  display: flex;
+  gap: 30px;
+  /* Removed min-height to allow natural sizing */
+}
+
+/* Left column - Players section */
+.players-section {
+  flex: 1;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content; /* Allow natural height */
+}
+
+/* Right column - Teams section */
+.teams-section {
+  flex: 1;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content; /* Allow natural height */
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+  }
+}
