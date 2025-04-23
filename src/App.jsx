@@ -30,6 +30,9 @@ function App() {
   // Toggle for showing all known players
   const [showAllPlayers, setShowAllPlayers] = useState(false);
 
+  // Randomness slider state (0-100%)
+  const [randomness, setRandomness] = useState(0);
+
   // Handler functions
   // Fetch score mappings from backend
   const fetchScoreMappings = async () => {
@@ -186,7 +189,13 @@ function App() {
         usersData[player.nickname] = player.score;
       });
 
-      console.log('Sending balance request with data:', { users: usersData });
+      // Include randomness in the request data
+      const requestData = {
+        users: usersData,
+        randomness: randomness
+      };
+
+      console.log('Sending balance request with data:', requestData);
 
       // Make the POST request to the balance API
       // Note: Using /api/balance without trailing slash to match the server route
@@ -195,7 +204,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ users: usersData }),
+        body: JSON.stringify(requestData),
         // Adding mode: 'cors' explicitly
         mode: 'cors',
       });
@@ -249,7 +258,12 @@ function App() {
             onRemovePlayer={handleRemovePlayer}
           />
           <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={scoreMappings} />
-          <BalanceButton onBalanceTeams={handleBalanceTeams} isLoading={isLoading} />
+          <BalanceButton
+            onBalanceTeams={handleBalanceTeams}
+            isLoading={isLoading}
+            randomness={randomness}
+            onRandomnessChange={setRandomness}
+          />
 
           {/* All known players toggle */}
           <div style={{ marginTop: '10px', marginBottom: '20px' }}>
