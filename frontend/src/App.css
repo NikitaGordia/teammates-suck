@@ -1,0 +1,143 @@
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  padding: 30px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5px 15px 30px 15px; /* Added horizontal padding */
+  background-color: #f5f5f5;
+}
+
+h2 {
+  margin-bottom: 15px;
+  color: #444;
+}
+
+/* Main container with flexible layout */
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "players teams"
+    "balancing-status teams";
+  gap: 30px;
+  padding: 10px;
+  margin-top: 10px; /* Added top margin to compensate for removed title */
+  /* Removed min-height to allow natural sizing */
+}
+
+/* Players section */
+.players-section {
+  grid-area: players;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content; /* Allow natural height */
+}
+
+/* Teams section */
+.teams-section {
+  grid-area: teams;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content; /* Allow natural height */
+}
+
+/* Balancing status section */
+.balancing-status-section {
+  grid-area: balancing-status;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .main-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "players"
+      "teams"
+      "balancing-status";
+    gap: 30px;
+  }
+
+  body {
+    padding: 20px;
+  }
+
+  .App {
+    padding: 0 10px 20px 10px;
+  }
+}
+
+/* Spinner Animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.refresh-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.refresh-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  width: 80px;
+  height: 28px;
+  transition: background-color 0.3s;
+}
+
+.refresh-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.refresh-button:not(:disabled):hover {
+  background-color: #1976D2;
+}
+
+/* Animation for fade in effect - kept for potential future use */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
