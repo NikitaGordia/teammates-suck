@@ -91,16 +91,20 @@ h2 {
   color: #444;
 }
 
-/* Main container with two-column layout */
+/* Main container with flexible layout */
 .main-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "players teams"
+    "balancing-status teams";
   gap: 30px;
   /* Removed min-height to allow natural sizing */
 }
 
-/* Left column - Players section */
+/* Players section */
 .players-section {
-  flex: 1;
+  grid-area: players;
   background-color: white;
   padding: 20px;
   border-radius: 8px;
@@ -108,20 +112,37 @@ h2 {
   height: fit-content; /* Allow natural height */
 }
 
-/* Right column - Teams section */
+/* Teams section */
 .teams-section {
-  flex: 1;
+  grid-area: teams;
   background-color: white;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   height: fit-content; /* Allow natural height */
+}
+
+/* Balancing status section */
+.balancing-status-section {
+  grid-area: balancing-status;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 /* Responsive layout */
 @media (max-width: 768px) {
   .main-container {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "players"
+      "teams"
+      "balancing-status";
+    gap: 30px;
   }
 }
 

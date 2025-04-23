@@ -359,7 +359,13 @@ function App() {
               {/* Raw Data section removed as requested */}
             </div>
           )}
+        </div>
 
+        <div className="balancing-status-section">
+          <h2>Balancing Status</h2>
+          <p style={{ marginBottom: '15px', color: '#666', fontSize: '14px' }}>
+            Player scores determine how teams are balanced. Here's what each score means:
+          </p>
           <BalancingInfo />
         </div>
 
