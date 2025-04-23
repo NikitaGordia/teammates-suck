@@ -164,36 +164,59 @@ function App() {
     setPlayers(updatedPlayers);
   };
 
-  const handleBalanceTeams = () => {
+  const handleBalanceTeams = async () => {
     console.log('handleBalanceTeams called');
 
-    // Simple team balancing algorithm
+    // Check if there are players to balance
     if (players.length === 0) {
       alert('Please add players first!');
       return;
     }
 
-    // Sort players by score (descending)
-    const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+    // Set loading state
+    setIsLoading(true);
 
-    // Initialize teams
-    const team1 = [];
-    const team2 = [];
-    let team1Score = 0;
-    let team2Score = 0;
+    try {
+      // Format the players data as required by the API
+      const usersData = {};
+      players.forEach(player => {
+        usersData[player.nickname] = player.score;
+      });
 
-    // Distribute players to balance teams
-    sortedPlayers.forEach(player => {
-      if (team1Score <= team2Score) {
-        team1.push(player);
-        team1Score += player.score;
-      } else {
-        team2.push(player);
-        team2Score += player.score;
+      console.log('Sending balance request with data:', { users: usersData });
+
+      // Make the POST request to the balance API
+      // Note: Using /api/balance without trailing slash to match the server route
+      const response = await fetch('http://127.0.0.1:5000/api/balance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ users: usersData }),
+        // Adding mode: 'cors' explicitly
+        mode: 'cors',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    });
 
-    setTeams({ team1, team2 });
+      // Parse the response
+      const data = await response.json();
+      console.log('Received balanced teams:', data);
+
+      // Map the API response to the expected format for the teams state
+      // API returns { teamA: [], teamB: [] } but our components expect { team1: [], team2: [] }
+      setTeams({
+        team1: data.teamA || [],
+        team2: data.teamB || []
+      });
+    } catch (error) {
+      console.error('Error balancing teams:', error);
+      alert('Failed to balance teams. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -209,7 +232,7 @@ function App() {
             onRemovePlayer={handleRemovePlayer}
           />
           <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={scoreMappings} />
-          <BalanceButton onBalanceTeams={handleBalanceTeams} />
+          <BalanceButton onBalanceTeams={handleBalanceTeams} isLoading={isLoading} />
 
           {/* All known players toggle */}
           <div style={{ marginTop: '10px', marginBottom: '20px' }}>
