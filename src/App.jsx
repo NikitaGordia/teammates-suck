@@ -254,8 +254,6 @@ function App() {
 
   return (
     <div className="App">
-      <h1 className="title">Team <span className="fancy-title">Balancer</span></h1>
-
       <div className="main-container">
         <div className="players-section">
           <h2>Players</h2>
