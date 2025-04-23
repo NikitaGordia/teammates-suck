@@ -16,6 +16,7 @@ frontend/
 ├── public/             # Static assets
 ├── src/                # Source code
 │   ├── components/     # React components
+│   ├── config.js       # Application configuration
 │   ├── App.jsx         # Main application component
 │   ├── App.css         # Main application styles
 │   ├── main.jsx        # Application entry point
@@ -33,14 +34,15 @@ frontend/
    ```bash
    # Navigate to the frontend directory
    cd frontend
-   
+
    # Install dependencies
    npm install
    ```
 
 3. Configure the backend URL:
-   - The application is configured to connect to the backend at `http://127.0.0.1:5000`
-   - If your backend runs on a different URL, update the API endpoint URLs in `src/App.jsx`
+   - The application is configured to connect to the backend at `http://127.0.0.1:5050` by default
+   - If your backend runs on a different URL, create a `.env` file based on `.env.example` and set the `VITE_API_BASE_URL` variable
+   - All API configuration is centralized in `src/config.js`
 
 ## Development
 

@@ -5,6 +5,7 @@ import BalanceButton from './components/BalanceButton';
 import TeamsDisplay from './components/TeamsDisplay';
 import TeamCopyText, { copyTeamsToClipboard } from './components/TeamCopyText';
 import BalancingInfo from './components/BalancingInfo';
+import { API_CONFIG, getApiUrl } from './config';
 import './App.css';
 
 function App() {
@@ -55,7 +56,7 @@ function App() {
     setIsThrottled(true);
 
     // Start the throttle countdown
-    let timeRemaining = 30;
+    let timeRemaining = API_CONFIG.THROTTLE_TIME;
     setThrottleTimeLeft(timeRemaining);
 
     // Update the countdown every second
@@ -72,10 +73,10 @@ function App() {
     try {
       // Create AbortController for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
+      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
       // Add force_refresh=true parameter to the URL
-      const url = new URL('http://127.0.0.1:5000/api/get_mappings');
+      const url = new URL(getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS));
       url.searchParams.append('force_refresh', 'true');
 
       const response = await fetch(url.toString(), {
@@ -94,7 +95,7 @@ function App() {
     } catch (error) {
       console.error('Error fetching score mappings:', error);
       if (error.name === 'AbortError') {
-        alert('Request timed out after 30 seconds. Please check if the backend server is running.');
+        alert(`Request timed out after ${API_CONFIG.TIMEOUT/1000} seconds. Please check if the backend server is running.`);
       } else {
         alert('Failed to fetch score mappings from the server. Please try again later.');
       }
@@ -109,9 +110,9 @@ function App() {
     setIsLoading(true);
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
-      const response = await fetch('http://127.0.0.1:5000/api/get_mappings', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS), {
         signal: controller.signal
       });
 
@@ -125,7 +126,7 @@ function App() {
     } catch (error) {
       console.error('Error fetching initial score mappings:', error);
       if (error.name === 'AbortError') {
-        alert('Initial request timed out after 30 seconds. Please check if the backend server is running.');
+        alert(`Initial request timed out after ${API_CONFIG.TIMEOUT/1000} seconds. Please check if the backend server is running.`);
       } else {
         alert('Failed to fetch initial score mappings from the server.');
       }
@@ -209,8 +210,7 @@ function App() {
       console.log('Sending balance request with data:', requestData);
 
       // Make the POST request to the balance API
-      // Note: Using /api/balance without trailing slash to match the server route
-      const response = await fetch('http://127.0.0.1:5000/api/balance', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.BALANCE), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
