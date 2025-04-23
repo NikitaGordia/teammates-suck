@@ -74,7 +74,7 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
   }, []);
 
   return (
-    <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+    <div style={{ marginTop: '5px', marginBottom: '5px' }}>
       {/* Container for button and slider in a row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         {/* Balance button */}

@@ -116,7 +116,7 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {} }) => {
   };
 
   return (
-    <div style={{ marginBottom: '20px' }}>
+    <div style={{ marginBottom: '5px' }}>
       <form onSubmit={handleSubmit}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <tbody>

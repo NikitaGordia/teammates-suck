@@ -16,7 +16,7 @@ body {
 .App {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 15px 30px 15px; /* Added horizontal padding */
+  padding: 5px 15px 30px 15px; /* Added horizontal padding */
   background-color: #f5f5f5;
 }
 
