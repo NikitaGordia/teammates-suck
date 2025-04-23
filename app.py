@@ -17,6 +17,7 @@ RANGE_NAME = "Scores!B2:C"  # Adjust based on your sheet structure
 # Constants
 REFRESH_INTERVAL_HOURS = 4  # Refresh interval in hours
 MIN_REFRESH_INTERVAL_SECONDS = 30  # Minimum time between forced refreshes
+DEFAULT_RANDOMNESS = 0  # Default randomness value (0-100) for team balancing
 
 # Global variables to store the score mappings and last refresh time
 score_mappings = {}
@@ -65,12 +66,15 @@ def fetch_all_scores_from_sheet():
         return {}  # Return empty dict on error
 
 
-def balance_teams(user_scores):
+def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
     """
-    Balance players into two teams based on their scores.
+    Balance players into two teams by pairing players from the sorted list and distributing each pair
+    between the two teams, with optional randomness applied to the scores.
 
     Args:
         user_scores (dict): Dictionary mapping usernames to their scores {'user1': 3, 'user2': 2, ...}
+        randomness (int): Value between 0-100 that determines how much randomness to add to scores
+                         0 = no randomness, 100 = maximum randomness
 
     Returns:
         dict: Dictionary with 'teamA' and 'teamB' lists of player objects
@@ -78,13 +82,40 @@ def balance_teams(user_scores):
     # Convert the user_scores dictionary to a list of player objects
     players = []
     for username, score in user_scores.items():
-        players.append({"nickname": username, "score": score})
+        # Create a copy of the original score for balancing
+        original_score = score
 
-    # Shuffle the players randomly first
+        # Apply randomness if specified (value between 0-100)
+        if randomness > 0:
+            # Calculate the maximum random adjustment based on the randomness parameter
+            # Higher randomness = larger potential adjustment
+            max_adjustment = original_score * (randomness / 100)
+
+            # Generate a random adjustment between -max_adjustment and +max_adjustment
+            random_adjustment = random.uniform(-max_adjustment, max_adjustment)
+
+            # Apply the random adjustment to create a randomized score for balancing
+            randomized_score = original_score + random_adjustment
+
+            # Ensure score doesn't go below 0
+            randomized_score = max(0, randomized_score)
+        else:
+            # No randomness, use original score
+            randomized_score = original_score
+
+        players.append(
+            {
+                "nickname": username,
+                "score": original_score,  # Keep original score for display
+                "randomized_score": randomized_score,  # Use randomized score for balancing
+            }
+        )
+
+    # Shuffle the players randomly first to ensure random distribution when scores are equal
     random.shuffle(players)
 
-    # Sort players by score in descending order
-    players.sort(key=lambda x: x["score"], reverse=True)
+    # Sort players by randomized score in descending order
+    players.sort(key=lambda x: x["randomized_score"], reverse=True)
 
     # Initialize teams and their total scores
     team_a = []
@@ -92,15 +123,25 @@ def balance_teams(user_scores):
     team_a_total = 0
     team_b_total = 0
 
-    # Assign players to teams based on the lowest current team total score
+    max_players_per_team = len(players) // 2
+
+    # Pair players and distribute them between teams
     for player in players:
-        if team_a_total <= team_b_total:
+        if len(team_b) >= max_players_per_team:
             team_a.append(player)
-            team_a_total += player["score"]
+            team_a_total += player["randomized_score"]
+        elif len(team_a) >= max_players_per_team:
+            team_b.append(player)
+            team_b_total += player["randomized_score"]
+        elif team_a_total <= team_b_total:
+            team_a.append(player)
+            team_a_total += player["randomized_score"]
         else:
             team_b.append(player)
-            team_b_total += player["score"]
+            team_b_total += player["randomized_score"]
 
+    team_a.sort(key=lambda x: x["score"], reverse=True)
+    team_b.sort(key=lambda x: x["score"], reverse=True)
     return {"teamA": team_a, "teamB": team_b}
 
 
@@ -192,7 +233,10 @@ def balance():
     """
     Endpoint to balance players into two teams based on their scores.
 
-    Expected request body: {'users': {'user1': 3, 'user2': 2, ...}}
+    Expected request body: {
+        'users': {'user1': 3, 'user2': 2, ...},
+        'randomness': 50  # Optional, value between 0-100
+    }
     Returns: {'teamA': [...], 'teamB': [...]}
     """
     try:
@@ -218,7 +262,22 @@ def balance():
             if not isinstance(score, (int, float)):
                 user_scores[username] = 0  # Convert non-numeric scores to 0
 
-        balanced_teams = balance_teams(user_scores)
+        # Get randomness parameter if provided, otherwise use default
+        randomness = DEFAULT_RANDOMNESS
+        if "randomness" in data:
+            try:
+                randomness = int(data["randomness"])
+                # Ensure randomness is within valid range (0-100)
+                if randomness < 0 or randomness > 100:
+                    return jsonify(
+                        {"error": "Randomness must be a value between 0 and 100."}
+                    ), 400
+            except (ValueError, TypeError):
+                return jsonify(
+                    {"error": "Randomness must be a valid integer between 0 and 100."}
+                ), 400
+
+        balanced_teams = balance_teams(user_scores, randomness)
 
         return jsonify(balanced_teams)
 

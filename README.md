@@ -73,7 +73,7 @@ If a forced refresh is prevented due to the minimum interval not being met, the 
 - `seconds_until_next_refresh`: number of seconds until a forced refresh is allowed
 
 ### POST /api/balance
-Balances players into two teams based on their scores.
+Balances players into two teams so that the total sum of each team's scores is as close as possible.
 
 Request body:
 ```json
@@ -83,9 +83,18 @@ Request body:
     "Player2": 8,
     "Player3": 5,
     "Player4": 7
-  }
+  },
+  "randomness": 50
 }
 ```
+
+Parameters:
+- `users` (object, required): Mapping of player nicknames to their scores
+- `randomness` (integer, optional): Value between 0-100 that determines how much randomness to add to scores
+  - 0 = no randomness (default)
+  - 100 = maximum randomness
+
+Note: The algorithm sorts players by score (with randomness applied if specified), then pairs consecutive players and distributes each pair between the two teams. This ensures that for every high-skilled player in one team, there's a corresponding high-skilled player in the other team. If there's an odd number of players, the last player is assigned to the team with the lower total score.
 
 Response:
 ```json
