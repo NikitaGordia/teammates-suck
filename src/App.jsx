@@ -148,7 +148,7 @@ function App() {
             onScoreChange={handleScoreChange}
             onRemovePlayer={handleRemovePlayer}
           />
-          <AddPlayerForm onAddPlayer={handleAddPlayer} />
+          <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={scoreMappings} />
           <BalanceButton onBalanceTeams={handleBalanceTeams} />
 
           {/* Refresh scores button */}

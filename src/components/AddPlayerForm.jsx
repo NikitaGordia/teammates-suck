@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Helper function to get color based on score
 const getScoreColor = (score) => {
@@ -20,16 +20,98 @@ const getScoreColor = (score) => {
   }
 };
 
-const AddPlayerForm = ({ onAddPlayer }) => {
+const AddPlayerForm = ({ onAddPlayer, scoreMappings = {} }) => {
   const [nickname, setNickname] = useState('');
   const [score, setScore] = useState(3); // Default score
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+  const suggestionsRef = useRef(null);
+
+  // Filter suggestions based on input
+  useEffect(() => {
+    if (nickname.trim() === '') {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const filteredSuggestions = Object.keys(scoreMappings)
+      .filter(name =>
+        name.toLowerCase().includes(nickname.toLowerCase()))
+      .slice(0, 5); // Limit to 5 suggestions
+
+    setSuggestions(filteredSuggestions);
+    setShowSuggestions(filteredSuggestions.length > 0);
+    setActiveSuggestionIndex(0);
+  }, [nickname, scoreMappings]);
+
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (nickname.trim()) {
-      onAddPlayer({ nickname, score: Number(score) });
+      // If the nickname exists in scoreMappings, use its score
+      const playerScore = scoreMappings[nickname] !== undefined
+        ? Number(scoreMappings[nickname])
+        : Number(score);
+
+      onAddPlayer({ nickname, score: playerScore });
       setNickname('');
       setScore(3);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setNickname(suggestion);
+    if (scoreMappings[suggestion] !== undefined) {
+      setScore(Number(scoreMappings[suggestion]));
+    }
+    setShowSuggestions(false);
+  };
+
+  const handleKeyDown = (e) => {
+    // If no suggestions or not showing suggestions, return
+    if (!showSuggestions || suggestions.length === 0) return;
+
+    // Arrow down
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestionIndex(prevIndex =>
+        prevIndex < suggestions.length - 1 ? prevIndex + 1 : prevIndex
+      );
+    }
+    // Arrow up
+    else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestionIndex(prevIndex =>
+        prevIndex > 0 ? prevIndex - 1 : 0
+      );
+    }
+    // Enter
+    else if (e.key === 'Enter' && showSuggestions) {
+      e.preventDefault();
+      const selectedSuggestion = suggestions[activeSuggestionIndex];
+      if (selectedSuggestion) {
+        handleSuggestionClick(selectedSuggestion);
+      }
+    }
+    // Escape
+    else if (e.key === 'Escape') {
+      setShowSuggestions(false);
     }
   };
 
@@ -40,19 +122,68 @@ const AddPlayerForm = ({ onAddPlayer }) => {
           <tbody>
             <tr>
               <td style={{ padding: '8px', width: '100%' }}>
-                <input
-                  type="text"
-                  placeholder="Nickname"
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px',
-                    borderRadius: '4px',
-                    border: '1px solid #ddd'
-                  }}
-                  required
-                />
+                <div style={{ position: 'relative', width: '100%' }} ref={suggestionsRef}>
+                  <input
+                    type="text"
+                    placeholder="Nickname"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => nickname.trim() !== '' && setShowSuggestions(suggestions.length > 0)}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      borderRadius: '4px',
+                      border: '1px solid #ddd'
+                    }}
+                    required
+                  />
+                  {showSuggestions && suggestions.length > 0 && (
+                    <ul style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      width: '100%',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
+                      margin: 0,
+                      padding: 0,
+                      listStyle: 'none',
+                      border: '1px solid #ddd',
+                      borderTop: 'none',
+                      borderRadius: '0 0 4px 4px',
+                      backgroundColor: 'white',
+                      zIndex: 10,
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}>
+                      {suggestions.map((suggestion, index) => (
+                        <li
+                          key={index}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          style={{
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            backgroundColor: index === activeSuggestionIndex ? '#f0f0f0' : 'white',
+                            borderBottom: index < suggestions.length - 1 ? '1px solid #eee' : 'none',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <span>{suggestion}</span>
+                          {scoreMappings[suggestion] !== undefined && (
+                            <span style={{
+                              fontWeight: 'bold',
+                              color: getScoreColor(scoreMappings[suggestion])
+                            }}>
+                              {scoreMappings[suggestion]}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </td>
               <td style={{ padding: '8px', textAlign: 'right' }}>
                 <select
