@@ -20,19 +20,48 @@ function App() {
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
 
+  // Throttle state for refresh button
+  const [isThrottled, setIsThrottled] = useState(false);
+  const [throttleTimeLeft, setThrottleTimeLeft] = useState(0);
+
   // Toggle for showing all known players
   const [showAllPlayers, setShowAllPlayers] = useState(false);
 
   // Handler functions
   // Fetch score mappings from backend
   const fetchScoreMappings = async () => {
+    // If already throttled, don't allow another fetch
+    if (isThrottled) return;
+
+    // Set loading and throttle states
     setIsLoading(true);
+    setIsThrottled(true);
+
+    // Start the throttle countdown
+    let timeRemaining = 30;
+    setThrottleTimeLeft(timeRemaining);
+
+    // Update the countdown every second
+    const countdownInterval = setInterval(() => {
+      timeRemaining -= 1;
+      setThrottleTimeLeft(timeRemaining);
+
+      if (timeRemaining <= 0) {
+        clearInterval(countdownInterval);
+        setIsThrottled(false);
+      }
+    }, 1000);
+
     try {
       // Create AbortController for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 seconds timeout
 
-      const response = await fetch('http://127.0.0.1:5000/api/get_mappings', {
+      // Add force_refresh=true parameter to the URL
+      const url = new URL('http://127.0.0.1:5000/api/get_mappings');
+      url.searchParams.append('force_refresh', 'true');
+
+      const response = await fetch(url.toString(), {
         signal: controller.signal
       });
 
@@ -54,12 +83,43 @@ function App() {
       }
     } finally {
       setIsLoading(false);
+      // Note: We don't reset the throttle here as we want the button to remain disabled for 30 seconds
+    }
+  };
+
+  // Function to fetch data without throttling (for initial load)
+  const initialFetchScoreMappings = async () => {
+    setIsLoading(true);
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      const response = await fetch('http://127.0.0.1:5000/api/get_mappings', {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setScoreMappings(data.scores || {});
+    } catch (error) {
+      console.error('Error fetching initial score mappings:', error);
+      if (error.name === 'AbortError') {
+        alert('Initial request timed out after 30 seconds. Please check if the backend server is running.');
+      } else {
+        alert('Failed to fetch initial score mappings from the server.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Initialize data on component mount
   useEffect(() => {
-    fetchScoreMappings();
+    initialFetchScoreMappings();
   }, []);
 
   // We're not automatically updating players list when score mappings change
@@ -183,19 +243,19 @@ function App() {
                     <td style={{ padding: '2px 0', textAlign: 'center', width: '100px' }}>
                       <button
                         onClick={fetchScoreMappings}
-                        disabled={isLoading}
-                        style={{
-                          padding: '5px 10px',
-                          backgroundColor: '#2196F3',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '3px',
-                          cursor: isLoading ? 'not-allowed' : 'pointer',
-                          opacity: isLoading ? 0.7 : 1,
-                          width: '80px'
-                        }}
+                        disabled={isLoading || isThrottled}
+                        className="refresh-button"
                       >
-                        {isLoading ? '...' : 'Refresh'}
+                        {isLoading ? (
+                          <>
+                            <div className="refresh-spinner"></div>
+                            <span>Loading</span>
+                          </>
+                        ) : isThrottled ? (
+                          <span>{throttleTimeLeft}s</span>
+                        ) : (
+                          <span>Refresh</span>
+                        )}
                       </button>
                     </td>
                   </tr>
