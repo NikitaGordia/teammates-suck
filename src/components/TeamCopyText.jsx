@@ -25,7 +25,7 @@ export const copyTeamsToClipboard = (teams) => {
   return clipboardText;
 };
 
-const TeamCopyText = ({ teams }) => {
+const TeamCopyText = ({ teams, autocopied = false }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -38,6 +38,9 @@ const TeamCopyText = ({ teams }) => {
     }, 2000);
   };
 
+  // Use either manual copy state or auto-copied state from props
+  const isCopied = copied || autocopied;
+
   return (
     <div className="copy-container">
       <h3>Copy Teams</h3>
@@ -49,12 +52,12 @@ const TeamCopyText = ({ teams }) => {
       </div>
       <button
         onClick={handleCopy}
-        className={`copy-button ${copied ? 'copied' : ''}`}
+        className={`copy-button ${isCopied ? 'copied' : ''}`}
       >
-        {copied ? (
+        {isCopied ? (
           <>
             <span className="checkmark"></span>
-            Copied!
+            {autocopied ? 'Teams automatically copied to clipboard!' : 'Copied!'}
           </>
         ) : (
           <>

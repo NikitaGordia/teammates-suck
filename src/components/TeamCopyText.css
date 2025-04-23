@@ -60,6 +60,10 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 48px;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .copy-button:not(.copied):hover {

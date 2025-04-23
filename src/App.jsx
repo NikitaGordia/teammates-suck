@@ -359,13 +359,7 @@ function App() {
         <div className="teams-section">
           <h2>Balanced Teams</h2>
           <TeamsDisplay teams={teams} />
-          <TeamCopyText teams={teams} />
-          {teamsCopied && (
-            <div className="auto-copy-notification">
-              <span className="checkmark"></span>
-              Teams automatically copied to clipboard!
-            </div>
-          )}
+          <TeamCopyText teams={teams} autocopied={teamsCopied} />
         </div>
       </div>
     </div>
