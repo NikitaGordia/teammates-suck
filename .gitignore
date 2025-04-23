@@ -29,6 +29,7 @@ build
 *.njsproj
 *.sln
 *.sw?
+*.code-workspace
 
 # Environment variables
 .env
