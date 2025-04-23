@@ -151,26 +151,6 @@ function App() {
           <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={scoreMappings} />
           <BalanceButton onBalanceTeams={handleBalanceTeams} />
 
-          {/* Refresh scores button */}
-          <div style={{ marginTop: '20px', marginBottom: '20px' }}>
-            <button
-              onClick={fetchScoreMappings}
-              disabled={isLoading}
-              style={{
-                padding: '10px 15px',
-                backgroundColor: '#2196F3',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                width: '100%',
-                opacity: isLoading ? 0.7 : 1
-              }}
-            >
-              {isLoading ? 'Refreshing scores...' : 'Refresh scores from Sheet'}
-            </button>
-          </div>
-
           {/* All known players toggle */}
           <div style={{ marginTop: '10px', marginBottom: '20px' }}>
             <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
@@ -188,13 +168,39 @@ function App() {
           {showAllPlayers && (
             <div style={{
               marginTop: '10px',
-              padding: '10px',
+              padding: '8px',
               backgroundColor: '#f5f5f5',
               borderRadius: '4px',
               border: '1px solid #ddd',
               fontSize: '14px'
             }}>
-              <h4 style={{ marginBottom: '8px' }}>All Known Players from Sheet</h4>
+              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '4px' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '2px 0', textAlign: 'left' }}>
+                      <h4 style={{ margin: 0, fontSize: '13px' }}>All Known Players from Sheet</h4>
+                    </td>
+                    <td style={{ padding: '2px 0', textAlign: 'center', width: '100px' }}>
+                      <button
+                        onClick={fetchScoreMappings}
+                        disabled={isLoading}
+                        style={{
+                          padding: '5px 10px',
+                          backgroundColor: '#2196F3',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '3px',
+                          cursor: isLoading ? 'not-allowed' : 'pointer',
+                          opacity: isLoading ? 0.7 : 1,
+                          width: '80px'
+                        }}
+                      >
+                        {isLoading ? '...' : 'Refresh'}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
               <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '10px' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
