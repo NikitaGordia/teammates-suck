@@ -33,6 +33,13 @@ function App() {
   // Randomness slider state (0-100%)
   const [randomness, setRandomness] = useState(0);
 
+  // Function to ensure randomness is always a fixed percentage (multiple of 5)
+  const handleRandomnessChange = (value) => {
+    // Ensure value is a multiple of 5
+    const fixedValue = Math.round(value / 5) * 5;
+    setRandomness(fixedValue);
+  };
+
   // Handler functions
   // Fetch score mappings from backend
   const fetchScoreMappings = async () => {
@@ -262,7 +269,7 @@ function App() {
             onBalanceTeams={handleBalanceTeams}
             isLoading={isLoading}
             randomness={randomness}
-            onRandomnessChange={setRandomness}
+            onRandomnessChange={handleRandomnessChange}
           />
 
           {/* All known players toggle */}
