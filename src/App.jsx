@@ -33,11 +33,15 @@ function App() {
   // Randomness slider state (0-100%)
   const [randomness, setRandomness] = useState(0);
 
-  // Function to ensure randomness is always a fixed percentage (multiple of 5)
+  // Function to ensure randomness is always one of the five snap points (0, 25, 50, 75, 100)
   const handleRandomnessChange = (value) => {
-    // Ensure value is a multiple of 5
-    const fixedValue = Math.round(value / 5) * 5;
-    setRandomness(fixedValue);
+    // Value should already be snapped by the BalanceButton component
+    // but we'll ensure it's one of our valid snap points
+    const snapPoints = [0, 25, 50, 75, 100];
+    const closestSnapPoint = snapPoints.reduce((prev, curr) =>
+      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+    );
+    setRandomness(closestSnapPoint);
   };
 
   // Handler functions

@@ -5,10 +5,13 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
 
   // Function to snap value to nearest fixed percentage
   const snapToFixedPercentage = (value) => {
-    // Define the step size (5% increments)
-    const step = 5;
-    // Calculate the nearest step value
-    return Math.round(value / step) * step;
+    // Define the specific snap points (0, 25, 50, 75, 100)
+    const snapPoints = [0, 25, 50, 75, 100];
+
+    // Find the closest snap point
+    return snapPoints.reduce((prev, curr) =>
+      Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
+    );
   };
 
   // Handle slider change with snapping
@@ -32,19 +35,34 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
       const ticksContainer = document.createElement('div');
       ticksContainer.className = 'slider-ticks';
       ticksContainer.style.position = 'relative';
-      ticksContainer.style.width = '100%';
+      ticksContainer.style.width = 'calc(100% - 20px)';
       ticksContainer.style.height = '10px';
       ticksContainer.style.marginTop = '2px';
+      ticksContainer.style.marginLeft = '10px';
+      ticksContainer.style.marginRight = '10px';
+
+      // Define main snap points
+      const mainSnapPoints = [0, 25, 50, 75, 100];
 
       // Add tick marks for each 5% increment
       for (let i = 0; i <= 100; i += 5) {
         const tick = document.createElement('div');
-        tick.className = 'slider-tick';
+        const isMainTick = mainSnapPoints.includes(i);
+
+        tick.className = isMainTick ? 'slider-tick main-tick' : 'slider-tick';
         tick.style.position = 'absolute';
         tick.style.left = `${i}%`;
         tick.style.width = '1px';
-        tick.style.height = i % 25 === 0 ? '8px' : '5px';
-        tick.style.backgroundColor = '#999';
+
+        // Main ticks are 60% larger and slightly purple
+        if (isMainTick) {
+          tick.style.height = '8px';
+          tick.style.backgroundColor = '#673AB7';
+        } else {
+          tick.style.height = '5px';
+          tick.style.backgroundColor = '#999';
+        }
+
         tick.style.transform = 'translateX(-50%)';
 
         ticksContainer.appendChild(tick);
@@ -75,7 +93,8 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
             width: '48%',
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            height: '42px' // Fixed height to match slider height
           }}
         >
           {isLoading ? (
@@ -99,37 +118,39 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
         </button>
 
         {/* Randomness slider container */}
-        <div style={{ width: '48%' }}>
-          <div style={{ marginBottom: '5px' }}>
-            <label
-              htmlFor="randomness-slider"
-              style={{ fontSize: '14px', fontWeight: '500', color: '#555' }}
-            >
-              Randomness: {randomness}%
-            </label>
-          </div>
-          <div style={{ position: 'relative' }}>
-            <input
-              ref={sliderRef}
-              id="randomness-slider"
-              type="range"
-              min="0"
-              max="100"
-              value={randomness}
-              onChange={handleSliderChange}
-              style={{
-                width: '100%',
-                height: '8px',
-                borderRadius: '4px',
-                appearance: 'none',
-                backgroundColor: '#e0e0e0',
-                outline: 'none',
-                opacity: isLoading ? '0.7' : '1',
-                transition: 'opacity 0.2s',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-              }}
-              disabled={isLoading}
-            />
+        <div style={{ width: '48%', display: 'flex', alignItems: 'center' }}>
+          <div style={{ width: '100%', paddingBottom: '2px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+              <label
+                htmlFor="randomness-slider"
+                style={{ fontSize: '14px', fontWeight: '500', color: '#555' }}
+              >
+                Randomness: {randomness}%
+              </label>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                ref={sliderRef}
+                id="randomness-slider"
+                type="range"
+                min="0"
+                max="100"
+                value={randomness}
+                onChange={handleSliderChange}
+                style={{
+                  width: '100%',
+                  height: '8px',
+                  borderRadius: '4px',
+                  appearance: 'none',
+                  backgroundColor: '#e0e0e0',
+                  outline: 'none',
+                  opacity: isLoading ? '0.7' : '1',
+                  transition: 'opacity 0.2s',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                }}
+                disabled={isLoading}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -198,10 +219,10 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
           transition: background-color 0.2s;
         }
 
-        /* Highlight ticks at 0%, 25%, 50%, 75%, and 100% */
-        .slider-tick:nth-child(6n+1) {
-          background-color: #673AB7;
-          height: 10px !important;
+        /* Styling for main ticks (0%, 25%, 50%, 75%, 100%) */
+        .main-tick {
+          background-color: #673AB7 !important;
+          height: 8px !important;
         }
       `}</style>
     </div>
