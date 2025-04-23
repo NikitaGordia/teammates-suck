@@ -170,3 +170,55 @@ h2 {
 .refresh-button:not(:disabled):hover {
   background-color: #1976D2;
 }
+
+/* Auto-copy notification */
+.auto-copy-notification {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auto-copy-notification .checkmark {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  position: relative;
+  animation: checkmark 0.3s ease-in-out forwards;
+}
+
+.auto-copy-notification .checkmark::before,
+.auto-copy-notification .checkmark::after {
+  content: '';
+  position: absolute;
+  background-color: white;
+}
+
+.auto-copy-notification .checkmark::before {
+  width: 3px;
+  height: 9px;
+  left: 9px;
+  top: 2px;
+  transform: rotate(45deg);
+}
+
+.auto-copy-notification .checkmark::after {
+  width: 3px;
+  height: 15px;
+  left: 4px;
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

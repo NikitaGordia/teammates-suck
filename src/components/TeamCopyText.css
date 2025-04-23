@@ -1,0 +1,151 @@
+/* TeamCopyText.css */
+.copy-container {
+  margin-top: 20px;
+}
+
+.copy-container h3 {
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+  color: #444;
+  position: relative;
+  display: inline-block;
+}
+
+.copy-container h3::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, #673AB7, #3F51B5);
+  border-radius: 2px;
+}
+
+.copy-text-box {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  margin-bottom: 15px;
+  font-family: monospace;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.copy-text-box:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.clipboard-section {
+  word-break: break-all;
+}
+
+.clipboard-section strong {
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.copy-button {
+  padding: 12px 15px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.copy-button:not(.copied):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.copy-button:not(.copied):active {
+  transform: translateY(0);
+}
+
+.copy-button.copied {
+  background-color: #4CAF50;
+}
+
+.copy-button:not(.copied) {
+  background-color: #607D8B;
+}
+
+.copy-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transition: left 0.7s ease;
+}
+
+.copy-button:not(.copied):hover::before {
+  left: 100%;
+}
+
+.copy-icon {
+  margin-right: 8px;
+}
+
+/* Animation for copied state */
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.checkmark {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+  position: relative;
+  animation: checkmark 0.3s ease-in-out forwards;
+}
+
+.checkmark::before,
+.checkmark::after {
+  content: '';
+  position: absolute;
+  background-color: white;
+}
+
+.checkmark::before {
+  width: 3px;
+  height: 9px;
+  left: 9px;
+  top: 2px;
+  transform: rotate(45deg);
+}
+
+.checkmark::after {
+  width: 3px;
+  height: 15px;
+  left: 4px;
+  top: 0;
+  transform: rotate(-45deg);
+}

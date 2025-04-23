@@ -1,54 +1,35 @@
 import React, { useState } from 'react';
+import './TeamCopyText.css';
+
+// Utility function to generate clipboard text - exported for use in other components
+export const generateClipboardText = (teams) => {
+  const playersList = [];
+
+  // Add Team 1 players
+  teams.team1.forEach(player => {
+    playersList.push(`${player.nickname}-1`);
+  });
+
+  // Add Team 2 players
+  teams.team2.forEach(player => {
+    playersList.push(`${player.nickname}-2`);
+  });
+
+  return playersList.join(',');
+};
+
+// Utility function to copy teams to clipboard - exported for use in other components
+export const copyTeamsToClipboard = (teams) => {
+  const clipboardText = generateClipboardText(teams);
+  navigator.clipboard.writeText(clipboardText);
+  return clipboardText;
+};
 
 const TeamCopyText = ({ teams }) => {
   const [copied, setCopied] = useState(false);
 
-  // Generate text representation of teams
-  const generateTeamText = () => {
-    // For display in the UI - formatted with teams
-    let displayText = 'Team 1:\n';
-
-    if (teams.team1.length === 0) {
-      displayText += 'No players\n';
-    } else {
-      teams.team1.forEach(player => {
-        displayText += `${player.nickname} (${player.score})\n`;
-      });
-    }
-
-    displayText += '\nTeam 2:\n';
-
-    if (teams.team2.length === 0) {
-      displayText += 'No players\n';
-    } else {
-      teams.team2.forEach(player => {
-        displayText += `${player.nickname} (${player.score})\n`;
-      });
-    }
-
-    return displayText;
-  };
-
-  // Generate comma-separated list for clipboard
-  const generateClipboardText = () => {
-    const playersList = [];
-
-    // Add Team 1 players
-    teams.team1.forEach(player => {
-      playersList.push(`${player.nickname}-1`);
-    });
-
-    // Add Team 2 players
-    teams.team2.forEach(player => {
-      playersList.push(`${player.nickname}-2`);
-    });
-
-    return playersList.join(',');
-  };
-
   const handleCopy = () => {
-    const clipboardText = generateClipboardText();
-    navigator.clipboard.writeText(clipboardText);
+    copyTeamsToClipboard(teams);
     setCopied(true);
 
     // Reset copied state after 2 seconds
@@ -58,43 +39,31 @@ const TeamCopyText = ({ teams }) => {
   };
 
   return (
-    <div>
-      <h3 style={{ marginBottom: '10px' }}>Copy Teams</h3>
-      <div style={{
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        padding: '15px',
-        backgroundColor: '#f9f9f9',
-        marginBottom: '15px',
-        fontFamily: 'monospace'
-      }}>
-        <div style={{ whiteSpace: 'pre-line', marginBottom: '15px' }}>
-          {generateTeamText().replace(/\\n/g, '\n')}
-        </div>
-
-        <div style={{
-          marginTop: '10px',
-          paddingTop: '10px',
-          borderTop: '1px dashed #ccc',
-          wordBreak: 'break-all'
-        }}>
-          <strong>Clipboard format:</strong><br />
-          {generateClipboardText()}
+    <div className="copy-container">
+      <h3>Copy Teams</h3>
+      <div className="copy-text-box">
+        <div className="clipboard-section">
+          <strong>Format:</strong><br />
+          {generateClipboardText(teams)}
         </div>
       </div>
       <button
         onClick={handleCopy}
-        style={{
-          padding: '10px 15px',
-          backgroundColor: copied ? '#4CAF50' : '#607D8B',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          width: '100%'
-        }}
+        className={`copy-button ${copied ? 'copied' : ''}`}
       >
-        {copied ? 'Copied!' : 'Copy to Clipboard'}
+        {copied ? (
+          <>
+            <span className="checkmark"></span>
+            Copied!
+          </>
+        ) : (
+          <>
+            <svg className="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="white"/>
+            </svg>
+            Copy to Clipboard
+          </>
+        )}
       </button>
     </div>
   );

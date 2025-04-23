@@ -3,7 +3,7 @@ import PlayerTable from './components/PlayerTable';
 import AddPlayerForm from './components/AddPlayerForm';
 import BalanceButton from './components/BalanceButton';
 import TeamsDisplay from './components/TeamsDisplay';
-import TeamCopyText from './components/TeamCopyText';
+import TeamCopyText, { copyTeamsToClipboard } from './components/TeamCopyText';
 import BalancingInfo from './components/BalancingInfo';
 import './App.css';
 
@@ -13,6 +13,9 @@ function App() {
 
   // Teams state
   const [teams, setTeams] = useState({ team1: [], team2: [] });
+
+  // State to track if teams were just copied to clipboard
+  const [teamsCopied, setTeamsCopied] = useState(false);
 
   // State for score mappings from backend
   const [scoreMappings, setScoreMappings] = useState({});
@@ -207,10 +210,24 @@ function App() {
 
       // Map the API response to the expected format for the teams state
       // API returns { teamA: [], teamB: [] } but our components expect { team1: [], team2: [] }
-      setTeams({
+      const balancedTeams = {
         team1: data.teamA || [],
         team2: data.teamB || []
-      });
+      };
+
+      setTeams(balancedTeams);
+
+      // Automatically copy teams to clipboard if there are players
+      if ((balancedTeams.team1.length > 0 || balancedTeams.team2.length > 0) &&
+          navigator.clipboard) {
+        copyTeamsToClipboard(balancedTeams);
+        setTeamsCopied(true);
+
+        // Reset the copied state after 2 seconds
+        setTimeout(() => {
+          setTeamsCopied(false);
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error balancing teams:', error);
       alert('Failed to balance teams. Please try again later.');
@@ -329,6 +346,12 @@ function App() {
           <h2>Balanced Teams</h2>
           <TeamsDisplay teams={teams} />
           <TeamCopyText teams={teams} />
+          {teamsCopied && (
+            <div className="auto-copy-notification">
+              <span className="checkmark"></span>
+              Teams automatically copied to clipboard!
+            </div>
+          )}
         </div>
       </div>
     </div>
