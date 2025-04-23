@@ -266,7 +266,7 @@ function App() {
             onScoreChange={handleScoreChange}
             onRemovePlayer={handleRemovePlayer}
           />
-          <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={scoreMappings} />
+          <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={scoreMappings} noPlayersAdded={players.length === 0} />
           <BalanceButton
             onBalanceTeams={handleBalanceTeams}
             isLoading={isLoading}

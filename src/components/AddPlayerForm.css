@@ -1,0 +1,35 @@
+/* AddPlayerForm.css */
+.nickname-input {
+  transition: all 0.3s ease;
+}
+
+.glow-effect {
+  border-color: #673AB7 !important;
+  animation: glow-pulse 2s infinite;
+  outline: none;
+}
+
+/* Make placeholder text more prominent when glowing */
+.glow-effect::placeholder {
+  color: #673AB7;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+@keyframes glow-pulse {
+  0% {
+    box-shadow: 0 0 2px rgba(103, 58, 183, 0.2), 0 0 4px rgba(103, 58, 183, 0.2);
+  }
+  25% {
+    box-shadow: 0 0 5px rgba(103, 58, 183, 0.5), 0 0 10px rgba(103, 58, 183, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 8px rgba(103, 58, 183, 0.8), 0 0 15px rgba(103, 58, 183, 0.5);
+  }
+  75% {
+    box-shadow: 0 0 5px rgba(103, 58, 183, 0.5), 0 0 10px rgba(103, 58, 183, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 2px rgba(103, 58, 183, 0.2), 0 0 4px rgba(103, 58, 183, 0.2);
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import './AddPlayerForm.css';
 
 // Helper function to get color based on score
 const getScoreColor = (score) => {
@@ -20,7 +21,7 @@ const getScoreColor = (score) => {
   }
 };
 
-const AddPlayerForm = ({ onAddPlayer, scoreMappings = {} }) => {
+const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false }) => {
   const [nickname, setNickname] = useState('');
   const [score, setScore] = useState(3); // Default score
   const [suggestions, setSuggestions] = useState([]);
@@ -125,16 +126,17 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {} }) => {
                 <div style={{ position: 'relative', width: '100%' }} ref={suggestionsRef}>
                   <input
                     type="text"
-                    placeholder="Nickname"
+                    placeholder={noPlayersAdded ? "Add your first player here" : "Nickname"}
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     onKeyDown={handleKeyDown}
                     onFocus={() => nickname.trim() !== '' && setShowSuggestions(suggestions.length > 0)}
+                    className={noPlayersAdded ? 'nickname-input glow-effect' : 'nickname-input'}
                     style={{
                       width: '100%',
                       padding: '8px',
                       borderRadius: '4px',
-                      border: '1px solid #ddd'
+                      border: noPlayersAdded ? '1px solid #673AB7' : '1px solid #ddd'
                     }}
                     required
                   />
