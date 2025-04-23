@@ -5,21 +5,43 @@ A Flask backend for the Team Balancer application that fetches player scores fro
 ## Setup
 
 1. Clone the repository
-2. Install dependencies:
+2. Create and activate a virtual environment:
+   ```bash
+   # Create a virtual environment
+   python -m venv .venv
+
+   # Activate the virtual environment
+   # On macOS/Linux:
+   source .venv/bin/activate
+   # On Windows:
+   # .venv\Scripts\activate
    ```
-   pip install -r requirements.txt
+3. Install uv (a faster Python package installer and resolver):
+   ```bash
+   pip install uv
    ```
-3. Create a `.env` file in the root directory with your Google API Key and Spreadsheet ID:
+4. Install dependencies using uv:
+   ```bash
+   uv pip install -r requirements.txt
+   ```
+5. Create a `.env` file in the root directory with your Google API Key and Spreadsheet ID:
    ```
    GOOGLE_API_KEY=your_google_api_key_here
    SPREADSHEET_ID=your_spreadsheet_id_here
    ```
-4. Update the `RANGE_NAME` constant in `app.py` if needed based on your sheet structure
+6. Update the `RANGE_NAME` constant in `app.py` if needed based on your sheet structure
 
 ## Running the Application
 
-Start the Flask development server:
-```
+Make sure your virtual environment is activated, then start the Flask development server:
+```bash
+# Activate the virtual environment (if not already activated)
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+
+# Start the Flask server
 python app.py
 ```
 
