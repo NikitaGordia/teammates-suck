@@ -19,7 +19,7 @@ A web application for balancing teams based on player skill levels.
 
 ## Docker Setup
 
-This project is containerized using Docker, making it easy to set up and run in any environment.
+This project is containerized using Docker, making it easy to set up and run in any environment. The project includes separate Docker images for the backend and frontend, united in docker-compose files.
 
 ### Prerequisites
 
@@ -35,6 +35,10 @@ SPREADSHEET_ID=...
 ```
 
 ### Running with Docker Compose
+
+The project uses two docker-compose files:
+- `docker-compose.dev.yml` - For development environment with hot-reloading
+- `docker-compose.yml` - For production environment
 
 #### Development Environment
 
@@ -57,7 +61,7 @@ For production deployment:
 ./prod.sh
 
 # Or manually
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose up -d --build
 ```
 
 This will:
@@ -72,7 +76,7 @@ To stop the application:
 docker-compose -f docker-compose.dev.yml down
 
 # Production
-docker-compose -f docker-compose.prod.yml down
+docker-compose down
 ```
 
 ### Development Features
@@ -92,7 +96,7 @@ If you make changes to the Dockerfiles and need to rebuild the images:
 docker-compose -f docker-compose.dev.yml up --build
 
 # Production
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose up -d --build
 ```
 
 The helper scripts (`dev.sh` and `prod.sh`) always rebuild the images automatically.
