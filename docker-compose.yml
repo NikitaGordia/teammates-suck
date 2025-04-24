@@ -1,9 +1,9 @@
-version: '3.8'
-
 services:
   backend:
-    build: ./backend
-    container_name: team-balancer-backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: team-balancer-backend-prod
     restart: unless-stopped
     ports:
       - "5050:5050"
@@ -13,12 +13,12 @@ services:
       - PYTHONUNBUFFERED=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}
-    volumes:
-      - ./backend:/app
 
   frontend:
-    build: ./frontend
-    container_name: team-balancer-frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: team-balancer-frontend-prod
     restart: unless-stopped
     ports:
       - "80:80"
@@ -26,8 +26,7 @@ services:
       - backend
     environment:
       - VITE_API_BASE_URL=http://localhost:5050
-    # No volumes needed for production as we're using a multi-stage build
 
 networks:
   default:
-    name: team-balancer-network
+    name: team-balancer-network-prod

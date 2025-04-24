@@ -136,7 +136,7 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
                     className={noPlayersAdded ? 'nickname-input glow-effect' : 'nickname-input'}
                     style={{
                       width: '100%',
-                      padding: '8px',
+                      padding: '10px',
                       borderRadius: '4px',
                       border: noPlayersAdded ? '1px solid #673AB7' : '1px solid #ddd'
                     }}
@@ -216,7 +216,7 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
                 <button
                   type="submit"
                   style={{
-                    padding: '5px 10px',
+                    padding: '10px 10px',
                     backgroundColor: '#4CAF50', /* Green color for Add button */
                     color: 'white',
                     border: 'none',

@@ -28,7 +28,9 @@
 }
 
 .team-header {
-  padding: 15px;
+  padding-left: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   position: relative;
   overflow: hidden;
   display: flex;
