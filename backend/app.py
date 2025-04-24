@@ -115,7 +115,7 @@ def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
     random.shuffle(players)
 
     # Sort players by randomized score in descending order
-    players.sort(key=lambda x: x["randomized_score"], reverse=True)
+    players.sort(key=lambda x: (x["randomized_score"], x["nickname"]), reverse=True)
 
     # Initialize teams and their total scores
     team_a = []

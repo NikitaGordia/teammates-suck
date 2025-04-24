@@ -132,6 +132,29 @@ Response:
 }
 ```
 
+## Testing
+
+The backend includes a comprehensive test suite using pytest. To run the tests:
+
+```bash
+# Activate the virtual environment
+source .venv/bin/activate
+
+# Install pytest and related packages (if not already installed)
+pip install pytest pytest-flask pytest-mock
+
+# Run all tests
+python -m pytest
+
+# Run tests with verbose output
+python -m pytest -v
+
+# Run a specific test file
+python -m pytest tests/test_app.py
+```
+
+For more details about the tests, see the [tests README](tests/README.md).
+
 ## Google Sheets Setup
 
 1. Create a Google Sheet with player nicknames in column B and scores in column C (based on the default RANGE_NAME="scores!B2:C")
