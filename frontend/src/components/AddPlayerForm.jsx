@@ -120,7 +120,7 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
 
   return (
     <div style={{ marginBottom: '5px' }}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} role="form">
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <tbody>
             <tr>
