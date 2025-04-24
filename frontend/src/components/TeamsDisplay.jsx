@@ -71,7 +71,12 @@ const TeamsDisplay = ({ teams }) => {
               <ul className="player-list">
                 {teams.team1.map((player, index) => (
                   <li key={index} className="player-item">
-                    <span className="player-name">{player.nickname}</span>
+                    <span className="player-name">
+                      {player.nickname}
+                      {index === 0 && teams.team1.length > 0 && (
+                        <span className="player-leader-tag">{t('teams.leader')}</span>
+                      )}
+                    </span>
                     <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
                       {player.score}
                     </span>
@@ -115,7 +120,12 @@ const TeamsDisplay = ({ teams }) => {
               <ul className="player-list">
                 {teams.team2.map((player, index) => (
                   <li key={index} className="player-item">
-                    <span className="player-name">{player.nickname}</span>
+                    <span className="player-name">
+                      {player.nickname}
+                      {index === 0 && teams.team2.length > 0 && (
+                        <span className="player-leader-tag">{t('teams.leader')}</span>
+                      )}
+                    </span>
                     <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
                       {player.score}
                     </span>

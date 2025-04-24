@@ -35,7 +35,8 @@
     "total": "Total",
     "higher": "HIGHER",
     "lower": "LOWER",
-    "equal": "EQUAL"
+    "equal": "EQUAL",
+    "leader": "Leader"
   },
   "balance": {
     "balanceTeams": "Balance Teams",

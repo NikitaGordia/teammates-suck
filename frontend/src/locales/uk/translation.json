@@ -34,7 +34,8 @@
     "total": "Всього",
     "higher": "ВИЩЕ",
     "lower": "НИЖЧЕ",
-    "equal": "РІВНО"
+    "equal": "РІВНО",
+    "leader": "Лідер"
   },
   "balance": {
     "balanceTeams": "Забалансити",
