@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import PlayerTable from './components/PlayerTable';
 import AddPlayerForm from './components/AddPlayerForm';
 import BalanceButton from './components/BalanceButton';
 import TeamsDisplay from './components/TeamsDisplay';
 import TeamCopyText, { copyTeamsToClipboard } from './components/TeamCopyText';
 import BalancingInfo from './components/BalancingInfo';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { API_CONFIG, getApiUrl } from './config';
 import './App.css';
 
 function App() {
+  const { t } = useTranslation();
   // Players state - initialize with empty array
   const [players, setPlayers] = useState([]);
 
@@ -152,7 +155,7 @@ function App() {
       if (!playerExists) {
         setPlayers([...players, { nickname, score }]);
       } else {
-        alert(`Player ${nickname} is already in the list.`);
+        alert(t('players.alreadyInList', { nickname }));
       }
     }
   };
@@ -164,7 +167,7 @@ function App() {
     if (!playerExists) {
       setPlayers([...players, player]);
     } else {
-      alert(`Player ${player.nickname} is already in the list.`);
+      alert(t('players.alreadyInList', { nickname: player.nickname }));
     }
   };
 
@@ -187,7 +190,7 @@ function App() {
 
     // Check if there are players to balance
     if (players.length === 0) {
-      alert('Please add players first!');
+      alert(t('balance.noPlayers'));
       return;
     }
 
@@ -250,7 +253,7 @@ function App() {
       }
     } catch (error) {
       console.error('Error balancing teams:', error);
-      alert('Failed to balance teams. Please try again later.');
+      alert(t('balance.error'));
     } finally {
       setIsLoading(false);
     }
@@ -258,9 +261,12 @@ function App() {
 
   return (
     <div className="App">
+      <div className="app-header">
+        <LanguageSwitcher />
+      </div>
       <div className="main-container">
         <div className="players-section">
-          <h2>Players</h2>
+          <h2>{t('app.players')}</h2>
           <PlayerTable
             players={players}
             onScoreChange={handleScoreChange}
@@ -283,7 +289,7 @@ function App() {
                 onChange={() => setShowAllPlayers(!showAllPlayers)}
                 style={{ marginRight: '8px' }}
               />
-              Show all known players
+              {t('players.showAllKnown')}
             </label>
           </div>
 
@@ -301,7 +307,7 @@ function App() {
                 <tbody>
                   <tr>
                     <td style={{ padding: '2px 0', textAlign: 'left' }}>
-                      <h4 style={{ margin: 0, fontSize: '13px' }}>All Known Players from Sheet</h4>
+                      <h4 style={{ margin: 0, fontSize: '13px' }}>{t('players.allKnownFromSheet')}</h4>
                     </td>
                     <td style={{ padding: '2px 0', textAlign: 'center', width: '100px' }}>
                       <button
@@ -312,12 +318,12 @@ function App() {
                         {isLoading ? (
                           <>
                             <div className="refresh-spinner"></div>
-                            <span>Loading</span>
+                            <span>{t('balance.loading')}</span>
                           </>
                         ) : isThrottled ? (
                           <span>{throttleTimeLeft}s</span>
                         ) : (
-                          <span>Refresh</span>
+                          <span>{t('balance.refresh')}</span>
                         )}
                       </button>
                     </td>
@@ -328,9 +334,9 @@ function App() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-                      <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Nickname</th>
-                      <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>Score</th>
-                      <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>Action</th>
+                      <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.nickname')}</th>
+                      <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
+                      <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -350,7 +356,7 @@ function App() {
                               cursor: 'pointer'
                             }}
                           >
-                            Add
+                            {t('players.add')}
                           </button>
                         </td>
                       </tr>
@@ -364,15 +370,15 @@ function App() {
         </div>
 
         <div className="balancing-status-section">
-          <h2>Balancing Status</h2>
+          <h2>{t('balance.statusTitle')}</h2>
           <p style={{ marginBottom: '15px', color: '#666', fontSize: '14px' }}>
-            Player scores determine how teams are balanced. Here's what each score means:
+            {t('balance.statusDescription')}
           </p>
           <BalancingInfo />
         </div>
 
         <div className="teams-section">
-          <h2>Balanced Teams</h2>
+          <h2>{t('app.balancedTeams')}</h2>
           <TeamsDisplay teams={teams} />
           <TeamCopyText teams={teams} autocopied={teamsCopied} />
         </div>

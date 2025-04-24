@@ -1,0 +1,58 @@
+{
+  "app": {
+    "title": "Team Balancer App",
+    "players": "Players",
+    "balancedTeams": "Balanced Teams"
+  },
+  "players": {
+    "nickname": "Nickname",
+    "score": "Score",
+    "actions": "Actions",
+    "addFirstPlayer": "Add your first player here",
+    "addPlayer": "Add Player",
+    "add": "Add",
+    "remove": "Remove",
+    "showAllKnown": "Show all known players",
+    "allKnownFromSheet": "All Known Players from Sheet",
+    "noPlayersYet": "No players added yet. Use the form below to add players.",
+    "alreadyInList": "Player {{nickname}} is already in the list."
+  },
+  "teams": {
+    "team1": "Team 1",
+    "team2": "Team 2",
+    "noPlayers": "No players yet",
+    "copyTeams": "Copy Teams",
+    "format": "Format:",
+    "copyToClipboard": "Copy to Clipboard",
+    "copied": "Copied!",
+    "teamsAutoCopied": "Teams automatically copied to clipboard!",
+    "balancePerfect": "Perfect balance",
+    "balanceGood": "Good balance",
+    "balanceFair": "Fair balance",
+    "balancePoor": "Poor balance",
+    "balancePercentage": "{{percentage}}% balanced",
+    "pointDifference": " ({{difference}} point difference)",
+    "total": "Total",
+    "higher": "HIGHER",
+    "lower": "LOWER",
+    "equal": "EQUAL"
+  },
+  "balance": {
+    "balanceTeams": "Balance Teams",
+    "balancing": "Balancing...",
+    "randomness": "Randomness: {{value}}%",
+    "statusTitle": "Balancing Status",
+    "statusDescription": "Player scores determine how teams are balanced. Here's what each score means:",
+    "loading": "Loading",
+    "refresh": "Refresh",
+    "description": "Description",
+    "noPlayers": "Please add players first!",
+    "error": "Failed to balance teams. Please try again later.",
+    "score4": "Positive balance",
+    "score3": "No need to be balanced",
+    "score2": "Moderate balance",
+    "score1": "Needs to be significantly balanced",
+    "score0": "Unbalanceable",
+    "scoreMinus1": "Ban"
+  }
+}

@@ -1,14 +1,17 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const BalancingInfo = () => {
+  const { t } = useTranslation();
+
   // Status information with descriptions
   const statusInfo = [
-    { score: 4, description: 'Positive balance' },
-    { score: 3, description: 'No need to be balanced' },
-    { score: 2, description: 'Moderate balance' },
-    { score: 1, description: 'Needs to be significantly balanced' },
-    { score: 0, description: 'Unbalanceable' },
-    { score: -1, description: 'Ban' }
+    { score: 4, description: t('balance.score4') },
+    { score: 3, description: t('balance.score3') },
+    { score: 2, description: t('balance.score2') },
+    { score: 1, description: t('balance.score1') },
+    { score: 0, description: t('balance.score0') },
+    { score: -1, description: t('balance.scoreMinus1') }
   ];
 
   return (
@@ -16,8 +19,8 @@ const BalancingInfo = () => {
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
         <thead>
           <tr style={{ backgroundColor: '#f2f2f2' }}>
-            <th style={{ textAlign: 'center', padding: '10px', borderBottom: '2px solid #ddd', width: '60px' }}>Score</th>
-            <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #ddd' }}>Description</th>
+            <th style={{ textAlign: 'center', padding: '10px', borderBottom: '2px solid #ddd', width: '60px' }}>{t('players.score')}</th>
+            <th style={{ textAlign: 'left', padding: '10px', borderBottom: '2px solid #ddd' }}>{t('balance.description')}</th>
           </tr>
         </thead>
         <tbody>

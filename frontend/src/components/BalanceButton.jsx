@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChange }) => {
+  const { t } = useTranslation();
   const sliderRef = useRef(null);
 
   // Function to snap value to nearest fixed percentage
@@ -110,10 +112,10 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
                   marginRight: '10px'
                 }}
               />
-              Balancing...
+              {t('balance.balancing')}
             </>
           ) : (
-            'Balance Teams'
+            t('balance.balanceTeams')
           )}
         </button>
 
@@ -125,7 +127,7 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
                 htmlFor="randomness-slider"
                 style={{ fontSize: '14px', fontWeight: '500', color: '#555' }}
               >
-                Randomness: {randomness}%
+                {t('balance.randomness', { value: randomness })}
               </label>
             </div>
             <div style={{ position: 'relative' }}>

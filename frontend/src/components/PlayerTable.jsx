@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Helper function to get color based on score
 const getScoreColor = (score) => {
@@ -21,13 +22,15 @@ const getScoreColor = (score) => {
 };
 
 const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
+  const { t } = useTranslation();
   return (
     <div className="player-table">
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
         <thead>
           <tr>
-            <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>Nickname</th>
-            <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>Score</th>
+            <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.nickname')}</th>
+            <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
+            <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.actions')}</th>
           </tr>
         </thead>
         <tbody>
@@ -70,7 +73,7 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
                       width: '80px'
                     }}
                   >
-                    Remove
+                    {t('players.remove')}
                   </button>
                 </td>
               </tr>
@@ -78,7 +81,7 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
           ) : (
             <tr>
               <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic', borderBottom: '1px solid #ddd' }}>
-                No players added yet. Use the form below to add players.
+                {t('players.noPlayersYet')}
               </td>
             </tr>
           )}

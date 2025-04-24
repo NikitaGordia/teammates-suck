@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import './TeamsDisplay.css';
 
 // Helper function to get color based on score
@@ -22,6 +23,7 @@ const getScoreColor = (score) => {
 };
 
 const TeamsDisplay = ({ teams }) => {
+  const { t } = useTranslation();
   // Calculate total score for each team
   const team1Score = teams.team1.reduce((sum, player) => sum + player.score, 0);
   const team2Score = teams.team2.reduce((sum, player) => sum + player.score, 0);
@@ -42,16 +44,16 @@ const TeamsDisplay = ({ teams }) => {
 
   if (balancePercentage >= 95) {
     balanceQuality = 'meter-perfect';
-    balanceDescription = 'Perfect balance';
+    balanceDescription = t('teams.balancePerfect');
   } else if (balancePercentage >= 85) {
     balanceQuality = 'meter-good';
-    balanceDescription = 'Good balance';
+    balanceDescription = t('teams.balanceGood');
   } else if (balancePercentage >= 70) {
     balanceQuality = 'meter-fair';
-    balanceDescription = 'Fair balance';
+    balanceDescription = t('teams.balanceFair');
   } else {
     balanceQuality = 'meter-poor';
-    balanceDescription = 'Poor balance';
+    balanceDescription = t('teams.balancePoor');
   }
 
   // No longer need random check numbers
@@ -62,7 +64,7 @@ const TeamsDisplay = ({ teams }) => {
         {/* Team 1 */}
         <div className={`team-card team1-card`}>
           <div className="team-header team1-header">
-            <h3>Team 1</h3>
+            <h3>{t('teams.team1')}</h3>
           </div>
           <div className="team-content">
             {teams.team1.length > 0 ? (
@@ -77,7 +79,7 @@ const TeamsDisplay = ({ teams }) => {
                 ))}
               </ul>
             ) : (
-              <div className="empty-team">No players yet</div>
+              <div className="empty-team">{t('teams.noPlayers')}</div>
             )}
           </div>
 
@@ -85,17 +87,17 @@ const TeamsDisplay = ({ teams }) => {
           {teams.team1.length > 0 && (
             <div className="paycheck">
               <div className="paycheck-amount">
-                <span className="paycheck-label">Total:</span>
+                <span className="paycheck-label">{t('teams.total')}:</span>
                 <div>
                   <span className="paycheck-value">{team1Score}</span>
                   {team1Higher && !equalScores && (
-                    <span className="paycheck-badge higher-score">HIGHER</span>
+                    <span className="paycheck-badge higher-score">{t('teams.higher')}</span>
                   )}
                   {team2Higher && !equalScores && (
-                    <span className="paycheck-badge lower-score">LOWER</span>
+                    <span className="paycheck-badge lower-score">{t('teams.lower')}</span>
                   )}
                   {equalScores && totalScore > 0 && (
-                    <span className="paycheck-badge equal-score">EQUAL</span>
+                    <span className="paycheck-badge equal-score">{t('teams.equal')}</span>
                   )}
                 </div>
               </div>
@@ -106,7 +108,7 @@ const TeamsDisplay = ({ teams }) => {
         {/* Team 2 */}
         <div className={`team-card team2-card`}>
           <div className="team-header team2-header">
-            <h3>Team 2</h3>
+            <h3>{t('teams.team2')}</h3>
           </div>
           <div className="team-content">
             {teams.team2.length > 0 ? (
@@ -121,7 +123,7 @@ const TeamsDisplay = ({ teams }) => {
                 ))}
               </ul>
             ) : (
-              <div className="empty-team">No players yet</div>
+              <div className="empty-team">{t('teams.noPlayers')}</div>
             )}
           </div>
 
@@ -129,17 +131,17 @@ const TeamsDisplay = ({ teams }) => {
           {teams.team2.length > 0 && (
             <div className="paycheck">
               <div className="paycheck-amount">
-                <span className="paycheck-label">Total:</span>
+                <span className="paycheck-label">{t('teams.total')}:</span>
                 <div>
                   <span className="paycheck-value">{team2Score}</span>
                   {team2Higher && !equalScores && (
-                    <span className="paycheck-badge higher-score">HIGHER</span>
+                    <span className="paycheck-badge higher-score">{t('teams.higher')}</span>
                   )}
                   {team1Higher && !equalScores && (
-                    <span className="paycheck-badge lower-score">LOWER</span>
+                    <span className="paycheck-badge lower-score">{t('teams.lower')}</span>
                   )}
                   {equalScores && totalScore > 0 && (
-                    <span className="paycheck-badge equal-score">EQUAL</span>
+                    <span className="paycheck-badge equal-score">{t('teams.equal')}</span>
                   )}
                 </div>
               </div>
@@ -159,8 +161,8 @@ const TeamsDisplay = ({ teams }) => {
             ></div>
           </div>
           <div className="meter-value">
-            {balancePercentage.toFixed(1)}% balanced
-            {scoreDifference > 0 && ` (${scoreDifference} point difference)`}
+            {t('teams.balancePercentage', { percentage: balancePercentage.toFixed(1) })}
+            {scoreDifference > 0 && t('teams.pointDifference', { difference: scoreDifference })}
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import './AddPlayerForm.css';
 
 // Helper function to get color based on score
@@ -22,6 +23,7 @@ const getScoreColor = (score) => {
 };
 
 const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false }) => {
+  const { t } = useTranslation();
   const [nickname, setNickname] = useState('');
   const [score, setScore] = useState(3); // Default score
   const [suggestions, setSuggestions] = useState([]);
@@ -126,7 +128,7 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
                 <div style={{ position: 'relative', width: '100%' }} ref={suggestionsRef}>
                   <input
                     type="text"
-                    placeholder={noPlayersAdded ? "Add your first player here" : "Nickname"}
+                    placeholder={noPlayersAdded ? t('players.addFirstPlayer') : t('players.nickname')}
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -223,7 +225,7 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
                     width: '80px'
                   }}
                 >
-                  Add
+                  {t('players.addPlayer')}
                 </button>
               </td>
             </tr>
