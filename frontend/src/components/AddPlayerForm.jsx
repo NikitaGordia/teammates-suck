@@ -124,7 +124,7 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <tbody>
             <tr>
-              <td style={{ padding: '8px', width: '100%' }}>
+              <td style={{ paddingRight: '8px', width: '100%' }}>
                 <div style={{ position: 'relative', width: '100%' }} ref={suggestionsRef}>
                   <input
                     type="text"

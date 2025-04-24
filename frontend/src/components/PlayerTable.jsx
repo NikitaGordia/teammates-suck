@@ -29,7 +29,7 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
         <thead>
           <tr>
             <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.nickname')}</th>
-            <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
+            <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
             <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.actions')}</th>
           </tr>
         </thead>
@@ -79,11 +79,20 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
               </tr>
             ))
           ) : (
-            <tr>
-              <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic', borderBottom: '1px solid #ddd' }}>
-                {t('players.noPlayersYet')}
-              </td>
-            </tr>
+            <>
+              {/* Empty row to maintain column structure */}
+              <tr style={{ height: 0, visibility: 'hidden' }}>
+                <td style={{ padding: 0, border: 'none' }}></td>
+                <td style={{ padding: 0, border: 'none', textAlign: 'right' }}></td>
+                <td style={{ padding: 0, border: 'none', textAlign: 'center', width: '100px' }}></td>
+              </tr>
+              {/* Message row */}
+              <tr>
+                <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic', borderBottom: '1px solid #ddd' }}>
+                  {t('players.noPlayersYet')}
+                </td>
+              </tr>
+            </>
           )}
         </tbody>
       </table>
