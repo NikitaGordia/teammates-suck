@@ -3,7 +3,11 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
     container_name: team-balancer-backend-prod
+    image: ${REGISTRY_URL}/teammates-suck-backend:${BUILD_TAG}
     restart: unless-stopped
     ports:
       - "5050:5050"
@@ -18,14 +22,18 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+      args:
+        - VITE_API_BASE_URL=/api
     container_name: team-balancer-frontend-prod
+    image: ${REGISTRY_URL}/teammates-suck-frontend:${BUILD_TAG}
     restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
       - backend
-    environment:
-      - VITE_API_BASE_URL=http://localhost:5050
 
 networks:
   default:

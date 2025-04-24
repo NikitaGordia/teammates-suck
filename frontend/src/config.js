@@ -7,12 +7,12 @@
 const API_CONFIG = {
   // Base URL for API requests
   // In Docker, we can use relative URLs since Nginx will proxy the requests
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5050',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL,
 
   // API endpoints
   ENDPOINTS: {
-    GET_MAPPINGS: '/api/get_mappings',
-    BALANCE: '/api/balance',
+    GET_MAPPINGS: '/get_mappings',
+    BALANCE: '/balance',
   },
 
   // Request timeout in milliseconds

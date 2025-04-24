@@ -1,4 +1,4 @@
-FROM node:20 as build
+FROM node:20 AS build
 
 WORKDIR /app
 
@@ -11,8 +11,11 @@ RUN npm ci
 # Copy the rest of the application
 COPY . .
 
-# Build the application
-RUN npm run build
+ARG VITE_API_BASE_URL
+
+# ---> Use the ARG when running the build command <---
+# Prefix the build command with the env var assignment
+RUN VITE_API_BASE_URL=${VITE_API_BASE_URL} npm run build
 
 # Production stage
 FROM nginx:alpine
