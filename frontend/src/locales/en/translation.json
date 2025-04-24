@@ -54,5 +54,11 @@
     "score1": "Needs to be significantly balanced",
     "score0": "Unbalanceable",
     "scoreMinus1": "Ban"
+  },
+  "developer": {
+    "contacts": "Developer Contacts:",
+    "discord": "Discord: @mykytahordia",
+    "github": "Github: MykytaHordia",
+    "cossacs3": "Cossacs 3: \"mykyta.\""
   }
 }

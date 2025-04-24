@@ -383,6 +383,20 @@ function App() {
           <TeamCopyText teams={teams} autocopied={teamsCopied} />
         </div>
       </div>
+
+      {/* Developer Contacts - outside of main-container and without a white tile */}
+      <div style={{
+        marginTop: '30px',
+        textAlign: 'center',
+        color: '#555',
+        fontSize: '14px',
+        padding: '10px'
+      }}>
+        <div style={{ marginBottom: '5px', fontWeight: 'bold' }}>{t('developer.contacts')}</div>
+        <div>{t('developer.discord')}</div>
+        <div>{t('developer.github').split(': ')[0]}: <a href="https://github.com/NikitaGordia" target="_blank" rel="noopener noreferrer" style={{ color: '#2196F3', textDecoration: 'none' }}>MykytaHordia</a></div>
+        <div>{t('developer.cossacs3')}</div>
+      </div>
     </div>
   );
 }

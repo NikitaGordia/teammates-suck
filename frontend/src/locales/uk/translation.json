@@ -53,5 +53,11 @@
     "score1": "Потребує значного балансування",
     "score0": "Не балансується (габела)",
     "scoreMinus1": "Бан"
+  },
+  "developer": {
+    "contacts": "Контакти розробника:",
+    "discord": "Discord: @mykytahordia",
+    "github": "Github: MykytaHordia",
+    "cossacs3": "Cossacs 3: \"mykyta.\""
   }
 }
