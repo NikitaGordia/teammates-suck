@@ -1,4 +1,6 @@
-# Team Balancer
+# 😩 Teammates suck!
+
+![MVP Screenshot](readme_resources/MVP.png)
 
 A web application for balancing teams based on player skill levels.
 
