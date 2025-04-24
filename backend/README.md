@@ -2,6 +2,13 @@
 
 A Flask backend for the Team Balancer application that fetches player scores from Google Sheets and balances teams.
 
+## Technologies Used
+
+- **Flask** - Web framework
+- **Gunicorn** - WSGI HTTP Server for production deployment
+- **Google Sheets API** - For fetching player data
+- **Pytest** - For testing
+
 ## Setup
 
 1. Clone the repository
@@ -16,36 +23,50 @@ A Flask backend for the Team Balancer application that fetches player scores fro
    # On Windows:
    # .venv\Scripts\activate
    ```
-3. Install uv (a faster Python package installer and resolver):
+3. Install dependencies using pip:
    ```bash
-   pip install uv
+   pip install -r requirements.txt
    ```
-4. Install dependencies using uv:
-   ```bash
-   uv pip install -r requirements.txt
-   ```
-5. Create a `.env` file in the root directory with your Google API Key and Spreadsheet ID:
+4. Create a `.env` file in the root directory with your Google API Key and Spreadsheet ID:
    ```
    GOOGLE_API_KEY=your_google_api_key_here
    SPREADSHEET_ID=your_spreadsheet_id_here
    ```
-6. Update the `RANGE_NAME` constant in `app.py` if needed based on your sheet structure
+5. Update the `RANGE_NAME` constant in `app.py` if needed based on your sheet structure
 
 ## Running the Application
 
-Make sure your virtual environment is activated, then start the Flask development server:
+Make sure your virtual environment is activated, then start the server:
+
+### Development Mode (Flask Development Server)
 ```bash
 # Activate the virtual environment (if not already activated)
 # On macOS/Linux:
-source venv/bin/activate
+source .venv/bin/activate
 # On Windows:
-# venv\Scripts\activate
+# .venv\Scripts\activate
 
-# Start the Flask server
+# Start the Flask development server
 python app.py
 ```
 
-The server will run on http://localhost:5000 by default.
+The Flask development server will run on http://localhost:5050. Note that this is only recommended for development.
+
+### Production Mode (Gunicorn)
+```bash
+# Activate the virtual environment (if not already activated)
+# On macOS/Linux:
+source .venv/bin/activate
+# On Windows:
+# .venv\Scripts\activate
+
+# Start the Gunicorn server
+gunicorn --workers=4 --bind=0.0.0.0:5050 app:app
+```
+
+Gunicorn is the recommended way to run the application in production.
+
+Gunicorn will run on http://0.0.0.0:5050, making it accessible from other devices on the network.
 
 ## API Endpoints
 

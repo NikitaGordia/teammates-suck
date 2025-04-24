@@ -24,7 +24,7 @@ score_mappings = {}
 last_refresh_time = None
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 def fetch_all_scores_from_sheet():
@@ -286,4 +286,4 @@ def balance():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5050)
+    app.run(debug=True, host="0.0.0.0", port=5050)

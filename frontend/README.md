@@ -8,6 +8,7 @@ A React-based frontend for the Team Balancer application that allows users to cr
 - **Vite** - Build tool and development server
 - **CSS** - Styling (with component-specific CSS files)
 - **Fetch API** - For backend communication
+- **i18next** - Internationalization framework (Ukrainian as default language)
 
 ## Project Structure
 
@@ -77,6 +78,8 @@ npm run preview
 - **Randomness Control**: Adjust the randomness factor in team balancing
 - **Clipboard Integration**: Easily copy team assignments to clipboard
 - **Responsive Design**: Works on desktop and mobile devices
+- **Internationalization**: Supports Ukrainian (default) and English languages
+- **Developer Contacts**: Displays developer contact information
 
 ## API Integration
 
@@ -92,6 +95,39 @@ The frontend communicates with the backend through the following API endpoints:
 3. Commit your changes: `git commit -m 'Add some feature'`
 4. Push to the branch: `git push origin feature-name`
 5. Submit a pull request
+
+## Testing
+
+The frontend includes a comprehensive test suite using Vitest and React Testing Library. To run the tests:
+
+```bash
+# Navigate to the frontend directory
+cd frontend
+
+# Run all tests
+npm test
+
+# Run tests in watch mode (tests will re-run when files change)
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests with UI
+npm run test:ui
+```
+
+For more details about the tests, see the [tests README](src/test/README.md).
+
+## Internationalization
+
+The application uses i18next for internationalization:
+
+- Ukrainian is the default language
+- English is available as an alternative
+- Language detection is based on browser settings
+- Language can be switched using the language switcher in the UI
+- All UI text is stored in translation files in `src/locales/`
 
 ## Related Projects
 

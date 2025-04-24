@@ -6,17 +6,18 @@
 // API configuration
 const API_CONFIG = {
   // Base URL for API requests
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5050',
-  
+  // In Docker, we can use relative URLs since Nginx will proxy the requests
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || '',
+
   // API endpoints
   ENDPOINTS: {
     GET_MAPPINGS: '/api/get_mappings',
     BALANCE: '/api/balance',
   },
-  
+
   // Request timeout in milliseconds
   TIMEOUT: 30000, // 30 seconds
-  
+
   // Throttle time for refresh button in seconds
   THROTTLE_TIME: 30,
 };

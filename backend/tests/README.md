@@ -19,7 +19,7 @@ This directory contains tests for the Team Balancer backend using pytest.
 
 ## Running Tests
 
-To run all tests:
+The backend uses pytest for testing. To run all tests:
 
 ```bash
 # Activate the virtual environment
