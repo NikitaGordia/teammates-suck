@@ -23,6 +23,7 @@ const getScoreColor = (score) => {
 };
 
 const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false }) => {
+  // Note: scoreMappings is now expected to be window.scoreMappings which is a simplified version of userData
   const { t } = useTranslation();
   const [nickname, setNickname] = useState('');
   const [score, setScore] = useState(3); // Default score
@@ -71,7 +72,11 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
         ? Number(scoreMappings[nickname])
         : Number(score);
 
-      onAddPlayer({ nickname, score: playerScore });
+      // Get wins and losses from window.userData if available
+      const wins = window.userData && window.userData[nickname] ? window.userData[nickname].wins : 0;
+      const losses = window.userData && window.userData[nickname] ? window.userData[nickname].losses : 0;
+
+      onAddPlayer({ nickname, score: playerScore, wins, losses });
       setNickname('');
       setScore(3);
       setShowSuggestions(false);
@@ -175,14 +180,27 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
                           }}
                         >
                           <span>{suggestion}</span>
-                          {scoreMappings[suggestion] !== undefined && (
-                            <span style={{
-                              fontWeight: 'bold',
-                              color: getScoreColor(scoreMappings[suggestion])
-                            }}>
-                              {scoreMappings[suggestion]}
-                            </span>
-                          )}
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            {window.userData && window.userData[suggestion] && (
+                              <span style={{
+                                fontSize: '12px',
+                                marginRight: '8px',
+                                whiteSpace: 'nowrap'
+                              }}>
+                                <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{window.userData[suggestion].wins}</span>
+                                <span style={{ margin: '0 2px' }}>/</span>
+                                <span style={{ color: '#F44336', fontWeight: 'bold' }}>{window.userData[suggestion].losses}</span>
+                              </span>
+                            )}
+                            {scoreMappings[suggestion] !== undefined && (
+                              <span style={{
+                                fontWeight: 'bold',
+                                color: getScoreColor(scoreMappings[suggestion])
+                              }}>
+                                {scoreMappings[suggestion]}
+                              </span>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>

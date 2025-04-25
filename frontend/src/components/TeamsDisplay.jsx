@@ -77,9 +77,18 @@ const TeamsDisplay = ({ teams }) => {
                         <span className="player-leader-tag">{t('teams.leader')}</span>
                       )}
                     </span>
-                    <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
-                      {player.score}
-                    </span>
+                    <div className="player-stats">
+                      {player.wins !== undefined && player.losses !== undefined && (
+                        <span className="player-wl">
+                          <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{player.wins}</span>
+                          <span style={{ margin: '0 2px' }}>/</span>
+                          <span style={{ color: '#F44336', fontWeight: 'bold' }}>{player.losses}</span>
+                        </span>
+                      )}
+                      <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
+                        {player.score}
+                      </span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -126,9 +135,18 @@ const TeamsDisplay = ({ teams }) => {
                         <span className="player-leader-tag">{t('teams.leader')}</span>
                       )}
                     </span>
-                    <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
-                      {player.score}
-                    </span>
+                    <div className="player-stats">
+                      {player.wins !== undefined && player.losses !== undefined && (
+                        <span className="player-wl">
+                          <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{player.wins}</span>
+                          <span style={{ margin: '0 2px' }}>/</span>
+                          <span style={{ color: '#F44336', fontWeight: 'bold' }}>{player.losses}</span>
+                        </span>
+                      )}
+                      <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
+                        {player.score}
+                      </span>
+                    </div>
                   </li>
                 ))}
               </ul>

@@ -21,8 +21,8 @@ function App() {
   // State to track if teams were just copied to clipboard
   const [teamsCopied, setTeamsCopied] = useState(false);
 
-  // State for score mappings from backend
-  const [scoreMappings, setScoreMappings] = useState({});
+  // State for user data from backend (includes scores, wins, losses)
+  const [userData, setUserData] = useState({});
 
   // Loading state
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +49,7 @@ function App() {
   };
 
   // Handler functions
-  // Fetch score mappings from backend with optional force refresh
+  // Fetch user data from backend with optional force refresh
   const fetchScoreMappings = async (force_refresh = false) => {
     // If force_refresh is true and already throttled, don't allow another fetch
     if (force_refresh && isThrottled) return;
@@ -99,13 +99,27 @@ function App() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      setScoreMappings(data.scores || {});
+
+      // Update userData with the new response format
+      setUserData(data.users || {});
+
+      // Create a simplified score mappings object for backward compatibility
+      const simplifiedScoreMappings = {};
+      Object.entries(data.users || {}).forEach(([nickname, userData]) => {
+        simplifiedScoreMappings[nickname] = userData.score;
+      });
+
+      // For backward compatibility with existing code
+      window.scoreMappings = simplifiedScoreMappings;
+
+      // Store the full userData in window for components to access
+      window.userData = data.users || {};
 
       if (force_refresh) {
-        console.log('Fetched score mappings:', data.scores);
+        console.log('Fetched user data:', data.users);
       }
     } catch (error) {
-      const errorType = force_refresh ? 'score mappings' : 'initial score mappings';
+      const errorType = force_refresh ? 'user data' : 'initial user data';
       console.error(`Error fetching ${errorType}:`, error);
 
       if (error.name === 'AbortError') {
@@ -115,8 +129,8 @@ function App() {
         alert(timeoutMessage);
       } else {
         const errorMessage = force_refresh
-          ? 'Failed to fetch score mappings from the server. Please try again later.'
-          : 'Failed to fetch initial score mappings from the server.';
+          ? 'Failed to fetch user data from the server. Please try again later.'
+          : 'Failed to fetch initial user data from the server.';
         alert(errorMessage);
       }
     } finally {
@@ -133,14 +147,17 @@ function App() {
   // We're not automatically updating players list when score mappings change
   // Instead, we'll just store the mappings for future use
 
-  // Function to add a player from the mappings
+  // Function to add a player from the user data
   const handleAddPlayerFromMappings = (nickname) => {
-    if (scoreMappings[nickname] !== undefined) {
-      const score = Number(scoreMappings[nickname]);
+    if (userData[nickname] !== undefined) {
+      const score = Number(userData[nickname].score);
+      const wins = userData[nickname].wins;
+      const losses = userData[nickname].losses;
+
       // Check if player already exists
       const playerExists = players.some(player => player.nickname === nickname);
       if (!playerExists) {
-        setPlayers([...players, { nickname, score }]);
+        setPlayers([...players, { nickname, score, wins, losses }]);
       } else {
         alert(t('players.alreadyInList', { nickname }));
       }
@@ -191,6 +208,15 @@ function App() {
         usersData[player.nickname] = player.score;
       });
 
+      // Add wins/losses data to the players in the teams
+      const playersWithStats = players.map(player => {
+        return {
+          ...player,
+          wins: player.wins || 0,
+          losses: player.losses || 0
+        };
+      });
+
       // Include randomness in the request data
       const requestData = {
         users: usersData,
@@ -220,9 +246,26 @@ function App() {
 
       // Map the API response to the expected format for the teams state
       // API returns { teamA: [], teamB: [] } but our components expect { team1: [], team2: [] }
+      // Also add wins/losses data to each player
       const balancedTeams = {
-        team1: data.teamA || [],
-        team2: data.teamB || []
+        team1: (data.teamA || []).map(player => {
+          // Find the player in our local data to get wins/losses
+          const localPlayer = playersWithStats.find(p => p.nickname === player.nickname);
+          return {
+            ...player,
+            wins: localPlayer ? localPlayer.wins : 0,
+            losses: localPlayer ? localPlayer.losses : 0
+          };
+        }),
+        team2: (data.teamB || []).map(player => {
+          // Find the player in our local data to get wins/losses
+          const localPlayer = playersWithStats.find(p => p.nickname === player.nickname);
+          return {
+            ...player,
+            wins: localPlayer ? localPlayer.wins : 0,
+            losses: localPlayer ? localPlayer.losses : 0
+          };
+        })
       };
 
       setTeams(balancedTeams);
@@ -259,7 +302,7 @@ function App() {
             onScoreChange={handleScoreChange}
             onRemovePlayer={handleRemovePlayer}
           />
-          <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={scoreMappings} noPlayersAdded={players.length === 0} />
+          <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={window.scoreMappings || {}} noPlayersAdded={players.length === 0} />
           <BalanceButton
             onBalanceTeams={handleBalanceTeams}
             isLoading={isLoading}
@@ -323,14 +366,22 @@ function App() {
                     <tr>
                       <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.nickname')}</th>
                       <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
+                      <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>W/L</th>
                       <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(scoreMappings).map(([nickname, score], index) => (
+                    {Object.entries(userData).map(([nickname, user], index) => (
                       <tr key={index}>
                         <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{nickname}</td>
-                        <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'right' }}>{score}</td>
+                        <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'right' }}>{user.score}</td>
+                        <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-block', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                            <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{user.wins}</span>
+                            <span style={{ margin: '0 2px' }}>/</span>
+                            <span style={{ color: '#F44336', fontWeight: 'bold' }}>{user.losses}</span>
+                          </div>
+                        </td>
                         <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
                           <button
                             onClick={() => handleAddPlayerFromMappings(nickname)}

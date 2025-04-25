@@ -285,13 +285,28 @@
   color: white;
 }
 
+.player-stats {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.player-wl {
+  display: inline-block;
+  font-size: 12px;
+  margin-right: 8px;
+  white-space: nowrap;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
 .player-score {
   font-weight: bold;
   padding: 3px 8px;
   border-radius: 3px;
   min-width: 30px;
   text-align: center;
-  margin-left: 8px;
 }
 
 .empty-team {

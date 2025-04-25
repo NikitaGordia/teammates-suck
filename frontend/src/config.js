@@ -7,11 +7,12 @@
 const API_CONFIG = {
   // Base URL for API requests
   // In Docker, we can use relative URLs since Nginx will proxy the requests
-  BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  // Default to '/api' if environment variable is not set
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || '/api',
 
   // API endpoints
   ENDPOINTS: {
-    GET_MAPPINGS: '/get_mappings',
+    GET_MAPPINGS: '/users',
     BALANCE: '/balance',
   },
 

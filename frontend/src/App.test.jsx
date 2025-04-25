@@ -9,7 +9,7 @@ vi.mock('./config', () => ({
   API_CONFIG: {
     BASE_URL: 'http://test-api',
     ENDPOINTS: {
-      GET_MAPPINGS: '/api/get_mappings',
+      GET_MAPPINGS: '/api/users',
       BALANCE: '/api/balance',
     },
   },
@@ -23,14 +23,26 @@ describe('App Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock successful fetch for score mappings
+    // Mock successful fetch for user data
     global.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        scores: {
-          'Player1': 4,
-          'Player2': 3,
-          'Player3': 2,
+        users: {
+          'Player1': {
+            score: 4,
+            wins: 2,
+            losses: 1
+          },
+          'Player2': {
+            score: 3,
+            wins: 1,
+            losses: 2
+          },
+          'Player3': {
+            score: 2,
+            wins: 0,
+            losses: 3
+          }
         },
         refreshed: new Date().toISOString(),
         force_refresh_prevented: false,
@@ -99,12 +111,12 @@ describe('App Integration Tests', () => {
           ok: true,
           json: () => Promise.resolve({
             teamA: [
-              { nickname: 'Player1', score: 4 },
-              { nickname: 'Player3', score: 2 },
+              { nickname: 'Player1', score: 4, wins: 2, losses: 1 },
+              { nickname: 'Player3', score: 2, wins: 0, losses: 3 },
             ],
             teamB: [
-              { nickname: 'Player2', score: 3 },
-              { nickname: 'TestPlayer', score: 3 },
+              { nickname: 'Player2', score: 3, wins: 1, losses: 2 },
+              { nickname: 'TestPlayer', score: 3, wins: 0, losses: 0 },
             ]
           })
         });
@@ -114,7 +126,7 @@ describe('App Integration Tests', () => {
       return Promise.resolve({
         ok: true,
         json: () => Promise.resolve({
-          scores: {},
+          users: {},
           refreshed: new Date().toISOString(),
           force_refresh_prevented: false,
           seconds_until_next_refresh: 0

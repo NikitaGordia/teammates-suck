@@ -30,6 +30,7 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
           <tr>
             <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.nickname')}</th>
             <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
+            <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>W/L</th>
             <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.actions')}</th>
           </tr>
         </thead>
@@ -60,6 +61,17 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
                     <option value="4" style={{ color: getScoreColor(4), fontWeight: 'bold' }}>4</option>
                   </select>
                 </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
+                  {player.wins !== undefined && player.losses !== undefined ? (
+                    <div style={{ display: 'inline-block', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                      <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{player.wins}</span>
+                      <span style={{ margin: '0 2px' }}>/</span>
+                      <span style={{ color: '#F44336', fontWeight: 'bold' }}>{player.losses}</span>
+                    </div>
+                  ) : (
+                    <span style={{ color: '#999', fontSize: '12px' }}>-</span>
+                  )}
+                </td>
                 <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center', width: '100px' }}>
                   <button
                     onClick={() => onRemovePlayer(index)}
@@ -84,11 +96,12 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer }) => {
               <tr style={{ height: 0, visibility: 'hidden' }}>
                 <td style={{ padding: 0, border: 'none' }}></td>
                 <td style={{ padding: 0, border: 'none', textAlign: 'right' }}></td>
+                <td style={{ padding: 0, border: 'none', textAlign: 'center' }}></td>
                 <td style={{ padding: 0, border: 'none', textAlign: 'center', width: '100px' }}></td>
               </tr>
               {/* Message row */}
               <tr>
-                <td colSpan="3" style={{ padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic', borderBottom: '1px solid #ddd' }}>
+                <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic', borderBottom: '1px solid #ddd' }}>
                   {t('players.noPlayersYet')}
                 </td>
               </tr>
