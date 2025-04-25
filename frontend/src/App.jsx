@@ -366,7 +366,7 @@ function App() {
                     <tr>
                       <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.nickname')}</th>
                       <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
-                      <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>W/L</th>
+                      <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.winLoss')}</th>
                       <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.actions')}</th>
                     </tr>
                   </thead>

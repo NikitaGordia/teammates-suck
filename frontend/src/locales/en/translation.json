@@ -8,6 +8,7 @@
     "nickname": "Nickname",
     "score": "Score",
     "actions": "Actions",
+    "winLoss": "W/L",
     "addFirstPlayer": "Add your first player here",
     "addPlayer": "Add",
     "add": "Add",
