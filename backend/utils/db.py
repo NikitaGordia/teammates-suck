@@ -446,5 +446,40 @@ def remove_admin_by_name(name):
         conn.close()
 
 
+def delete_user_events(nickname):
+    """
+    Delete all events for a specific user by nickname.
+
+    Args:
+        nickname (str): Nickname of the user whose events should be deleted
+
+    Returns:
+        int: Number of events deleted
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        # Get count of events to be deleted for return value
+        cursor.execute("SELECT COUNT(*) FROM events WHERE nickname = ?", (nickname,))
+        events_count = cursor.fetchone()[0]
+
+        if events_count == 0:
+            # No events found for this nickname
+            return 0
+
+        # Delete all events for the specified nickname
+        cursor.execute("DELETE FROM events WHERE nickname = ?", (nickname,))
+        conn.commit()
+
+        return events_count
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting user events: {e}")
+        return -1
+    finally:
+        conn.close()
+
+
 # Initialize the database when the module is imported
 init_db()
