@@ -14,6 +14,7 @@ const API_CONFIG = {
   ENDPOINTS: {
     GET_MAPPINGS: '/users',
     BALANCE: '/balance',
+    SUBMIT_GAME: '/submit_game',
   },
 
   // Request timeout in milliseconds

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { API_CONFIG, getApiUrl } from '../config';
 import './TeamsDisplay.css';
 
 // Helper function to get color based on score
@@ -22,8 +23,13 @@ const getScoreColor = (score) => {
   }
 };
 
-const TeamsDisplay = ({ teams }) => {
+const TeamsDisplay = ({ teams, onGameSubmitted }) => {
   const { t } = useTranslation();
+  const [winningTeam, setWinningTeam] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+
   // Calculate total score for each team
   const team1Score = teams.team1.reduce((sum, player) => sum + player.score, 0);
   const team2Score = teams.team2.reduce((sum, player) => sum + player.score, 0);
@@ -56,17 +62,120 @@ const TeamsDisplay = ({ teams }) => {
     balanceDescription = t('teams.balancePoor');
   }
 
-  // No longer need random check numbers
+  // Function to handle team selection and game submission
+  const handleTeamSelect = async (team) => {
+    // If already submitting, do nothing
+    if (isSubmitting) return;
+
+    // If the team is already selected, deselect it
+    if (winningTeam === team) {
+      setWinningTeam(null);
+      return;
+    }
+
+    // Set the winning team
+    setWinningTeam(team);
+
+    // Reset submission states
+    setSubmitSuccess(false);
+    setSubmitError(null);
+
+    // Only proceed with submission if both teams have players
+    if (teams.team1.length === 0 || teams.team2.length === 0) {
+      setSubmitError(t('teams.notEnoughPlayers'));
+      return;
+    }
+
+    // Start submission
+    setIsSubmitting(true);
+
+    try {
+      // Create a game name with date and players
+      const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const team1Names = teams.team1.map(player => player.nickname).join(',');
+      const team2Names = teams.team2.map(player => player.nickname).join(',');
+      const gameName = `${date}-${team1Names}vs${team2Names}`;
+
+      // Prepare the request data
+      const requestData = {
+        teamA: teams.team1.map(player => ({ nickname: player.nickname })),
+        teamB: teams.team2.map(player => ({ nickname: player.nickname })),
+        winningTeam: team === 'team1' ? 'A' : 'B',
+        gameName: gameName,
+        adminPasscode: 'your_admin_passcode' // Hardcoded for now
+      };
+
+      // Make the POST request
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SUBMIT_GAME), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+        mode: 'cors',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Parse the response
+      const data = await response.json();
+      console.log('Game submission successful:', data);
+
+      // Set success state
+      setSubmitSuccess(true);
+
+      // Call the callback to notify parent component that a game was submitted
+      if (onGameSubmitted && typeof onGameSubmitted === 'function') {
+        // Pass the teams data to the callback
+        onGameSubmitted({
+          teamA: requestData.teamA.map(player => player.nickname),
+          teamB: requestData.teamB.map(player => player.nickname),
+          winningTeam: requestData.winningTeam
+        });
+      }
+
+      // Reset winning team immediately since we'll be clearing the teams
+      setWinningTeam(null);
+
+      // Keep success message visible for 2 seconds, then clear it
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        setSubmitError(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting game:', error);
+      setSubmitError(error.message || t('teams.submissionError'));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="teams-container">
       <div className="teams-grid">
         {/* Team 1 */}
-        <div className={`team-card team1-card`}>
+        <div
+          className={`team-card team1-card ${winningTeam === 'team1' ? 'winning-team' : ''} ${teams.team1.length === 0 || teams.team2.length === 0 ? 'team-disabled' : 'team-clickable'}`}
+          onClick={() => teams.team1.length > 0 && teams.team2.length > 0 && handleTeamSelect('team1')}
+          style={{ cursor: teams.team1.length > 0 && teams.team2.length > 0 ? 'pointer' : 'default' }}
+        >
           <div className="team-header team1-header">
-            <h3>{t('teams.team1')}</h3>
+            <h3>
+              {t('teams.team1')}
+              {winningTeam === 'team1' && (
+                <span className="winning-badge">{t('teams.winner')}</span>
+              )}
+            </h3>
+
           </div>
           <div className="team-content">
+            {teams.team1.length > 0 && teams.team2.length > 0 && (
+              <div className="click-indicator-center">
+                <span className="click-text">{t('teams.clickToSelect')}</span>
+              </div>
+            )}
             {teams.team1.length > 0 ? (
               <ul className="player-list">
                 {teams.team1.map((player, index) => (
@@ -120,11 +229,26 @@ const TeamsDisplay = ({ teams }) => {
         </div>
 
         {/* Team 2 */}
-        <div className={`team-card team2-card`}>
+        <div
+          className={`team-card team2-card ${winningTeam === 'team2' ? 'winning-team' : ''} ${teams.team1.length === 0 || teams.team2.length === 0 ? 'team-disabled' : 'team-clickable'}`}
+          onClick={() => teams.team1.length > 0 && teams.team2.length > 0 && handleTeamSelect('team2')}
+          style={{ cursor: teams.team1.length > 0 && teams.team2.length > 0 ? 'pointer' : 'default' }}
+        >
           <div className="team-header team2-header">
-            <h3>{t('teams.team2')}</h3>
+            <h3>
+              {t('teams.team2')}
+              {winningTeam === 'team2' && (
+                <span className="winning-badge">{t('teams.winner')}</span>
+              )}
+            </h3>
+
           </div>
           <div className="team-content">
+            {teams.team1.length > 0 && teams.team2.length > 0 && (
+              <div className="click-indicator-center">
+                <span className="click-text">{t('teams.clickToSelect')}</span>
+              </div>
+            )}
             {teams.team2.length > 0 ? (
               <ul className="player-list">
                 {teams.team2.map((player, index) => (
@@ -177,6 +301,16 @@ const TeamsDisplay = ({ teams }) => {
           )}
         </div>
       </div>
+
+      {/* Status message for game submission */}
+      {(isSubmitting || submitSuccess || submitError) && (
+        <div className={`submission-status ${submitSuccess ? 'success' : submitError ? 'error' : ''}`}>
+          {isSubmitting && <div className="loading-spinner"></div>}
+          {isSubmitting && <span>{t('teams.submitting')}</span>}
+          {submitSuccess && <span>{t('teams.submissionSuccess')}</span>}
+          {submitError && <span>{t('teams.submissionError')}: {submitError}</span>}
+        </div>
+      )}
 
       {/* Balance meter - only show when there are players */}
       {(teams.team1.length > 0 || teams.team2.length > 0) && (

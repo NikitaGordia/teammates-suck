@@ -189,6 +189,76 @@ function App() {
     setPlayers(updatedPlayers);
   };
 
+  // Handle game submission - refresh user data, reset teams, and update players
+  const handleGameSubmitted = async (gameData) => {
+    console.log('Game submitted:', gameData);
+
+    try {
+      // First, refresh the user data to get updated wins/losses
+      // Create AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+
+      // Create API URL with force_refresh parameter
+      let url = `${getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS)}?force_refresh=true`;
+
+      const response = await fetch(url, {
+        signal: controller.signal
+      });
+
+      // Clear the timeout
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // Get the fresh data directly from the response
+      const data = await response.json();
+      const freshUserData = data.users || {};
+
+      // Update the userData state with the fresh data
+      setUserData(freshUserData);
+
+      // Update window.userData and window.scoreMappings for compatibility
+      window.userData = freshUserData;
+      const simplifiedScoreMappings = {};
+      Object.entries(freshUserData).forEach(([nickname, userData]) => {
+        simplifiedScoreMappings[nickname] = userData.score;
+      });
+      window.scoreMappings = simplifiedScoreMappings;
+
+      console.log('Fetched fresh user data after game submission:', freshUserData);
+
+      // Clear the current teams
+      setTeams({ team1: [], team2: [] });
+
+      // Update existing players with fresh data while maintaining their order
+      const updatedPlayers = players.map(player => {
+        // If the player has updated data in the fresh userData, use it
+        if (freshUserData[player.nickname]) {
+          return {
+            ...player,
+            score: freshUserData[player.nickname].score || player.score,
+            wins: freshUserData[player.nickname].wins || 0,
+            losses: freshUserData[player.nickname].losses || 0
+          };
+        }
+        return player;
+      });
+
+      // Update the players state with the updated list (preserving order)
+      setPlayers(updatedPlayers);
+
+      // Ensure teams remain empty (no auto-rebalancing)
+      setTeams({ team1: [], team2: [] });
+    } catch (error) {
+      console.error('Error refreshing data after game submission:', error);
+      // Still clear teams even if refresh fails
+      setTeams({ team1: [], team2: [] });
+    }
+  };
+
   const handleBalanceTeams = async () => {
     console.log('handleBalanceTeams called');
 
@@ -417,7 +487,10 @@ function App() {
 
         <div className="teams-section">
           <h2>{t('app.balancedTeams')}</h2>
-          <TeamsDisplay teams={teams} />
+          <TeamsDisplay
+            teams={teams}
+            onGameSubmitted={handleGameSubmitted}
+          />
           <TeamCopyText teams={teams} autocopied={teamsCopied} />
         </div>
       </div>

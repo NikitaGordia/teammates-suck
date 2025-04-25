@@ -22,9 +22,61 @@
   min-height: 300px; /* Ensure enough space for the paycheck */
 }
 
-.team-card:hover {
+.team-clickable:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+/* Team 1 hover effect - only when clickable */
+.team1-card.team-clickable {
+  /* Add a transparent border by default to prevent layout shift on hover */
+  border: 2px solid transparent;
+}
+
+.team1-card.team-clickable:hover {
+  border-color: #2196F3;
+  box-shadow: 0 6px 12px rgba(33, 150, 243, 0.3);
+}
+
+.team1-card.team-clickable:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), rgba(33, 203, 243, 0.1));
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Team 2 hover effect - only when clickable */
+.team2-card.team-clickable {
+  /* Add a transparent border by default to prevent layout shift on hover */
+  border: 2px solid transparent;
+}
+
+.team2-card.team-clickable:hover {
+  border-color: #F44336;
+  box-shadow: 0 6px 12px rgba(244, 67, 54, 0.3);
+}
+
+.team2-card.team-clickable:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(255, 152, 0, 0.1));
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Disabled team styling */
+.team-disabled {
+  opacity: 0.9;
 }
 
 .team-header {
@@ -428,3 +480,123 @@
 .player-item:nth-child(8) { animation-delay: 0.8s; }
 .player-item:nth-child(9) { animation-delay: 0.9s; }
 .player-item:nth-child(10) { animation-delay: 1.0s; }
+
+/* Winning team styles */
+.winning-team {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-color: #4CAF50;
+}
+
+.winning-team .team-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(76, 175, 80, 0.1));
+  z-index: 1;
+  pointer-events: none;
+}
+
+.winning-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  vertical-align: middle;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Submission status styles */
+.submission-status {
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.submission-status.success {
+  background-color: #E8F5E9;
+  color: #2E7D32;
+  border-left: 4px solid #4CAF50;
+}
+
+.submission-status.error {
+  background-color: #FFEBEE;
+  color: #C62828;
+  border-left: 4px solid #F44336;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #673AB7;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Click indicator styles */
+.click-indicator-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+  pointer-events: none; /* Allow clicks to pass through */
+  width: 100%;
+}
+
+.click-text {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.team-clickable:hover .click-text {
+  opacity: 1;
+  animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}

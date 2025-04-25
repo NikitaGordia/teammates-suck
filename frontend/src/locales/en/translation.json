@@ -37,7 +37,13 @@
     "higher": "HIGHER",
     "lower": "LOWER",
     "equal": "EQUAL",
-    "leader": "Leader"
+    "leader": "Leader",
+    "winner": "WINNER",
+    "submitting": "Submitting game result...",
+    "submissionSuccess": "Game result submitted successfully!",
+    "submissionError": "Error submitting game result",
+    "notEnoughPlayers": "Both teams need players to submit a game result",
+    "clickToSelect": "Click to select winner"
   },
   "balance": {
     "balanceTeams": "Balance Teams",

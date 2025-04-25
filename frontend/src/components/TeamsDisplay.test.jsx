@@ -1,9 +1,16 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TeamsDisplay from './TeamsDisplay';
-import { mockTeams } from '../test/test-utils';
+import { mockTeams, mockSubmitGameResponse } from '../test/test-utils';
+import { API_CONFIG, getApiUrl } from '../config';
+
+// Mock fetch
+global.fetch = vi.fn();
 
 describe('TeamsDisplay Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   it('renders teams correctly', () => {
     render(<TeamsDisplay teams={mockTeams} />);
 
@@ -86,5 +93,121 @@ describe('TeamsDisplay Component', () => {
 
     // No leader tags should be present
     expect(screen.queryByText('teams.leader')).not.toBeInTheDocument();
+  });
+
+  it('highlights team as winner when clicked', async () => {
+    render(<TeamsDisplay teams={mockTeams} />);
+
+    // Click on Team 1
+    const team1Card = screen.getByText('teams.team1').closest('.team-card');
+    fireEvent.click(team1Card);
+
+    // Team 1 should have the winning-team class
+    expect(team1Card).toHaveClass('winning-team');
+
+    // Winner badge should be displayed
+    expect(screen.getByText('teams.winner')).toBeInTheDocument();
+  });
+
+  it('submits game result when a team is selected and calls onGameSubmitted', async () => {
+    // Mock successful API response
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(mockSubmitGameResponse)
+    });
+
+    // Mock callback function
+    const mockOnGameSubmitted = vi.fn().mockImplementation(({ teamA, teamB, winningTeam }) => {
+      // Simulate what App.jsx does - clear the teams
+      render(<TeamsDisplay teams={{ team1: [], team2: [] }} onGameSubmitted={mockOnGameSubmitted} />);
+    });
+
+    render(<TeamsDisplay teams={mockTeams} onGameSubmitted={mockOnGameSubmitted} />);
+
+    // Click on Team 1
+    const team1Card = screen.getByText('teams.team1').closest('.team-card');
+    fireEvent.click(team1Card);
+
+    // Wait for the API call to be made
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        getApiUrl(API_CONFIG.ENDPOINTS.SUBMIT_GAME),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json'
+          }),
+          body: expect.any(String)
+        })
+      );
+    });
+
+    // Check that the request body contains the correct data
+    const requestBody = JSON.parse(global.fetch.mock.calls[0][1].body);
+    expect(requestBody.teamA).toEqual(mockTeams.team1.map(player => ({ nickname: player.nickname })));
+    expect(requestBody.teamB).toEqual(mockTeams.team2.map(player => ({ nickname: player.nickname })));
+    expect(requestBody.winningTeam).toBe('A');
+    expect(requestBody.gameName).toContain('vs');
+    expect(requestBody.adminPasscode).toBe('your_admin_passcode');
+
+    // Success message should be displayed
+    await waitFor(() => {
+      expect(screen.getByText('teams.submissionSuccess')).toBeInTheDocument();
+    });
+
+    // Check that the onGameSubmitted callback was called with the correct data
+    expect(mockOnGameSubmitted).toHaveBeenCalledTimes(1);
+    expect(mockOnGameSubmitted).toHaveBeenCalledWith({
+      teamA: mockTeams.team1.map(player => player.nickname),
+      teamB: mockTeams.team2.map(player => player.nickname),
+      winningTeam: 'A'
+    });
+
+    // Winning team should be reset immediately
+    expect(team1Card).not.toHaveClass('winning-team');
+
+    // After the callback is called, teams should be empty
+    await waitFor(() => {
+      // Check that the empty team message is displayed for both teams
+      expect(screen.getAllByText('teams.noPlayers').length).toBe(2);
+    });
+  });
+
+  it('shows error message when API call fails', async () => {
+    // Mock failed API response
+    global.fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500
+    });
+
+    render(<TeamsDisplay teams={mockTeams} />);
+
+    // Click on Team 2
+    const team2Card = screen.getByText('teams.team2').closest('.team-card');
+    fireEvent.click(team2Card);
+
+    // Wait for the error message to be displayed
+    await waitFor(() => {
+      expect(screen.getByText(/teams.submissionError/)).toBeInTheDocument();
+    });
+  });
+
+  it('prevents submission when teams are empty', async () => {
+    const emptyTeam2 = {
+      team1: [{ nickname: 'Player1', score: 3 }],
+      team2: []
+    };
+
+    render(<TeamsDisplay teams={emptyTeam2} />);
+
+    // Click on Team 1
+    const team1Card = screen.getByText('teams.team1').closest('.team-card');
+    fireEvent.click(team1Card);
+
+    // Error message should be displayed
+    expect(screen.getByText(/teams.notEnoughPlayers/)).toBeInTheDocument();
+
+    // API should not be called
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });
