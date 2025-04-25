@@ -57,4 +57,3 @@ echo "Deployment steps on VPS completed successfully."
 # Optional: Clean up unused Docker resources
 echo "Cleaning up unused Docker resources..."
 docker system prune -af
-d
