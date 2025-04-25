@@ -86,3 +86,8 @@ coverage.xml
 credentials.json
 token.json
 
+# SQLite database
+*.db
+*.sqlite
+*.sqlite3
+
