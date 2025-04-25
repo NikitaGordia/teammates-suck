@@ -259,3 +259,39 @@ def get_player_stats():
         return jsonify({"stats": stats})
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+@db_api.route("/admins", methods=["POST"])
+def add_admin():
+    """
+    Add a new admin.
+
+    Expected request body: {
+        'name': 'admin_name',
+        'passcode': 'admin_passcode'
+    }
+
+    Returns:
+        JSON: New admin ID or error message
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        required_fields = ["name", "passcode"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Validate data types
+        if not isinstance(data["name"], str):
+            return jsonify({"error": "Name must be a string"}), 400
+        if not isinstance(data["passcode"], str):
+            return jsonify({"error": "Passcode must be a string"}), 400
+
+        # Add the admin
+        admin_id = db.add_admin(data["name"], data["passcode"])
+
+        return jsonify({"id": admin_id, "message": "Admin added successfully"})
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500

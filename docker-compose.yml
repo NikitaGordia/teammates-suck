@@ -17,6 +17,7 @@ services:
       - PYTHONUNBUFFERED=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}
+      - DB_PATH=backend/data/database.sqlite # TODO change to /etc and add static volume
 
   frontend:
     build: 

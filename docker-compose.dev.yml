@@ -4,7 +4,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     container_name: team-balancer-backend-dev
-    restart: unless-stopped
     ports:
       - "5050:5050"
     environment:
@@ -14,6 +13,7 @@ services:
       - PYTHONUNBUFFERED=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}
+      - DB_PATH=data/database.sqlite
     volumes:
       - ./backend:/app
     command: >
@@ -24,7 +24,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     container_name: team-balancer-frontend-dev
-    restart: unless-stopped
     ports:
       - "5173:5173"
     depends_on:

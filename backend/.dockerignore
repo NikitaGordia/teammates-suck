@@ -84,3 +84,7 @@ Dockerfile
 # Git
 .git
 .gitignore
+
+# Data
+data/
+

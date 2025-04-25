@@ -7,11 +7,17 @@ import sqlite3
 import os
 from pathlib import Path
 import hashlib
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
 
 # Database file path
-DB_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
-DB_FILE = DB_DIR / "database.sqlite"
+DB_PATH = os.getenv("DB_PATH")
+if DB_PATH:
+    DB_FILE = Path(DB_PATH)
+else:
+    raise Exception("DB_PATH environment variable not set")
 
 
 def get_db_connection():
@@ -20,6 +26,7 @@ def get_db_connection():
     Returns:
         sqlite3.Connection: Database connection object
     """
+    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row  # This enables column access by name
     return conn
@@ -41,6 +48,15 @@ def init_db():
             game_name TEXT NOT NULL,
             win BOOLEAN NOT NULL,
             admin TEXT NOT NULL
+        )
+        """)
+
+        # Create admins table
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS admins (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            hash TEXT NOT NULL
         )
         """)
 
@@ -333,6 +349,99 @@ def get_player_stats(nicknames):
     except Exception as e:
         print(f"Error getting player stats: {e}")
         return {nickname: {"wins": 0, "losses": 0} for nickname in nicknames}
+    finally:
+        conn.close()
+
+
+def admin_exists(name):
+    """
+    Check if an admin with the given name already exists.
+
+    Args:
+        name (str): Admin name to check
+
+    Returns:
+        bool: True if admin exists, False otherwise
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM admins WHERE name = ?", (name,))
+        result = cursor.fetchone()
+        return result is not None
+    except Exception as e:
+        print(f"Error checking if admin exists: {e}")
+        return False
+    finally:
+        conn.close()
+
+
+def add_admin(name, passcode):
+    """
+    Add a new admin to the database.
+
+    Args:
+        name (str): Admin name
+        passcode (str): Admin passcode (will be hashed)
+
+    Returns:
+        int: ID of the newly created admin
+
+    Raises:
+        ValueError: If an admin with the same name already exists
+    """
+    # Check if admin already exists
+    if admin_exists(name):
+        raise ValueError(f"Admin with name '{name}' already exists")
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        passcode_hash = hash_passcode(passcode)
+
+        cursor.execute(
+            "INSERT INTO admins (name, hash) VALUES (?, ?)",
+            (name, passcode_hash),
+        )
+        conn.commit()
+        return cursor.lastrowid
+    except Exception as e:
+        conn.rollback()
+        print(f"Error adding admin: {e}")
+        raise
+    finally:
+        conn.close()
+
+
+def remove_admin_by_name(name):
+    """
+    Remove an admin from the database by name.
+
+    Args:
+        name (str): Admin name to remove
+
+    Returns:
+        bool: True if admin was removed, False if admin was not found
+    """
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        # Check if admin exists
+        cursor.execute("SELECT * FROM admins WHERE name = ?", (name,))
+        admin = cursor.fetchone()
+
+        if not admin:
+            return False
+
+        # Delete the admin
+        cursor.execute("DELETE FROM admins WHERE name = ?", (name,))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error removing admin: {e}")
+        return False
     finally:
         conn.close()
 
