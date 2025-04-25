@@ -43,7 +43,8 @@
     "submissionSuccess": "Game result submitted successfully!",
     "submissionError": "Error submitting game result",
     "notEnoughPlayers": "Both teams need players to submit a game result",
-    "clickToSelect": "Click to select winner"
+    "clickToSelect": "Click to select winner",
+    "secretRequired": "Admin secret required to submit game result"
   },
   "balance": {
     "balanceTeams": "Balance Teams",
@@ -62,6 +63,15 @@
     "score1": "Needs to be significantly balanced",
     "score0": "Unbalanceable",
     "scoreMinus1": "Ban"
+  },
+  "admin": {
+    "secretTitle": "Admin Secret Required",
+    "secretLabel": "Enter Admin Secret",
+    "secretPlaceholder": "Format: admin:password",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "contactForSecret": "Contact me to get a secret if you don't have one",
+    "secretMissing": "Admin secret is required to submit game results"
   },
   "developer": {
     "contacts": "Developer Contacts:",

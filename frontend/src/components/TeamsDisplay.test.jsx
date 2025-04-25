@@ -4,6 +4,25 @@ import TeamsDisplay from './TeamsDisplay';
 import { mockTeams, mockSubmitGameResponse } from '../test/test-utils';
 import { API_CONFIG, getApiUrl } from '../config';
 
+// Mock AdminSecretModal component
+vi.mock('./AdminSecretModal', () => ({
+  default: ({ isOpen, onClose, onSubmit }) => {
+    if (!isOpen) return null;
+
+    // Immediately submit with a test admin secret when modal is opened
+    setTimeout(() => {
+      onSubmit('admin:testpassword');
+    }, 0);
+
+    return (
+      <div data-testid="admin-secret-modal">
+        <button onClick={() => onSubmit('admin:testpassword')}>Submit</button>
+        <button onClick={onClose}>Cancel</button>
+      </div>
+    );
+  }
+}));
+
 // Mock fetch
 global.fetch = vi.fn();
 
@@ -148,7 +167,7 @@ describe('TeamsDisplay Component', () => {
     expect(requestBody.teamB).toEqual(mockTeams.team2.map(player => ({ nickname: player.nickname })));
     expect(requestBody.winningTeam).toBe('A');
     expect(requestBody.gameName).toContain('vs');
-    expect(requestBody.adminPasscode).toBe('your_admin_passcode');
+    expect(requestBody.adminPasscode).toBe('admin:testpassword');
 
     // Success message should be displayed
     await waitFor(() => {
@@ -186,6 +205,11 @@ describe('TeamsDisplay Component', () => {
     const team2Card = screen.getByText('teams.team2').closest('.team-card');
     fireEvent.click(team2Card);
 
+    // Wait for the admin modal to appear and auto-submit
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+    });
+
     // Wait for the error message to be displayed
     await waitFor(() => {
       expect(screen.getByText(/teams.submissionError/)).toBeInTheDocument();
@@ -209,5 +233,35 @@ describe('TeamsDisplay Component', () => {
 
     // API should not be called
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('shows admin secret modal when a team is selected', async () => {
+    // Override the auto-submit behavior for this test
+    vi.doMock('./AdminSecretModal', () => ({
+      default: ({ isOpen, onClose, onSubmit }) => {
+        if (!isOpen) return null;
+        return (
+          <div data-testid="admin-secret-modal">
+            <button data-testid="submit-button" onClick={() => onSubmit('admin:testpassword')}>Submit</button>
+            <button data-testid="cancel-button" onClick={onClose}>Cancel</button>
+          </div>
+        );
+      }
+    }), { virtual: true });
+
+    // Re-import TeamsDisplay to use the new mock
+    const { default: TeamsDisplayWithMock } = await import('./TeamsDisplay');
+
+    render(<TeamsDisplayWithMock teams={mockTeams} />);
+
+    // Click on Team 1
+    const team1Card = screen.getByText('teams.team1').closest('.team-card');
+    fireEvent.click(team1Card);
+
+    // Admin secret modal should be displayed
+    expect(screen.getByTestId('admin-secret-modal')).toBeInTheDocument();
+
+    // Reset the mock for other tests
+    vi.resetModules();
   });
 });

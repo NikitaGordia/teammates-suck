@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API_CONFIG, getApiUrl } from '../config';
+import AdminSecretModal from './AdminSecretModal';
 import './TeamsDisplay.css';
 
 // Helper function to get color based on score
@@ -29,6 +30,8 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
 
   // Calculate total score for each team
   const team1Score = teams.team1.reduce((sum, player) => sum + player.score, 0);
@@ -62,8 +65,8 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
     balanceDescription = t('teams.balancePoor');
   }
 
-  // Function to handle team selection and game submission
-  const handleTeamSelect = async (team) => {
+  // Function to handle team selection
+  const handleTeamSelect = (team) => {
     // If already submitting, do nothing
     if (isSubmitting) return;
 
@@ -86,6 +89,22 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
       return;
     }
 
+    // Store the selected team and show the admin secret modal
+    setSelectedTeam(team);
+    setShowAdminModal(true);
+  };
+
+  // Function to handle admin secret submission
+  const handleAdminSecretSubmit = async (adminSecret) => {
+    // Close the modal
+    setShowAdminModal(false);
+
+    // If no admin secret provided, show error and return
+    if (!adminSecret || !adminSecret.trim()) {
+      setSubmitError(t('admin.secretMissing'));
+      return;
+    }
+
     // Start submission
     setIsSubmitting(true);
 
@@ -100,9 +119,9 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
       const requestData = {
         teamA: teams.team1.map(player => ({ nickname: player.nickname })),
         teamB: teams.team2.map(player => ({ nickname: player.nickname })),
-        winningTeam: team === 'team1' ? 'A' : 'B',
+        winningTeam: selectedTeam === 'team1' ? 'A' : 'B',
         gameName: gameName,
-        adminPasscode: 'your_admin_passcode' // Hardcoded for now
+        adminPasscode: adminSecret
       };
 
       // Make the POST request
@@ -150,6 +169,13 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Function to handle admin modal close
+  const handleAdminModalClose = () => {
+    setShowAdminModal(false);
+    // If user cancels, reset the winning team selection
+    setWinningTeam(null);
   };
 
   return (
@@ -328,6 +354,13 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
           </div>
         </div>
       )}
+
+      {/* Admin Secret Modal */}
+      <AdminSecretModal
+        isOpen={showAdminModal}
+        onClose={handleAdminModalClose}
+        onSubmit={handleAdminSecretSubmit}
+      />
     </div>
   );
 };
