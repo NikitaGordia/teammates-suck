@@ -7,6 +7,7 @@ A Flask backend for the Team Balancer application that fetches player scores fro
 - **Flask** - Web framework
 - **Gunicorn** - WSGI HTTP Server for production deployment
 - **Google Sheets API** - For fetching player data
+- **SQLite** - Embedded database for storing events
 - **Pytest** - For testing
 
 ## Setup
@@ -150,6 +151,112 @@ Response:
     {"nickname": "Player2", "score": 8},
     {"nickname": "Player4", "score": 7}
   ]
+}
+```
+
+## Database API Endpoints
+
+The following endpoints are available for interacting with the SQLite database:
+
+### GET /api/db/events
+Returns all events or events for a specific admin.
+
+Query parameters:
+- `admin_passcode` (optional): If provided, only returns events with matching admin hash
+
+Response:
+```json
+{
+  "events": [
+    {
+      "id": 1,
+      "nickname": "player1",
+      "game_name": "Game1",
+      "win": true,
+      "admin": "hashed_admin_passcode"
+    },
+    {
+      "id": 2,
+      "nickname": "player2",
+      "game_name": "Game2",
+      "win": false,
+      "admin": "hashed_admin_passcode"
+    }
+  ]
+}
+```
+
+### GET /api/db/events/:id
+Returns a specific event by ID.
+
+Response:
+```json
+{
+  "event": {
+    "id": 1,
+    "nickname": "player1",
+    "game_name": "Game1",
+    "win": true,
+    "admin": "hashed_admin_passcode"
+  }
+}
+```
+
+### POST /api/db/events
+Creates a new event.
+
+Request body:
+```json
+{
+  "nickname": "player1",
+  "game_name": "Game1",
+  "win": true,
+  "admin_passcode": "admin123"
+}
+```
+
+Response:
+```json
+{
+  "id": 1,
+  "message": "Event added successfully"
+}
+```
+
+### PUT /api/db/events/:id
+Updates an existing event.
+
+Request body:
+```json
+{
+  "nickname": "updated_player",  // Optional
+  "game_name": "Updated Game",   // Optional
+  "win": false,                  // Optional
+  "admin_passcode": "admin123"   // Required for verification
+}
+```
+
+Response:
+```json
+{
+  "message": "Event updated successfully"
+}
+```
+
+### DELETE /api/db/events/:id
+Deletes an event.
+
+Request body:
+```json
+{
+  "admin_passcode": "admin123"  // Required for verification
+}
+```
+
+Response:
+```json
+{
+  "message": "Event deleted successfully"
 }
 ```
 

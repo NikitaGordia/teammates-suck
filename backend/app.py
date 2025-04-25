@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 import random
 from datetime import datetime, timedelta
+from db_api import db_api
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,6 +26,9 @@ last_refresh_time = None
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Register the database API blueprint
+app.register_blueprint(db_api, url_prefix="/api/db")
 
 
 def fetch_all_scores_from_sheet():
@@ -155,10 +159,10 @@ def hello():
     return jsonify({"message": "Hello from Team Balancer Backend!"})
 
 
-@app.route("/api/get_mappings", methods=["GET"])
-def get_mappings():
+@app.route("/api/users", methods=["GET"])
+def get_users():
     """
-    Endpoint to get the last fetched score mappings.
+    Endpoint to get all users with their scores and win/loss statistics.
     Auto-refreshes the data every REFRESH_INTERVAL_HOURS hours.
 
     Query parameters:
@@ -166,7 +170,14 @@ def get_mappings():
                              have passed since the last refresh
 
     Returns: {
-        'scores': {nickname: score, ...},
+        'users': {
+            nickname: {
+                'score': float,
+                'wins': int,
+                'losses': int
+            },
+            ...
+        },
         'refreshed': True/False,
         'force_refresh_prevented': True/False,
         'seconds_until_next_refresh': int (seconds remaining until a forced refresh is allowed)
@@ -212,9 +223,35 @@ def get_mappings():
         # Add information about whether a forced refresh was prevented due to time constraints
         force_refresh_prevented = force_refresh and not can_force_refresh
 
+        # Get all unique nicknames from the score mappings
+        nicknames = list(score_mappings.keys())
+
+        # Get win/loss statistics for all nicknames from the database using the db_api endpoint
+        user_stats = {}
+        if nicknames:
+            with app.test_client() as client:
+                response = client.post(
+                    "/api/db/players/stats",
+                    json={"nicknames": nicknames},
+                    content_type="application/json",
+                )
+
+                if response.status_code == 200:
+                    user_stats = response.get_json().get("stats", {})
+
+        # Combine scores and statistics into a single users dictionary
+        users = {}
+        for nickname, score in score_mappings.items():
+            stats = user_stats.get(nickname, {"wins": 0, "losses": 0})
+            users[nickname] = {
+                "score": score,
+                "wins": stats["wins"],
+                "losses": stats["losses"],
+            }
+
         return jsonify(
             {
-                "scores": score_mappings,
+                "users": users,
                 "refreshed": refreshed,
                 "force_refresh_prevented": force_refresh_prevented,
                 "seconds_until_next_refresh": MIN_REFRESH_INTERVAL_SECONDS
@@ -281,6 +318,102 @@ def balance():
 
         return jsonify(balanced_teams)
 
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+@app.route("/api/submit_game", methods=["POST"])
+def submit_game():
+    """
+    Endpoint to submit a new game with two teams and record the results in the database.
+
+    Expected request body: {
+        'teamA': [{'nickname': 'player1'}, {'nickname': 'player2'}, ...],
+        'teamB': [{'nickname': 'player3'}, {'nickname': 'player4'}, ...],
+        'winningTeam': 'A' or 'B',
+        'gameName': 'Game name',
+        'adminPasscode': 'admin_passcode'
+    }
+
+    Returns: {
+        'eventIds': [1, 2, 3, ...],
+        'message': 'Game results recorded successfully'
+    }
+    """
+    try:
+        data = request.get_json()
+
+        # Validate required fields
+        required_fields = ["teamA", "teamB", "winningTeam", "gameName", "adminPasscode"]
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing required field: {field}"}), 400
+
+        # Validate teams format
+        if not isinstance(data["teamA"], list) or not isinstance(data["teamB"], list):
+            return jsonify(
+                {"error": "Teams must be provided as lists of player objects"}
+            ), 400
+
+        # Validate winning team
+        if data["winningTeam"] not in ["A", "B"]:
+            return jsonify({"error": "winningTeam must be either 'A' or 'B'"}), 400
+
+        # Extract player nicknames from both teams
+        team_a_nicknames = [
+            player.get("nickname") for player in data["teamA"] if player.get("nickname")
+        ]
+        team_b_nicknames = [
+            player.get("nickname") for player in data["teamB"] if player.get("nickname")
+        ]
+
+        # Validate that we have at least one player in each team
+        if not team_a_nicknames or not team_b_nicknames:
+            return jsonify(
+                {"error": "Each team must have at least one player with a nickname"}
+            ), 400
+
+        # Combine all players and determine win/loss status
+        all_nicknames = []
+        all_wins = []
+
+        # Add Team A players
+        for nickname in team_a_nicknames:
+            all_nicknames.append(nickname)
+            all_wins.append(data["winningTeam"] == "A")
+
+        # Add Team B players
+        for nickname in team_b_nicknames:
+            all_nicknames.append(nickname)
+            all_wins.append(data["winningTeam"] == "B")
+
+        # Prepare data for the batch endpoint
+        batch_data = {
+            "nicknames": all_nicknames,
+            "game_name": data["gameName"],
+            "wins": all_wins,
+            "admin_passcode": data["adminPasscode"],
+        }
+
+        # Call the db_api endpoint to add events in batch
+        # We're making an internal request to the Blueprint endpoint
+        with app.test_client() as client:
+            response = client.post(
+                "/api/db/events/batch", json=batch_data, content_type="application/json"
+            )
+
+            if response.status_code != 200:
+                return response.get_json(), response.status_code
+
+            # Extract count from the response
+            events_added = response.get_json().get("count", 0)
+
+        return jsonify(
+            {"count": events_added, "message": "Game results recorded successfully"}
+        )
+
+    except ValueError as ve:
+        return jsonify({"error": str(ve)}), 400
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
