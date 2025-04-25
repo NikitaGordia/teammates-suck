@@ -49,40 +49,46 @@ function App() {
   };
 
   // Handler functions
-  // Fetch score mappings from backend
-  const fetchScoreMappings = async () => {
-    // If already throttled, don't allow another fetch
-    if (isThrottled) return;
+  // Fetch score mappings from backend with optional force refresh
+  const fetchScoreMappings = async (force_refresh = false) => {
+    // If force_refresh is true and already throttled, don't allow another fetch
+    if (force_refresh && isThrottled) return;
 
-    // Set loading and throttle states
+    // Set loading state
     setIsLoading(true);
-    setIsThrottled(true);
 
-    // Start the throttle countdown
-    let timeRemaining = API_CONFIG.THROTTLE_TIME;
-    setThrottleTimeLeft(timeRemaining);
+    // Apply throttling only for manual refresh (force_refresh = true)
+    if (force_refresh) {
+      setIsThrottled(true);
 
-    // Update the countdown every second
-    const countdownInterval = setInterval(() => {
-      timeRemaining -= 1;
+      // Start the throttle countdown
+      let timeRemaining = API_CONFIG.THROTTLE_TIME;
       setThrottleTimeLeft(timeRemaining);
 
-      if (timeRemaining <= 0) {
-        clearInterval(countdownInterval);
-        setIsThrottled(false);
-      }
-    }, 1000);
+      // Update the countdown every second
+      const countdownInterval = setInterval(() => {
+        timeRemaining -= 1;
+        setThrottleTimeLeft(timeRemaining);
+
+        if (timeRemaining <= 0) {
+          clearInterval(countdownInterval);
+          setIsThrottled(false);
+        }
+      }, 1000);
+    }
 
     try {
       // Create AbortController for timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
-      // Add force_refresh=true parameter to the URL
-      const url = new URL(getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS));
-      url.searchParams.append('force_refresh', 'true');
+      // Create API URL and add force_refresh parameter if needed
+      let url = getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS);
+      if (force_refresh) {
+        url = `${url}?force_refresh=true`;
+      }
 
-      const response = await fetch(url.toString(), {
+      const response = await fetch(url, {
         signal: controller.signal
       });
 
@@ -94,53 +100,34 @@ function App() {
       }
       const data = await response.json();
       setScoreMappings(data.scores || {});
-      console.log('Fetched score mappings:', data.scores);
+
+      if (force_refresh) {
+        console.log('Fetched score mappings:', data.scores);
+      }
     } catch (error) {
-      console.error('Error fetching score mappings:', error);
+      const errorType = force_refresh ? 'score mappings' : 'initial score mappings';
+      console.error(`Error fetching ${errorType}:`, error);
+
       if (error.name === 'AbortError') {
-        alert(`Request timed out after ${API_CONFIG.TIMEOUT/1000} seconds. Please check if the backend server is running.`);
+        const timeoutMessage = force_refresh
+          ? `Request timed out after ${API_CONFIG.TIMEOUT/1000} seconds. Please check if the backend server is running.`
+          : `Initial request timed out after ${API_CONFIG.TIMEOUT/1000} seconds. Please check if the backend server is running.`;
+        alert(timeoutMessage);
       } else {
-        alert('Failed to fetch score mappings from the server. Please try again later.');
+        const errorMessage = force_refresh
+          ? 'Failed to fetch score mappings from the server. Please try again later.'
+          : 'Failed to fetch initial score mappings from the server.';
+        alert(errorMessage);
       }
     } finally {
       setIsLoading(false);
-      // Note: We don't reset the throttle here as we want the button to remain disabled for 30 seconds
-    }
-  };
-
-  // Function to fetch data without throttling (for initial load)
-  const initialFetchScoreMappings = async () => {
-    setIsLoading(true);
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
-
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS), {
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setScoreMappings(data.scores || {});
-    } catch (error) {
-      console.error('Error fetching initial score mappings:', error);
-      if (error.name === 'AbortError') {
-        alert(`Initial request timed out after ${API_CONFIG.TIMEOUT/1000} seconds. Please check if the backend server is running.`);
-      } else {
-        alert('Failed to fetch initial score mappings from the server.');
-      }
-    } finally {
-      setIsLoading(false);
+      // Note: We don't reset the throttle here for force_refresh=true as we want the button to remain disabled
     }
   };
 
   // Initialize data on component mount
   useEffect(() => {
-    initialFetchScoreMappings();
+    fetchScoreMappings(false);
   }, []);
 
   // We're not automatically updating players list when score mappings change
@@ -311,7 +298,7 @@ function App() {
                     </td>
                     <td style={{ padding: '2px 0', textAlign: 'center', width: '100px' }}>
                       <button
-                        onClick={fetchScoreMappings}
+                        onClick={() => fetchScoreMappings(true)}
                         disabled={isLoading || isThrottled}
                         className="refresh-button"
                       >
