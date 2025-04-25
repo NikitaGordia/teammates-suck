@@ -4,7 +4,7 @@ This module contains all the Flask routes for interacting with the database.
 """
 
 from flask import Blueprint, jsonify, request
-import db
+from . import db
 
 # Create a Blueprint for the database API
 db_api = Blueprint("db_api", __name__)

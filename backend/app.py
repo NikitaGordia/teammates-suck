@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 import random
 from datetime import datetime, timedelta
-from db_api import db_api
+from utils.db_api import db_api
 
 # Load environment variables from .env file
 load_dotenv()

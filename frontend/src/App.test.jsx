@@ -55,7 +55,7 @@ describe('App Integration Tests', () => {
     // Check developer contacts
     expect(screen.getByText('developer.contacts')).toBeInTheDocument();
     expect(screen.getByText('developer.discord')).toBeInTheDocument();
-    expect(screen.getByText('developer.cossacs3')).toBeInTheDocument();
+    expect(screen.getByText('developer.cossacks3')).toBeInTheDocument();
   });
 
   it('allows adding and removing players', async () => {
