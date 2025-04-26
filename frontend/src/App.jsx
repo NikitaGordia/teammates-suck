@@ -7,6 +7,7 @@ import TeamsDisplay from './components/TeamsDisplay';
 import TeamCopyText, { copyTeamsToClipboard } from './components/TeamCopyText';
 import BalancingInfo from './components/BalancingInfo';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import LogoutButton from './components/LogoutButton';
 import { API_CONFIG, getApiUrl } from './config';
 import { handleApiResponse } from './utils/apiUtils';
 import './App.css';
@@ -361,6 +362,7 @@ function App() {
     <div className="App">
       <div className="app-header">
         <LanguageSwitcher />
+        <LogoutButton />
       </div>
       <div className="main-container">
         <div className="players-section">

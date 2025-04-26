@@ -74,7 +74,8 @@
     "secretMissing": "Admin secret is required to submit game results",
     "invalidFormat": "Invalid format. Must be 'admin:password'",
     "emptyName": "Admin name cannot be empty",
-    "emptyPassword": "Admin password cannot be empty"
+    "emptyPassword": "Admin password cannot be empty",
+    "logout": "Log Out"
   },
   "developer": {
     "contacts": "Developer Contacts:",

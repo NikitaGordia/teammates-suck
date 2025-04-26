@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API_CONFIG, getApiUrl } from '../config';
 import { handleApiResponse } from '../utils/apiUtils';
 import { validateAdminSecret } from '../utils/adminUtils';
+import { getCookie, setCookie, COOKIE_NAMES } from '../utils/cookieUtils';
 import AdminSecretModal from './AdminSecretModal';
 import './TeamsDisplay.css';
 
@@ -91,10 +92,27 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
       return;
     }
 
-    // Store the selected team and show the admin secret modal
+    // Store the selected team
     setSelectedTeam(team);
-    setShowAdminModal(true);
+
+    // Check if we have a saved admin secret
+    const savedAdminSecret = getCookie(COOKIE_NAMES.ADMIN_SECRET);
+
+    if (savedAdminSecret) {
+      // If we have a saved secret, use it directly
+      handleAdminSecretSubmit(savedAdminSecret);
+    } else {
+      // Otherwise show the admin secret modal
+      setShowAdminModal(true);
+    }
   };
+
+  // Check for saved admin secret on component mount
+  useEffect(() => {
+    const savedAdminSecret = getCookie(COOKIE_NAMES.ADMIN_SECRET);
+    // We don't need to do anything with it here, just making sure it's available
+    // when needed in handleTeamSelect
+  }, []);
 
   // Function to handle admin secret submission
   const handleAdminSecretSubmit = async (adminSecret) => {
@@ -107,6 +125,9 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
       setSubmitError(validationError);
       return;
     }
+
+    // Save the admin secret in a cookie (30 days expiration)
+    setCookie(COOKIE_NAMES.ADMIN_SECRET, adminSecret, 30);
 
     // Start submission
     setIsSubmitting(true);
