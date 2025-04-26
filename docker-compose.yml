@@ -1,6 +1,6 @@
 services:
   backend:
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
       platforms:
@@ -18,10 +18,12 @@ services:
       - PYTHONUNBUFFERED=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}
-      - DB_PATH=backend/data/database.sqlite # TODO change to /etc and add static volume
+      - DB_PATH=data/database.sqlite
+    volumes:
+      - db:/app/data
 
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile
       platforms:
@@ -40,3 +42,6 @@ services:
 networks:
   default:
     name: team-balancer-network-prod
+
+volumes:
+  db:
