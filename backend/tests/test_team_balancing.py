@@ -1,5 +1,5 @@
 import pytest
-from app import balance_teams
+from backend.src.app import balance_teams
 import random
 
 

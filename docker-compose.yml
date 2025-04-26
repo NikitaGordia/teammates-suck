@@ -12,7 +12,8 @@ services:
     ports:
       - "5050:5050"
     environment:
-      - FLASK_APP=app.py
+      - PYTHONPATH=/app/src
+      - FLASK_APP=src/app.py
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}

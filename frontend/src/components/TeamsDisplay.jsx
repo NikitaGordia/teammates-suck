@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { API_CONFIG, getApiUrl } from '../config';
+import { handleApiResponse } from '../utils/apiUtils';
+import { validateAdminSecret } from '../utils/adminUtils';
 import AdminSecretModal from './AdminSecretModal';
 import './TeamsDisplay.css';
 
@@ -99,9 +101,10 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
     // Close the modal
     setShowAdminModal(false);
 
-    // If no admin secret provided, show error and return
-    if (!adminSecret || !adminSecret.trim()) {
-      setSubmitError(t('admin.secretMissing'));
+    // Validate the admin secret
+    const validationError = validateAdminSecret(adminSecret, t);
+    if (validationError) {
+      setSubmitError(validationError);
       return;
     }
 
@@ -134,12 +137,8 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
         mode: 'cors',
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      // Parse the response
-      const data = await response.json();
+      // Use the handleApiResponse utility to check for errors
+      const data = await handleApiResponse(response);
       console.log('Game submission successful:', data);
 
       // Set success state
@@ -165,6 +164,8 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
       }, 2000);
     } catch (error) {
       console.error('Error submitting game:', error);
+      // The error message will already contain the API error message if present
+      // because handleApiResponse extracts it from the 'error' key in the response
       setSubmitError(error.message || t('teams.submissionError'));
     } finally {
       setIsSubmitting(false);

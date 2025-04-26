@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from app import fetch_all_scores_from_sheet
+from backend.src.app import fetch_all_scores_from_sheet
 
 
 def test_fetch_all_scores_from_sheet_success(mock_sheet_data):

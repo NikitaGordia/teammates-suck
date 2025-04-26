@@ -39,7 +39,7 @@ def generate_salt():
 
 
 def hash_password_with_salt(password, salt=None):
-    """
+    """в
     Hash a password with SHA256 and a salt.
 
     Args:

@@ -1,5 +1,5 @@
 import pytest
-from app import app, balance_teams, fetch_all_scores_from_sheet
+from backend.src.app import app, balance_teams, fetch_all_scores_from_sheet
 from flask import Flask
 
 

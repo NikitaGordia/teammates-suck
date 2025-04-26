@@ -135,6 +135,16 @@
   box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.2);
 }
 
+.modal-form-group input.input-error {
+  border-color: #F44336;
+  background-color: rgba(244, 67, 54, 0.05);
+}
+
+.modal-form-group input.input-error:focus {
+  border-color: #F44336;
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
+}
+
 /* Developer contacts section */
 .developer-contacts {
   margin-top: 20px;

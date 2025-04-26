@@ -1,16 +1,29 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Modal from './Modal';
+import { validateAdminSecret } from '../utils/adminUtils';
 
 const AdminSecretModal = ({ isOpen, onClose, onSubmit }) => {
   const { t } = useTranslation();
   const [adminSecret, setAdminSecret] = useState('');
+  const [validationError, setValidationError] = useState('');
 
   const handleSubmit = () => {
-    if (adminSecret.trim()) {
-      onSubmit(adminSecret);
-      setAdminSecret(''); // Clear the input after submission
+    // Validate the admin secret
+    const error = validateAdminSecret(adminSecret, t);
+
+    if (error) {
+      // If there's an error, set it and don't submit
+      setValidationError(error);
+      return;
     }
+
+    // Clear any previous validation errors
+    setValidationError('');
+
+    // Submit the admin secret
+    onSubmit(adminSecret);
+    setAdminSecret(''); // Clear the input after submission
   };
 
   const handleKeyDown = (e) => {
@@ -20,16 +33,24 @@ const AdminSecretModal = ({ isOpen, onClose, onSubmit }) => {
     }
   };
 
+  // Clear validation error when input changes
+  const handleInputChange = (e) => {
+    setAdminSecret(e.target.value);
+    if (validationError) {
+      setValidationError('');
+    }
+  };
+
   const footer = (
     <>
-      <button 
-        className="modal-button modal-button-secondary" 
+      <button
+        className="modal-button modal-button-secondary"
         onClick={onClose}
       >
         {t('admin.cancel')}
       </button>
-      <button 
-        className="modal-button modal-button-primary" 
+      <button
+        className="modal-button modal-button-primary"
         onClick={handleSubmit}
         disabled={!adminSecret.trim()}
       >
@@ -51,13 +72,19 @@ const AdminSecretModal = ({ isOpen, onClose, onSubmit }) => {
           id="admin-secret"
           type="text"
           value={adminSecret}
-          onChange={(e) => setAdminSecret(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder={t('admin.secretPlaceholder')}
           autoFocus
+          className={validationError ? 'input-error' : ''}
         />
+        {validationError && (
+          <div className="validation-error" style={{ color: '#F44336', fontSize: '14px', marginTop: '5px' }}>
+            {validationError}
+          </div>
+        )}
       </div>
-      
+
       <div className="developer-contacts">
         <div className="developer-contacts-title">{t('developer.contacts')}</div>
         <div>{t('developer.discord')}</div>

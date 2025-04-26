@@ -8,6 +8,7 @@ import TeamCopyText, { copyTeamsToClipboard } from './components/TeamCopyText';
 import BalancingInfo from './components/BalancingInfo';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { API_CONFIG, getApiUrl } from './config';
+import { handleApiResponse } from './utils/apiUtils';
 import './App.css';
 
 function App() {
@@ -95,10 +96,8 @@ function App() {
       // Clear the timeout
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
+      // Use the handleApiResponse utility to check for errors
+      const data = await handleApiResponse(response);
 
       // Update userData with the new response format
       setUserData(data.users || {});
@@ -128,9 +127,11 @@ function App() {
           : `Initial request timed out after ${API_CONFIG.TIMEOUT/1000} seconds. Please check if the backend server is running.`;
         alert(timeoutMessage);
       } else {
-        const errorMessage = force_refresh
+        // The error message will already contain the API error message if present
+        // because handleApiResponse extracts it from the 'error' key in the response
+        const errorMessage = error.message || (force_refresh
           ? 'Failed to fetch user data from the server. Please try again later.'
-          : 'Failed to fetch initial user data from the server.';
+          : 'Failed to fetch initial user data from the server.');
         alert(errorMessage);
       }
     } finally {
@@ -209,12 +210,8 @@ function App() {
       // Clear the timeout
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      // Get the fresh data directly from the response
-      const data = await response.json();
+      // Use the handleApiResponse utility to check for errors
+      const data = await handleApiResponse(response);
       const freshUserData = data.users || {};
 
       // Update the userData state with the fresh data
@@ -254,6 +251,10 @@ function App() {
       setTeams({ team1: [], team2: [] });
     } catch (error) {
       console.error('Error refreshing data after game submission:', error);
+      // Display the error message from the API if available
+      if (error.name !== 'AbortError') {
+        alert(error.message || 'Error refreshing data after game submission');
+      }
       // Still clear teams even if refresh fails
       setTeams({ team1: [], team2: [] });
     }
@@ -306,12 +307,8 @@ function App() {
         mode: 'cors',
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      // Parse the response
-      const data = await response.json();
+      // Use the handleApiResponse utility to check for errors
+      const data = await handleApiResponse(response);
       console.log('Received balanced teams:', data);
 
       // Map the API response to the expected format for the teams state
@@ -353,7 +350,8 @@ function App() {
       }
     } catch (error) {
       console.error('Error balancing teams:', error);
-      alert(t('balance.error'));
+      // Display the error message from the API if available
+      alert(error.message || t('balance.error'));
     } finally {
       setIsLoading(false);
     }

@@ -7,17 +7,18 @@ services:
     ports:
       - "5050:5050"
     environment:
-      - FLASK_APP=app.py
+      - PYTHONPATH=/app/src
+      - PYTHONUNBUFFERED=1
+      - FLASK_APP=src/app.py
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - PYTHONUNBUFFERED=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}
       - DB_PATH=data/database.sqlite
     volumes:
-      - ./backend:/app
-    command: >
-      gunicorn --workers=2 --bind=0.0.0.0:5050 --reload app:app
+      - ./backend/src:/app/src
+      - ./backend/data:/app/data
+    command: python -m app
 
   frontend:
     build:

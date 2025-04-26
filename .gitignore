@@ -70,3 +70,6 @@ coverage.xml
 # Misc
 .cache/
 .temp/
+
+# Devcontainer
+.devcontainer/

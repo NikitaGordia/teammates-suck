@@ -71,7 +71,10 @@
     "submit": "Submit",
     "cancel": "Cancel",
     "contactForSecret": "Contact me to get a secret if you don't have one",
-    "secretMissing": "Admin secret is required to submit game results"
+    "secretMissing": "Admin secret is required to submit game results",
+    "invalidFormat": "Invalid format. Must be 'admin:password'",
+    "emptyName": "Admin name cannot be empty",
+    "emptyPassword": "Admin password cannot be empty"
   },
   "developer": {
     "contacts": "Developer Contacts:",

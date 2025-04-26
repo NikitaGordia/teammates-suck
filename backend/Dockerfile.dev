@@ -8,15 +8,7 @@ COPY requirements.txt .
 # Install dependencies using pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set environment variables
-ENV FLASK_APP=app.py
-ENV FLASK_ENV=development
-ENV FLASK_DEBUG=1
-ENV PYTHONUNBUFFERED=1
-
 # Expose the port the app runs on
 EXPOSE 5050
 
-# Command to run the application with Gunicorn in development mode
-# Using 2 worker processes, auto-reload enabled, and binding to 0.0.0.0:5050
-CMD ["gunicorn", "--workers=2", "--bind=0.0.0.0:5050", "--reload", "app:app"]
+CMD ["python", "-m", "app"]

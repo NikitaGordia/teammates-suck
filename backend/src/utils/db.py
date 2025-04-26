@@ -81,6 +81,68 @@ def hash_passcode(passcode):
     return hashlib.sha256(passcode.encode()).hexdigest()
 
 
+def verify_admin_credentials(admin_passcode):
+    """
+    Verify admin credentials in the format "admin_name:admin_password".
+
+    Args:
+        admin_passcode (str): Admin credentials in the format "admin_name:admin_password"
+
+    Returns:
+        tuple: (bool, str) - (is_valid, error_message)
+    """
+    # Validate format
+    if not admin_passcode or ":" not in admin_passcode:
+        return False, "Admin passcode must be in format 'admin:password'"
+
+    # Split the admin secret into name and password
+    name, password = admin_passcode.split(":", 1)
+
+    # Validate inputs
+    if not name:
+        return False, "Admin name cannot be empty"
+
+    if not password:
+        return False, "Admin password cannot be empty"
+
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+
+        # Check if admin exists
+        cursor.execute("SELECT hash FROM admins WHERE name = ?", (name,))
+        result = cursor.fetchone()
+
+        if not result:
+            return False, f"Admin '{name}' not found"
+
+        stored_hash = result["hash"]
+
+        # Check if the stored hash contains a salt (format: hash:salt)
+        if ":" in stored_hash:
+            stored_password_hash, salt = stored_hash.split(":", 1)
+
+            # Hash the provided password with the stored salt
+            password_with_salt = password + salt
+            provided_hash = hashlib.sha256(password_with_salt.encode()).hexdigest()
+
+            # Compare the hashes
+            if provided_hash != stored_password_hash:
+                return False, "Invalid admin password"
+        else:
+            # For backward compatibility with non-salted hashes
+            provided_hash = hash_passcode(password)
+            if provided_hash != stored_hash:
+                return False, "Invalid admin password"
+
+        return True, ""
+    except Exception as e:
+        print(f"Error verifying admin credentials: {e}")
+        return False, f"Error verifying admin credentials: {str(e)}"
+    finally:
+        conn.close()
+
+
 def add_event(nickname, game_name, win, admin_passcode):
     """
     Add a new event to the database.
@@ -89,11 +151,19 @@ def add_event(nickname, game_name, win, admin_passcode):
         nickname (str): Player's nickname
         game_name (str): Name of the game
         win (bool): True if the player won, False if they lost
-        admin_passcode (str): Admin passcode (will be hashed)
+        admin_passcode (str): Admin passcode in format "admin_name:admin_password"
 
     Returns:
         int: ID of the newly created event
+
+    Raises:
+        ValueError: If admin credentials are invalid
     """
+    # Verify admin credentials
+    is_valid, error_message = verify_admin_credentials(admin_passcode)
+    if not is_valid:
+        raise ValueError(error_message)
+
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -119,6 +189,7 @@ def get_events(admin_passcode=None):
 
     Args:
         admin_passcode (str, optional): If provided, only return events with matching admin hash
+                                       Format: "admin_name:admin_password"
 
     Returns:
         list: List of events as dictionaries
@@ -128,6 +199,11 @@ def get_events(admin_passcode=None):
         cursor = conn.cursor()
 
         if admin_passcode:
+            # Verify admin credentials
+            is_valid, _ = verify_admin_credentials(admin_passcode)
+            if not is_valid:
+                return []  # Return empty list if admin credentials are invalid
+
             admin_hash = hash_passcode(admin_passcode)
             cursor.execute("SELECT * FROM events WHERE admin = ?", (admin_hash,))
         else:
@@ -179,11 +255,17 @@ def update_event(
         nickname (str, optional): New nickname
         game_name (str, optional): New game name
         win (bool, optional): New win status
-        admin_passcode (str, optional): New admin passcode
+        admin_passcode (str, optional): Admin passcode in format "admin_name:admin_password"
 
     Returns:
         bool: True if update was successful, False otherwise
     """
+    # Verify admin credentials if provided
+    if admin_passcode:
+        is_valid, _ = verify_admin_credentials(admin_passcode)
+        if not is_valid:
+            return False
+
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -231,11 +313,16 @@ def delete_event(event_id, admin_passcode):
 
     Args:
         event_id (int): ID of the event to delete
-        admin_passcode (str): Admin passcode for verification
+        admin_passcode (str): Admin passcode for verification in format "admin_name:admin_password"
 
     Returns:
         bool: True if deletion was successful, False otherwise
     """
+    # Verify admin credentials
+    is_valid, _ = verify_admin_credentials(admin_passcode)
+    if not is_valid:
+        return False
+
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
@@ -269,13 +356,21 @@ def add_events_batch(nicknames, game_name, wins, admin_passcode):
         nicknames (list): List of player nicknames
         game_name (str): Name of the game
         wins (list): List of boolean values indicating win/loss for each player
-        admin_passcode (str): Admin passcode (will be hashed)
+        admin_passcode (str): Admin passcode in format "admin_name:admin_password"
 
     Returns:
         int: Number of events added
+
+    Raises:
+        ValueError: If admin credentials are invalid or if lists have different lengths
     """
     if len(nicknames) != len(wins):
         raise ValueError("Length of nicknames and wins lists must match")
+
+    # Verify admin credentials
+    is_valid, error_message = verify_admin_credentials(admin_passcode)
+    if not is_valid:
+        raise ValueError(error_message)
 
     conn = get_db_connection()
     try:
@@ -376,13 +471,13 @@ def admin_exists(name):
         conn.close()
 
 
-def add_admin(name, passcode):
+def add_admin(name, saled_passcode_hash):
     """
     Add a new admin to the database.
 
     Args:
         name (str): Admin name
-        passcode (str): Admin passcode (will be hashed)
+        saled_passcode_hash (str): Admin passcode hash (will be stored as is)
 
     Returns:
         int: ID of the newly created admin
@@ -397,11 +492,10 @@ def add_admin(name, passcode):
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        passcode_hash = hash_passcode(passcode)
 
         cursor.execute(
             "INSERT INTO admins (name, hash) VALUES (?, ?)",
-            (name, passcode_hash),
+            (name, saled_passcode_hash),
         )
         conn.commit()
         return cursor.lastrowid
