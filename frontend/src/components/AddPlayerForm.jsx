@@ -89,6 +89,21 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
       setScore(Number(scoreMappings[suggestion]));
     }
     setShowSuggestions(false);
+
+    // Get wins and losses from window.userData if available
+    const wins = window.userData && window.userData[suggestion] ? window.userData[suggestion].wins : 0;
+    const losses = window.userData && window.userData[suggestion] ? window.userData[suggestion].losses : 0;
+
+    // Submit the form with the selected player
+    const playerScore = scoreMappings[suggestion] !== undefined
+      ? Number(scoreMappings[suggestion])
+      : Number(score);
+
+    onAddPlayer({ nickname: suggestion, score: playerScore, wins, losses });
+
+    // Reset the form
+    setNickname('');
+    setScore(3);
   };
 
   const handleKeyDown = (e) => {
@@ -114,7 +129,27 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
       e.preventDefault();
       const selectedSuggestion = suggestions[activeSuggestionIndex];
       if (selectedSuggestion) {
-        handleSuggestionClick(selectedSuggestion);
+        // Set the nickname and score
+        setNickname(selectedSuggestion);
+        if (scoreMappings[selectedSuggestion] !== undefined) {
+          setScore(Number(scoreMappings[selectedSuggestion]));
+        }
+        setShowSuggestions(false);
+
+        // Get wins and losses from window.userData if available
+        const wins = window.userData && window.userData[selectedSuggestion] ? window.userData[selectedSuggestion].wins : 0;
+        const losses = window.userData && window.userData[selectedSuggestion] ? window.userData[selectedSuggestion].losses : 0;
+
+        // Submit the form with the selected player
+        const playerScore = scoreMappings[selectedSuggestion] !== undefined
+          ? Number(scoreMappings[selectedSuggestion])
+          : Number(score);
+
+        onAddPlayer({ nickname: selectedSuggestion, score: playerScore, wins, losses });
+
+        // Reset the form
+        setNickname('');
+        setScore(3);
       }
     }
     // Escape
