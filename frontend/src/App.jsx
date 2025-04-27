@@ -191,6 +191,13 @@ function App() {
     setPlayers(updatedPlayers);
   };
 
+  const handleRemoveAllPlayers = () => {
+    console.log('handleRemoveAllPlayers called');
+    setPlayers([]);
+    // Also clear teams when removing all players
+    setTeams({ team1: [], team2: [] });
+  };
+
   const handleReorderPlayers = (newPlayers) => {
     console.log('handleReorderPlayers called with new order');
     setPlayers(newPlayers);
@@ -377,6 +384,7 @@ function App() {
             onScoreChange={handleScoreChange}
             onRemovePlayer={handleRemovePlayer}
             onReorderPlayers={handleReorderPlayers}
+            onRemoveAllPlayers={handleRemoveAllPlayers}
           />
           <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={window.scoreMappings || {}} noPlayersAdded={players.length === 0} />
           <BalanceButton

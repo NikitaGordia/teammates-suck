@@ -21,7 +21,8 @@ export const mockPlayers = [
 export const mockHandlers = {
   onScoreChange: vi.fn(),
   onRemovePlayer: vi.fn(),
-  onReorderPlayers: vi.fn()
+  onReorderPlayers: vi.fn(),
+  onRemoveAllPlayers: vi.fn()
 };
 
 // Mock API response for team balancing

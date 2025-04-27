@@ -11,13 +11,16 @@ describe('PlayerTable Component', () => {
         onScoreChange={mockHandlers.onScoreChange}
         onRemovePlayer={mockHandlers.onRemovePlayer}
         onReorderPlayers={mockHandlers.onReorderPlayers}
+        onRemoveAllPlayers={mockHandlers.onRemoveAllPlayers}
       />
     );
 
     // Check column headers
     expect(screen.getByText('players.nickname')).toBeInTheDocument();
     expect(screen.getByText('players.score')).toBeInTheDocument();
-    expect(screen.getByText('players.actions')).toBeInTheDocument();
+
+    // With players, we should see the "Remove All Players" button instead of "Actions"
+    expect(screen.getByText('players.removeAll')).toBeInTheDocument();
 
     // Check player data
     expect(screen.getByText('Player1')).toBeInTheDocument();
@@ -36,9 +39,12 @@ describe('PlayerTable Component', () => {
         onScoreChange={mockHandlers.onScoreChange}
         onRemovePlayer={mockHandlers.onRemovePlayer}
         onReorderPlayers={mockHandlers.onReorderPlayers}
+        onRemoveAllPlayers={mockHandlers.onRemoveAllPlayers}
       />
     );
 
+    // With no players, we should see "Actions" instead of "Remove All Players" button
+    expect(screen.getByText('players.actions')).toBeInTheDocument();
     expect(screen.getByText('players.noPlayersYet')).toBeInTheDocument();
   });
 
@@ -49,6 +55,7 @@ describe('PlayerTable Component', () => {
         onScoreChange={mockHandlers.onScoreChange}
         onRemovePlayer={mockHandlers.onRemovePlayer}
         onReorderPlayers={mockHandlers.onReorderPlayers}
+        onRemoveAllPlayers={mockHandlers.onRemoveAllPlayers}
       />
     );
 
@@ -65,6 +72,7 @@ describe('PlayerTable Component', () => {
         onScoreChange={mockHandlers.onScoreChange}
         onRemovePlayer={mockHandlers.onRemovePlayer}
         onReorderPlayers={mockHandlers.onReorderPlayers}
+        onRemoveAllPlayers={mockHandlers.onRemoveAllPlayers}
       />
     );
 
@@ -84,6 +92,7 @@ describe('PlayerTable Component', () => {
         onScoreChange={mockHandlers.onScoreChange}
         onRemovePlayer={mockHandlers.onRemovePlayer}
         onReorderPlayers={mockHandlers.onReorderPlayers}
+        onRemoveAllPlayers={mockHandlers.onRemoveAllPlayers}
       />
     );
 
@@ -101,5 +110,26 @@ describe('PlayerTable Component', () => {
 
     // Check if onReorderPlayers was called with the reordered players array
     expect(mockHandlers.onReorderPlayers).toHaveBeenCalled();
+  });
+
+  it('calls onRemoveAllPlayers when remove all button is clicked', () => {
+    render(
+      <PlayerTable
+        players={mockPlayers}
+        onScoreChange={mockHandlers.onScoreChange}
+        onRemovePlayer={mockHandlers.onRemovePlayer}
+        onReorderPlayers={mockHandlers.onReorderPlayers}
+        onRemoveAllPlayers={mockHandlers.onRemoveAllPlayers}
+      />
+    );
+
+    // Find the "Remove All Players" button in the header
+    const removeAllButton = screen.getByText('players.removeAll');
+
+    // Click the button
+    fireEvent.click(removeAllButton);
+
+    // Check if onRemoveAllPlayers was called
+    expect(mockHandlers.onRemoveAllPlayers).toHaveBeenCalled();
   });
 });

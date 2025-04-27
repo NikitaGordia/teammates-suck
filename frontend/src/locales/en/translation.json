@@ -13,6 +13,7 @@
     "addPlayer": "Add",
     "add": "Add",
     "remove": "Remove",
+    "removeAll": "Remove All",
     "showAllKnown": "Show all known players",
     "allKnownFromSheet": "All Known Players from Sheet",
     "noPlayersYet": "No players added yet. Use the form below to add players.",

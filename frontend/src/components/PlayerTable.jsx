@@ -21,7 +21,7 @@ const getScoreColor = (score) => {
   }
 };
 
-const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers }) => {
+const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers, onRemoveAllPlayers }) => {
   const { t } = useTranslation();
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -68,7 +68,27 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers 
             <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.nickname')}</th>
             <th style={{ textAlign: 'right', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.score')}</th>
             <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.winLoss')}</th>
-            <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>{t('players.actions')}</th>
+            <th style={{ textAlign: 'center', padding: '8px', borderBottom: '1px solid #ddd' }}>
+              {players.length > 0 ? (
+                <button
+                  onClick={onRemoveAllPlayers}
+                  style={{
+                    padding: '5px 10px',
+                    backgroundColor: '#f44336',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '3px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: 'normal'
+                  }}
+                >
+                  {t('players.removeAll')}
+                </button>
+              ) : (
+                t('players.actions')
+              )}
+            </th>
           </tr>
         </thead>
         <tbody>
