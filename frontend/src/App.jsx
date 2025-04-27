@@ -378,7 +378,7 @@ function App() {
       </div>
       <div className="main-container">
         <div className="players-section">
-          <h2>{t('app.players')}</h2>
+          <h2>{t('app.players')} ({players.length})</h2>
           <PlayerTable
             players={players}
             onScoreChange={handleScoreChange}
