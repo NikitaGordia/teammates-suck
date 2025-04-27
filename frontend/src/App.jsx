@@ -191,6 +191,11 @@ function App() {
     setPlayers(updatedPlayers);
   };
 
+  const handleReorderPlayers = (newPlayers) => {
+    console.log('handleReorderPlayers called with new order');
+    setPlayers(newPlayers);
+  };
+
   // Handle game submission - refresh user data, reset teams, and update players
   const handleGameSubmitted = async (gameData) => {
     console.log('Game submitted:', gameData);
@@ -371,6 +376,7 @@ function App() {
             players={players}
             onScoreChange={handleScoreChange}
             onRemovePlayer={handleRemovePlayer}
+            onReorderPlayers={handleReorderPlayers}
           />
           <AddPlayerForm onAddPlayer={handleAddPlayer} scoreMappings={window.scoreMappings || {}} noPlayersAdded={players.length === 0} />
           <BalanceButton

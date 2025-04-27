@@ -10,6 +10,20 @@ export const mockTeams = {
   ]
 };
 
+// Mock players for PlayerTable tests
+export const mockPlayers = [
+  { nickname: 'Player1', score: 4, wins: 2, losses: 1 },
+  { nickname: 'Player2', score: 3, wins: 1, losses: 2 },
+  { nickname: 'Player3', score: 2, wins: 0, losses: 3 }
+];
+
+// Mock handlers for component tests
+export const mockHandlers = {
+  onScoreChange: vi.fn(),
+  onRemovePlayer: vi.fn(),
+  onReorderPlayers: vi.fn()
+};
+
 // Mock API response for team balancing
 export const mockBalanceResponse = {
   teamA: [
