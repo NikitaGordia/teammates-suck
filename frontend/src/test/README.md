@@ -1,5 +1,7 @@
 # Frontend Tests
 
+![Vitest](https://img.shields.io/badge/vitest-0.34.1-6E9F18.svg) ![React Testing Library](https://img.shields.io/badge/React_Testing_Library-14.0.0-E33332.svg) ![JSDOM](https://img.shields.io/badge/jsdom-22.1.0-yellow.svg) ![Coverage](https://img.shields.io/badge/coverage-included-83B81A.svg)
+
 This directory contains tests for the Team Balancer frontend using Vitest and React Testing Library.
 
 ## Test Structure

@@ -1,6 +1,8 @@
 # 😩 Teammates suck!
 
-![MVP Screenshot](readme_resources/MVP.png)
+![Python](https://img.shields.io/badge/python-3.11-blue.svg) ![Flask](https://img.shields.io/badge/flask-2.3.3-lightgrey.svg) ![React](https://img.shields.io/badge/react-18.2.0-61DAFB.svg) ![Vite](https://img.shields.io/badge/vite-4.4.9-646CFF.svg) ![SQLite](https://img.shields.io/badge/sqlite-3-003B57.svg) ![Docker](https://img.shields.io/badge/docker-compose-2496ED.svg) ![License](https://img.shields.io/badge/license-MIT-green.svg) ![Language](https://img.shields.io/badge/language-Ukrainian/English-yellow.svg)
+
+![MVP Screenshot](readme_resources/demo_en.png)
 
 A web application for balancing teams based on player skill levels.
 
@@ -13,6 +15,9 @@ A web application for balancing teams based on player skill levels.
 
 - **Team Balancing Algorithm**: Automatically creates balanced teams based on player skill levels
 - **Google Sheets Integration**: Fetches player data from a Google Spreadsheet
+- **SQLite Database**: Stores player wins and losses for tracking performance
+- **Admin Authentication**: Secure admin authentication for submitting game results
+- **Flexible Lobby**: Drag-and-drop user table with win/loss statistics
 - **Randomness Control**: Adjustable randomness factor for team balancing
 - **Internationalization**: Supports Ukrainian (default) and English languages
 - **Responsive Design**: Works on both desktop and mobile devices
@@ -30,10 +35,18 @@ This project is containerized using Docker, making it easy to set up and run in 
 
 Create .env with the following envs:
 ```bash
+# Google Sheets API (optional if using SQLite only)
 GOOGLE_API_KEY=...
 SPREADSHEET_ID=...
 
+# Docker registry for deployment
 REGISTRY_URL=...
+
+# Deployment configuration (optional)
+SSH_USER=...
+VPS_ADDRESS=...
+REMOTE_PATH=...
+BUILD_TAG=...
 ```
 
 ### Running with Docker Compose
@@ -134,6 +147,27 @@ npm run dev
 
 - Backend tests use pytest and can be run with `python -m pytest` in the backend directory
 - Frontend tests use Vitest and can be run with `npm test` in the frontend directory
+
+## Utility Scripts
+
+The project includes several utility scripts for managing the database:
+
+### Admin Management
+
+```bash
+# Add a new admin (format: admin:password)
+docker compose exec backend python -m src.utils.admin add "admin:password"
+
+# Remove an admin
+docker compose exec backend python -m src.utils.admin remove "admin"
+```
+
+### User Management
+
+```bash
+# Clean history (wins and losses) for a specific user
+docker compose exec backend python -m src.utils.user clean "nickname"
+```
 
 ## Documentation
 

@@ -1,5 +1,7 @@
 # Team Balancer Frontend
 
+![React](https://img.shields.io/badge/react-18.2.0-61DAFB.svg) ![Vite](https://img.shields.io/badge/vite-4.4.9-646CFF.svg) ![Node.js](https://img.shields.io/badge/node-18.x-339933.svg) ![i18next](https://img.shields.io/badge/i18next-22.5.0-26A69A.svg) ![Vitest](https://img.shields.io/badge/vitest-0.34.1-6E9F18.svg) ![CSS](https://img.shields.io/badge/css-modules-1572B6.svg) ![Language](https://img.shields.io/badge/language-Ukrainian/English-yellow.svg)
+
 A React-based frontend for the Team Balancer application that allows users to create balanced teams for games or activities based on player skill levels.
 
 ## Technologies Used
@@ -75,6 +77,9 @@ npm run preview
 
 - **Player Management**: Add, remove, and adjust player scores
 - **Team Balancing**: Automatically balance players into two teams based on skill levels
+- **Win/Loss Tracking**: Display player statistics from the SQLite database
+- **Flexible Lobby**: Drag-and-drop user table with win/loss statistics
+- **Admin Authentication**: Secure admin authentication for submitting game results
 - **Randomness Control**: Adjust the randomness factor in team balancing
 - **Clipboard Integration**: Easily copy team assignments to clipboard
 - **Responsive Design**: Works on desktop and mobile devices
@@ -85,8 +90,19 @@ npm run preview
 
 The frontend communicates with the backend through the following API endpoints:
 
-- `GET /api/get_mappings` - Retrieves player score mappings from the database
+- `GET /api/users` - Retrieves player data including scores, wins, and losses
 - `POST /api/balance` - Balances teams based on provided player data and randomness factor
+- `POST /api/submit_game` - Submits game results with winning team information
+
+### Admin Authentication
+
+The application uses a secure admin authentication system:
+
+- Admin credentials are stored in the format `admin:password`
+- Passwords are hashed with SHA256 and include salt for security
+- Admin authentication is required for submitting game results
+- Admin secrets are stored in cookies after successful authentication
+- A logout button is provided to clear admin cookies
 
 ## Contributing
 

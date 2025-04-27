@@ -1,6 +1,8 @@
 # Team Balancer Backend
 
-A Flask backend for the Team Balancer application that fetches player scores from Google Sheets and balances teams.
+![Python](https://img.shields.io/badge/python-3.11-blue.svg) ![Flask](https://img.shields.io/badge/flask-2.3.3-lightgrey.svg) ![Gunicorn](https://img.shields.io/badge/gunicorn-21.2.0-green.svg) ![SQLite](https://img.shields.io/badge/sqlite-3-003B57.svg) ![Pytest](https://img.shields.io/badge/pytest-7.4.0-0A9EDC.svg) ![Google Sheets](https://img.shields.io/badge/Google_Sheets-API-4285F4.svg) ![Typer](https://img.shields.io/badge/typer-0.9.0-FF6B6B.svg)
+
+A Flask backend for the Team Balancer application that fetches player scores from Google Sheets, stores game results in SQLite, and balances teams.
 
 ## Technologies Used
 
@@ -28,10 +30,14 @@ A Flask backend for the Team Balancer application that fetches player scores fro
    ```bash
    pip install -r requirements.txt
    ```
-4. Create a `.env` file in the root directory with your Google API Key and Spreadsheet ID:
+4. Create a `.env` file in the root directory with the following variables:
    ```
+   # Google Sheets API (optional if using SQLite only)
    GOOGLE_API_KEY=your_google_api_key_here
    SPREADSHEET_ID=your_spreadsheet_id_here
+
+   # Database configuration
+   DB_PATH=data/database.sqlite
    ```
 5. Update the `RANGE_NAME` constant in `app.py` if needed based on your sheet structure
 
@@ -77,22 +83,8 @@ Returns a simple message indicating the backend is running.
 ### GET /api/hello
 Returns a hello message from the backend.
 
-### GET /api/refresh
-Refreshes the internal score mappings from the Google Sheet.
-
-**Note:** This endpoint is maintained for backward compatibility. It's recommended to use `/api/get_mappings?force_refresh=true` instead.
-
-Response:
-```json
-{
-  "success": true,
-  "message": "Score mappings refreshed successfully",
-  "count": 10
-}
-```
-
-### GET /api/get_mappings
-Returns the last fetched score mappings. Auto-refreshes the data every REFRESH_INTERVAL_HOURS hours.
+### GET /api/users
+Returns all users with their scores and win/loss statistics. Auto-refreshes the data every REFRESH_INTERVAL_HOURS hours.
 
 Query parameters:
 - `force_refresh` (boolean): If set to `true`, forces a refresh of the data if at least MIN_REFRESH_INTERVAL_SECONDS (30 seconds) have passed since the last refresh
@@ -100,11 +92,27 @@ Query parameters:
 Response:
 ```json
 {
-  "scores": {
-    "Player1": 10,
-    "Player2": 8,
-    "Player3": 5,
-    "Player4": 7
+  "users": {
+    "Player1": {
+      "score": 10,
+      "wins": 5,
+      "losses": 2
+    },
+    "Player2": {
+      "score": 8,
+      "wins": 3,
+      "losses": 4
+    },
+    "Player3": {
+      "score": 5,
+      "wins": 1,
+      "losses": 0
+    },
+    "Player4": {
+      "score": 7,
+      "wins": 2,
+      "losses": 3
+    }
   },
   "refreshed": true,
   "force_refresh_prevented": false,
@@ -115,6 +123,8 @@ Response:
 If a forced refresh is prevented due to the minimum interval not being met, the response will include:
 - `force_refresh_prevented`: true
 - `seconds_until_next_refresh`: number of seconds until a forced refresh is allowed
+
+**Note:** This endpoint replaces the previous `/api/get_mappings` endpoint and adds win/loss statistics for each player.
 
 ### POST /api/balance
 Balances players into two teams so that the total sum of each team's scores is as close as possible.
@@ -151,6 +161,41 @@ Response:
     {"nickname": "Player2", "score": 8},
     {"nickname": "Player4", "score": 7}
   ]
+}
+```
+
+### POST /api/submit_game
+Submits a new game with two teams and records the results in the database.
+
+Request body:
+```json
+{
+  "teamA": [
+    {"nickname": "player1"},
+    {"nickname": "player2"}
+  ],
+  "teamB": [
+    {"nickname": "player3"},
+    {"nickname": "player4"}
+  ],
+  "winningTeam": "A",
+  "gameName": "Game name",
+  "adminPasscode": "admin:password"
+}
+```
+
+Parameters:
+- `teamA` (array, required): Array of player objects for team A
+- `teamB` (array, required): Array of player objects for team B
+- `winningTeam` (string, required): Either "A" or "B" to indicate the winning team
+- `gameName` (string, required): Name of the game
+- `adminPasscode` (string, required): Admin credentials in the format "admin:password"
+
+Response:
+```json
+{
+  "count": 4,
+  "message": "Game results recorded successfully"
 }
 ```
 
@@ -258,6 +303,34 @@ Response:
 {
   "message": "Event deleted successfully"
 }
+```
+
+## Utility Scripts
+
+The project includes several utility scripts for managing the database:
+
+### Admin Management
+
+```bash
+# Add a new admin (format: admin:password)
+python -m src.utils.admin add "admin:password"
+
+# Remove an admin
+python -m src.utils.admin remove "admin"
+```
+
+### User Management
+
+```bash
+# Clean history (wins and losses) for a specific user
+python -m src.utils.user clean "nickname"
+```
+
+When running in Docker, prefix the commands with `docker compose exec backend`:
+
+```bash
+docker compose exec backend python -m src.utils.admin add "admin:password"
+docker compose exec backend python -m src.utils.user clean "nickname"
 ```
 
 ## Testing

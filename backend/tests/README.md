@@ -1,5 +1,7 @@
 # Backend Tests
 
+![Pytest](https://img.shields.io/badge/pytest-7.4.0-0A9EDC.svg) ![Coverage](https://img.shields.io/badge/coverage-pytest--cov-83B81A.svg) ![Python](https://img.shields.io/badge/python-3.11-blue.svg)
+
 This directory contains tests for the Team Balancer backend using pytest.
 
 ## Test Structure
