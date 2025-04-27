@@ -4,19 +4,27 @@ import './TeamCopyText.css';
 
 // Utility function to generate clipboard text - exported for use in other components
 export const generateClipboardText = (teams) => {
-  const playersList = [];
+  // Create team strings with different color prefixes for each team
+  const team1ColorPrefix = "%color(2196F3)%"; // Blue for Team 1
+  const team2ColorPrefix = "%color(FFC107)%"; // Yellow for Team 2
 
-  // Add Team 1 players
-  teams.team1.forEach(player => {
-    playersList.push(`${player.nickname}-1`);
-  });
+  // Format Team 1 players
+  const team1String = teams.team1.length > 0
+    ? `${team1ColorPrefix}${teams.team1.map(player => `${player.nickname}-1`).join(',')}`
+    : '';
 
-  // Add Team 2 players
-  teams.team2.forEach(player => {
-    playersList.push(`${player.nickname}-2`);
-  });
+  // Format Team 2 players
+  const team2String = teams.team2.length > 0
+    ? `${team2ColorPrefix}${teams.team2.map(player => `${player.nickname}-2`).join(',')}`
+    : '';
 
-  return playersList.join(',');
+  // Join teams with newlines, filtering out empty teams, and add a newline at the beginning
+  const teamsText = ['', team1String, team2String]
+    .filter(teamStr => teamStr.length > 0)
+    .join('\n');
+
+  // Add a newline at the beginning if there's any team content
+  return teamsText.length > 0 ? `\n${teamsText}` : '';
 };
 
 // Utility function to copy teams to clipboard - exported for use in other components
@@ -49,7 +57,31 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
       <div className="copy-text-box">
         <div className="clipboard-section">
           <strong>{t('teams.format')}</strong><br />
-          {generateClipboardText(teams)}
+          <div className="team-format">
+            {/* Display newline at the beginning */}
+            <div className="newline-indicator">↵</div>
+
+            {/* Display Team 1 */}
+            {teams.team1.length > 0 && (
+              <div className="team-line team1-line">
+                <span className="color-prefix team1-color">%color(2196F3)%</span>
+                {teams.team1.map(player => `${player.nickname}-1`).join(',')}
+              </div>
+            )}
+
+            {/* Display Team 2 */}
+            {teams.team2.length > 0 && (
+              <div className="team-line team2-line">
+                <span className="color-prefix team2-color">%color(FFC107)%</span>
+                {teams.team2.map(player => `${player.nickname}-2`).join(',')}
+              </div>
+            )}
+
+            {/* Show message if no teams */}
+            {teams.team1.length === 0 && teams.team2.length === 0 && (
+              <div>{t('teams.noPlayers')}</div>
+            )}
+          </div>
         </div>
       </div>
       <button
