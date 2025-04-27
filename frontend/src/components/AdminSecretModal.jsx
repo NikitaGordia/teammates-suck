@@ -90,6 +90,7 @@ const AdminSecretModal = ({ isOpen, onClose, onSubmit }) => {
         <div>{t('developer.discord')}</div>
         <div>{t('developer.github').split(': ')[0]}: <a href="https://github.com/NikitaGordia" target="_blank" rel="noopener noreferrer" style={{ color: '#2196F3', textDecoration: 'none' }}>MykytaHordia</a></div>
         <div>{t('developer.cossacks3')}</div>
+        <div>{t('developer.version', { version: import.meta.env.VITE_BUILD_TAG || 'dev' })}</div>
         <div className="contact-message">{t('admin.contactForSecret')}</div>
       </div>
     </Modal>

@@ -12,10 +12,11 @@ RUN npm ci
 COPY . .
 
 ARG VITE_API_BASE_URL
+ARG VITE_BUILD_TAG
 
 # ---> Use the ARG when running the build command <---
 # Prefix the build command with the env var assignment
-RUN VITE_API_BASE_URL=${VITE_API_BASE_URL} npm run build
+RUN VITE_API_BASE_URL=${VITE_API_BASE_URL} VITE_BUILD_TAG=${VITE_BUILD_TAG} npm run build
 
 # Production stage
 FROM nginx:alpine

@@ -31,6 +31,7 @@ services:
         - "linux/arm64"
       args:
         - VITE_API_BASE_URL=/api
+        - VITE_BUILD_TAG=${BUILD_TAG}
     container_name: team-balancer-frontend-prod
     image: ${REGISTRY_URL}/teammates-suck-frontend:${BUILD_TAG}
     restart: unless-stopped

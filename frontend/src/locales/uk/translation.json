@@ -81,6 +81,7 @@
     "contacts": "Контакти розробника:",
     "discord": "Discord: @mykytahordia",
     "github": "Github: MykytaHordia",
-    "cossacks3": "Cossacks 3: \"mykyta.\""
+    "cossacks3": "Cossacks 3: \"mykyta.\"",
+    "version": "Версія: {{version}}"
   }
 }
