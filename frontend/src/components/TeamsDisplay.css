@@ -296,13 +296,15 @@
 }
 
 .player-item {
-  padding: 10px;
+  padding: 10px 10px 10px 12px; /* Increased left padding */
   border-radius: 4px;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
   background-color: #f9f9f9;
   transition: transform 0.2s ease, background-color 0.2s ease;
+  position: relative; /* For absolute positioning of leader indicator */
+  overflow: hidden; /* Ensure long nicknames don't break layout */
 }
 
 .player-item:hover {
@@ -315,26 +317,30 @@
   font-weight: 500;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 8px; /* Ensure some space between name and stats */
 }
 
-.player-leader-tag {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 8px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 0.7rem;
-  font-weight: bold;
-  color: white;
-  background-color: #7e7900; /* Gold color */
+.player-leader {
+  position: relative;
+  border-left: 3px solid #ffd700 !important; /* Gold border on the left */
 }
 
-.player-leader-tag::before {
+.player-leader::before {
   content: "★"; /* Star symbol */
-  display: inline-block;
-  margin-right: 4px;
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  transform: translateY(-50%);
   font-size: 0.8rem;
-  color: white;
+  color: #ffd700;
+  z-index: 1;
+}
+
+.player-leader .player-name {
+  padding-left: 16px; /* Make space for the star */
 }
 
 .player-stats {

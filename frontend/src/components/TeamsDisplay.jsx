@@ -328,10 +328,9 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
             {teams.team1.length > 0 ? (
               <ul className="player-list">
                 {teams.team1.map((player, index) => (
-                   <li key={index} className="player-item">
+                   <li key={index} className={`player-item ${index === 0 ? 'player-leader' : ''}`}>
                     <span className="player-name">
                       {player.nickname}
-                      {index === 0 && (<span className="player-leader-tag">{t('teams.leader')}</span>)}
                     </span>
                     <div className="player-stats">
                       {player.wins !== undefined && player.losses !== undefined && (
@@ -392,10 +391,9 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
              {teams.team2.length > 0 ? (
               <ul className="player-list">
                  {teams.team2.map((player, index) => (
-                   <li key={index} className="player-item">
+                   <li key={index} className={`player-item ${index === 0 ? 'player-leader' : ''}`}>
                      <span className="player-name">
                        {player.nickname}
-                       {index === 0 && (<span className="player-leader-tag">{t('teams.leader')}</span>)}
                      </span>
                      <div className="player-stats">
                        {player.wins !== undefined && player.losses !== undefined && (
