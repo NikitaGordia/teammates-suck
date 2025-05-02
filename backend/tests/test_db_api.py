@@ -6,13 +6,13 @@ from unittest.mock import patch, MagicMock
 
 # Add the parent directory to sys.path to import the app module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from utils import db
+# We don't need to import db directly as we're mocking it in app.py
 
 
 @pytest.fixture
 def mock_db_functions():
     """Mock the database functions."""
-    with patch("utils.db_api.db") as mock_db:
+    with patch("src.app.db") as mock_db:
         # Mock get_events
         mock_db.get_events.return_value = [
             {

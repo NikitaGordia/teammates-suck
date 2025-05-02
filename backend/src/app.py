@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from googleapiclient.discovery import build
 import random
 from datetime import datetime, timedelta
-from utils.db_api import db_api
+from utils import db
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,7 +17,7 @@ RANGE_NAME = "Scores!B2:C"  # Adjust based on your sheet structure
 
 # Constants
 REFRESH_INTERVAL_HOURS = 4  # Refresh interval in hours
-MIN_REFRESH_INTERVAL_SECONDS = 30  # Minimum time between forced refreshes
+MIN_REFRESH_INTERVAL_SECONDS = 30  # Minimum interval in seconds for a forced refresh
 DEFAULT_RANDOMNESS = 0  # Default randomness value (0-100) for team balancing
 
 # Global variables to store the score mappings and last refresh time
@@ -27,8 +27,7 @@ last_refresh_time = None
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# Register the database API blueprint
-app.register_blueprint(db_api, url_prefix="/api/db")
+gservice = build("sheets", "v4", developerKey=GOOGLE_API_KEY, cache_discovery=False)
 
 
 def fetch_all_scores_from_sheet():
@@ -39,13 +38,12 @@ def fetch_all_scores_from_sheet():
         dict: Dictionary mapping all nicknames to scores
     """
     try:
-        # Build the Sheets API service
-        service = build("sheets", "v4", developerKey=GOOGLE_API_KEY)
-
         # Call the Sheets API to get the data
-        sheet = service.spreadsheets()
         result = (
-            sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+            gservice.spreadsheets()
+            .values()
+            .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
+            .execute()
         )
         values = result.get("values", [])
 
@@ -226,18 +224,10 @@ def get_users():
         # Get all unique nicknames from the score mappings
         nicknames = list(score_mappings.keys())
 
-        # Get win/loss statistics for all nicknames from the database using the db_api endpoint
+        # Get win/loss statistics for all nicknames directly from the database
         user_stats = {}
         if nicknames:
-            with app.test_client() as client:
-                response = client.post(
-                    "/api/db/players/stats",
-                    json={"nicknames": nicknames},
-                    content_type="application/json",
-                )
-
-                if response.status_code == 200:
-                    user_stats = response.get_json().get("stats", {})
+            user_stats = db.get_player_stats(nicknames)
 
         # Combine scores and statistics into a single users dictionary
         users = {}
@@ -263,6 +253,33 @@ def get_users():
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+@app.route("/api/debug/gc", methods=["GET"])
+def trigger_garbage_collection():
+    """
+    Debug endpoint to manually trigger Python's garbage collector.
+
+    Returns:
+        JSON response with collection statistics
+    """
+    # Get counts before collection
+    counts_before = gc.get_count()
+
+    # Run a full collection
+    collected = gc.collect()
+
+    # Get counts after collection
+    counts_after = gc.get_count()
+
+    return jsonify(
+        {
+            "success": True,
+            "collected": collected,
+            "counts_before": counts_before,
+            "counts_after": counts_after,
+        }
+    )
 
 
 @app.route("/api/balance", methods=["POST"])
@@ -395,18 +412,13 @@ def submit_game():
             "admin_passcode": data["adminPasscode"],
         }
 
-        # Call the db_api endpoint to add events in batch
-        # We're making an internal request to the Blueprint endpoint
-        with app.test_client() as client:
-            response = client.post(
-                "/api/db/events/batch", json=batch_data, content_type="application/json"
-            )
-
-            if response.status_code != 200:
-                return response.get_json(), response.status_code
-
-            # Extract count from the response
-            events_added = response.get_json().get("count", 0)
+        # Call the database function directly to add events in batch
+        events_added = db.add_events_batch(
+            batch_data["nicknames"],
+            batch_data["game_name"],
+            batch_data["wins"],
+            batch_data["admin_passcode"],
+        )
 
         return jsonify(
             {"count": events_added, "message": "Game results recorded successfully"}
