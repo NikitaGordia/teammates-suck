@@ -213,8 +213,8 @@ function App() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
-      // Create API URL with force_refresh parameter
-      let url = `${getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS)}?force_refresh=true`;
+      // Create API URL without force_refresh parameter
+      let url = getApiUrl(API_CONFIG.ENDPOINTS.GET_MAPPINGS);
 
       const response = await fetch(url, {
         signal: controller.signal
@@ -238,7 +238,7 @@ function App() {
       });
       window.scoreMappings = simplifiedScoreMappings;
 
-      console.log('Fetched fresh user data after game submission:', freshUserData);
+      console.log('Fetched user data after game submission:', freshUserData);
 
       // Clear the current teams
       setTeams({ team1: [], team2: [] });
