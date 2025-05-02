@@ -4,22 +4,9 @@ import { API_CONFIG, getApiUrl } from '../config';
 import { handleApiResponse } from '../utils/apiUtils';
 import { validateAdminSecret } from '../utils/adminUtils';
 import { getCookie, setCookie, COOKIE_NAMES } from '../utils/cookieUtils';
+import { getScoreColor } from '../utils/scoreUtils';
 import AdminSecretModal from './AdminSecretModal';
 import './TeamsDisplay.css';
-
-// Helper function to get color based on score (no changes)
-const getScoreColor = (score) => {
-  // ... (same as before)
-  switch (Number(score)) {
-    case 4: return '#4CAF50'; // Green
-    case 3: return '#8BC34A'; // Light Green
-    case 2: return '#FFC107'; // Amber
-    case 1: return '#FF9800'; // Orange
-    case 0: return '#FF5722'; // Deep Orange
-    case -1: return '#F44336'; // Red
-    default: return '#000000'; // Black
-  }
-};
 
 // --- Reducer Logic ---
 

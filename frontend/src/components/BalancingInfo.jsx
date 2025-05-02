@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { getScoreColor } from '../utils/scoreUtils';
 
 // Import score icons
 import scoreIcon4 from '../resources/icons/score_4.png';
@@ -73,24 +74,6 @@ const BalancingInfo = () => {
   );
 };
 
-// Helper function to get color based on score
-const getScoreColor = (score) => {
-  switch (score) {
-    case 4:
-      return '#4CAF50'; // Green
-    case 3:
-      return '#8BC34A'; // Light Green
-    case 2:
-      return '#FFC107'; // Amber
-    case 1:
-      return '#FF9800'; // Orange
-    case 0:
-      return '#FF5722'; // Deep Orange
-    case -1:
-      return '#F44336'; // Red
-    default:
-      return '#000000'; // Black
-  }
-};
+
 
 export default BalancingInfo;
