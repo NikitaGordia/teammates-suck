@@ -169,6 +169,14 @@ docker compose exec backend python -m src.utils.admin remove "admin"
 docker compose exec backend python -m src.utils.user clean "nickname"
 ```
 
+## Release guide
+
+1. Update the `BUILD_TAG` in `.env` to the desired version (e.g., `v1.3.1` -> `v1.3.2`)
+2. Run `./tag_release.sh` to create a Git tag based on the `BUILD_TAG`
+3. Push the tag to the remote repository (`git push origin main --tags`)
+4. Run `./build_and_push.sh` to build and push the Docker images with the new tag
+5. Run `./deploy.sh` to build and deploy the Docker images with the new tag
+
 ## Documentation
 
 - [Backend Documentation](backend/README.md)
