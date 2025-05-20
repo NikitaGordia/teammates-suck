@@ -180,6 +180,7 @@ Request body:
   ],
   "winningTeam": "A",
   "gameName": "Game name",
+  "gameDatetime": "YYYY-MM-DD HH:MM:SS",
   "adminPasscode": "admin:password"
 }
 ```
@@ -189,6 +190,7 @@ Parameters:
 - `teamB` (array, required): Array of player objects for team B
 - `winningTeam` (string, required): Either "A" or "B" to indicate the winning team
 - `gameName` (string, required): Name of the game
+- `gameDatetime` (string, required): Datetime of the game
 - `adminPasscode` (string, required): Admin credentials in the format "admin:password"
 
 Response:
@@ -355,6 +357,10 @@ python -m pytest tests/test_app.py
 ```
 
 For more details about the tests, see the [tests README](tests/README.md).
+
+## Migrations
+
+`v2`: Added `game_datetime` column to `events` table and transformed `game_name` format to "TeamA|VS|TeamB". Replace admin's hash with admin's ID in `events` table.
 
 ## Google Sheets Setup
 

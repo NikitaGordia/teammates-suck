@@ -14,7 +14,6 @@ services:
     environment:
       - PYTHONPATH=/app/src
       - FLASK_APP=src/app.py
-      - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}

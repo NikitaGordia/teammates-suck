@@ -152,11 +152,6 @@ def index():
     return "Team Balancer Backend is running!"
 
 
-@app.route("/api/hello")
-def hello():
-    return jsonify({"message": "Hello from Team Balancer Backend!"})
-
-
 @app.route("/api/users", methods=["GET"])
 def get_users():
     """
@@ -255,33 +250,6 @@ def get_users():
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
-@app.route("/api/debug/gc", methods=["GET"])
-def trigger_garbage_collection():
-    """
-    Debug endpoint to manually trigger Python's garbage collector.
-
-    Returns:
-        JSON response with collection statistics
-    """
-    # Get counts before collection
-    counts_before = gc.get_count()
-
-    # Run a full collection
-    collected = gc.collect()
-
-    # Get counts after collection
-    counts_after = gc.get_count()
-
-    return jsonify(
-        {
-            "success": True,
-            "collected": collected,
-            "counts_before": counts_before,
-            "counts_after": counts_after,
-        }
-    )
-
-
 @app.route("/api/balance", methods=["POST"])
 def balance():
     """
@@ -361,7 +329,14 @@ def submit_game():
         data = request.get_json()
 
         # Validate required fields
-        required_fields = ["teamA", "teamB", "winningTeam", "gameName", "adminPasscode"]
+        required_fields = [
+            "teamA",
+            "teamB",
+            "winningTeam",
+            "gameName",
+            "gameDatetime",
+            "adminPasscode",
+        ]
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
@@ -404,20 +379,13 @@ def submit_game():
             all_nicknames.append(nickname)
             all_wins.append(data["winningTeam"] == "B")
 
-        # Prepare data for the batch endpoint
-        batch_data = {
-            "nicknames": all_nicknames,
-            "game_name": data["gameName"],
-            "wins": all_wins,
-            "admin_passcode": data["adminPasscode"],
-        }
-
         # Call the database function directly to add events in batch
         events_added = db.add_events_batch(
-            batch_data["nicknames"],
-            batch_data["game_name"],
-            batch_data["wins"],
-            batch_data["admin_passcode"],
+            nicknames=all_nicknames,
+            game_datetime=data["gameDatetime"],
+            game_name=data["gameName"],
+            wins=all_wins,
+            admin_passcode=data["adminPasscode"],
         )
 
         return jsonify(
@@ -428,7 +396,3 @@ def submit_game():
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5050)
