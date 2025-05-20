@@ -15,3 +15,4 @@ docker-compose -f docker-compose.yml up --build -d
 echo "Production deployment complete!"
 echo "Frontend is available at: http://localhost"
 echo "Backend is available at: http://localhost:5050"
+echo "Sqlite viewer is available at: http://localhost:8080"

@@ -39,6 +39,27 @@ services:
     depends_on:
       - backend
 
+  sqlite-viewer:
+    image: nikitagordia/sqlite-web:latest
+    container_name: team-balancer-sqlite-viewer-prod
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - db:/db_data
+    environment:
+      - SQLITE_WEB_USERNAME=${WEB_DB_USERNAME}
+      - SQLITE_WEB_PASSWORD=${WEB_DB_PASSWORD}
+    command: ["sqlite_web", "--port=8080",
+                            "--host=0.0.0.0",
+                            "--no-browser",
+                            "--read-only",
+                            "--password",
+                            "/db_data/database.sqlite"]
+    depends_on:
+      - backend
+    networks:
+      - default
 networks:
   default:
     name: team-balancer-network-prod
