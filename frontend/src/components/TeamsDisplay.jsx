@@ -182,16 +182,19 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
     if (state.status === 'submitting' && state.selectedTeamForSubmission && validatedAdminSecretRef.current) {
       const submitGame = async () => {
         try {
-          const date = new Date().toISOString().split('T')[0];
+          const now = new Date();
+          const gameDatetime = now.toISOString().slice(0, 19).replace('T', ' '); // "YYYY-MM-DD HH:MM:SS" in UTC
+
           const team1Names = teams.team1.map(player => player.nickname).join(',');
           const team2Names = teams.team2.map(player => player.nickname).join(',');
-          const gameName = `${date}-${team1Names}vs${team2Names}`;
+          const gameName = `${team1Names}|VS|${team2Names}`;
 
           const requestData = {
             teamA: teams.team1.map(player => ({ nickname: player.nickname })),
             teamB: teams.team2.map(player => ({ nickname: player.nickname })),
             winningTeam: state.selectedTeamForSubmission === 'team1' ? 'A' : 'B',
             gameName: gameName,
+            gameDatetime: gameDatetime,
             adminPasscode: validatedAdminSecretRef.current, // Use the validated secret
           };
 

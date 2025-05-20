@@ -10,15 +10,14 @@ services:
       - PYTHONPATH=/app/src
       - PYTHONUNBUFFERED=1
       - FLASK_APP=src/app.py
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}
       - DB_PATH=data/database.sqlite
     volumes:
       - ./backend/src:/app/src
+      - ./backend/scripts:/app/scripts
       - ./backend/data:/app/data
-    command: python -m app
+    command: flask run --port=5050 --debug --host=0.0.0.0
 
   frontend:
     build:
