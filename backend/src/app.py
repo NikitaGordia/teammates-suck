@@ -1,19 +1,15 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import os
-from dotenv import load_dotenv
-from googleapiclient.discovery import build
 import random
 from datetime import datetime, timedelta
 from utils import db
+import os
+from dotenv import load_dotenv
+from utils.spreadsheet import SheetScoreFetcher
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Configuration
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
-RANGE_NAME = "Scores!B2:C"  # Adjust based on your sheet structure
+fetcher = SheetScoreFetcher(os.getenv("GOOGLE_API_KEY"), os.getenv("SPREADSHEET_ID"))
 
 # Constants
 REFRESH_INTERVAL_HOURS = 4  # Refresh interval in hours
@@ -26,46 +22,6 @@ last_refresh_time = None
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-gservice = build("sheets", "v4", developerKey=GOOGLE_API_KEY, cache_discovery=False)
-
-
-def fetch_all_scores_from_sheet():
-    """
-    Fetch all scores from Google Sheet and return them as a dictionary.
-
-    Returns:
-        dict: Dictionary mapping all nicknames to scores
-    """
-    try:
-        # Call the Sheets API to get the data
-        result = (
-            gservice.spreadsheets()
-            .values()
-            .get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME)
-            .execute()
-        )
-        values = result.get("values", [])
-
-        if not values:
-            return {}
-
-        # Create a dictionary mapping nicknames to scores from the sheet
-        nickname_to_score = {}
-        for row in values:
-            if len(row) >= 2:  # Ensure row has both nickname and score
-                nickname = row[0]
-                try:
-                    score = float(row[1])
-                except ValueError:
-                    score = 0  # Default score if conversion fails
-                nickname_to_score[nickname] = score
-
-        return nickname_to_score
-
-    except Exception as e:
-        print(f"Error fetching scores from sheet: {e}")
-        return {}  # Return empty dict on error
 
 
 def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
@@ -201,7 +157,7 @@ def get_users():
             or last_refresh_time is None
             or (current_time - last_refresh_time) > refresh_interval
         ):
-            score_mappings = fetch_all_scores_from_sheet()
+            score_mappings = fetcher.fetch_all_scores()
             last_refresh_time = current_time
             refreshed = True
             refresh_type = "auto"

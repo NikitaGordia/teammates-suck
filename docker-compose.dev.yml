@@ -13,6 +13,7 @@ services:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SPREADSHEET_ID=${SPREADSHEET_ID}
       - DB_PATH=data/database.sqlite
+      - DIGEST_PATH=data/digest
     volumes:
       - ./backend/src:/app/src
       - ./backend/scripts:/app/scripts

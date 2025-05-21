@@ -177,6 +177,15 @@ docker compose exec backend python -m src.utils.user clean "nickname"
 4. Run `./build_and_push.sh` to build and push the Docker images with the new tag
 5. Run `./deploy.sh` to build and deploy the Docker images with the new tag
 
+## Digest guide
+
+1. Generate digest for the previous month locally with:
+`docker compose exec backend python -m src.utils.digest generate --no-plots`
+2. Start applying process:
+`docker compose exec backend python -m src.utils.digest apply`
+3. Adjust scores for promoted/devoted players according to the calculations
+4. `y` for clearing history for selected players
+
 ## Documentation
 
 - [Backend Documentation](backend/README.md)
