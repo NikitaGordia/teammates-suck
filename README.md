@@ -55,6 +55,13 @@ The project uses two docker-compose files:
 - `docker-compose.dev.yml` - For development environment with hot-reloading
 - `docker-compose.yml` - For production environment
 
+### Dockerhub images
+
+You can use the pre-built images from Dockerhub where both linux/arm64 and linux/amd64 are available:
+- nikitagordia/teammates-suck-frontend
+- nikitagordia/teammates-suck-backend
+
+
 #### Development Environment
 
 For development with hot-reloading:

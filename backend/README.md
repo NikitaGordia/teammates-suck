@@ -201,6 +201,60 @@ Response:
 }
 ```
 
+### GET /api/digest
+Returns the latest digest data.
+
+Response:
+```json
+{
+  "metadata": {
+    "generated_on": "2024-01-01T12:00:00",
+    "period_start_date": "2023-12-01",
+    "period_end_date": "2023-12-31"
+  },
+  "top_players": [
+    {"nickname": "Player1", "game_count": 10},
+    {"nickname": "Player2", "game_count": 8},
+    {"nickname": "Player3", "game_count": 5},
+    {"nickname": "Player4", "game_count": 7}
+    ...
+  ],
+  "top_admins": [
+    {"admin_name": "Admin1", "distinct_games_count": 15},
+    {"admin_name": "Admin2", "distinct_games_count": 12},
+    {"admin_name": "Admin3", "distinct_games_count": 10}
+    ...
+  ],
+  "players_for_status_change": [
+    {"nickname": "Player5", "total_games_played": 10, "wins": 6, "losses": 4, "win_rate_percentage": 60.0, "status": "Promote"},
+    {"nickname": "Player6", "total_games_played": 10, "wins": 4, "losses": 6, "win_rate_percentage": 40.0, "status": "Demote"}
+    ...
+  ],
+  "hourly_activity": [
+    {"hour": 0, "game_count": 5},
+    {"hour": 1, "game_count": 3},
+    ...
+  ],
+  "weekly_activity_by_day": [
+    {"day": "Sunday", "game_count": 10},
+    {"day": "Monday", "game_count": 8},
+    ...
+  ],
+  "total_activity_by_day_of_month": [
+    {"day_of_month": "01", "game_count": 15},
+    {"day_of_month": "02", "game_count": 12},
+    ...
+  ]
+}
+```
+
+In case there are no digests generated yet, the endpoint will return:
+```json
+{
+  "error": "No digest found"
+}
+```
+
 ## Database API Endpoints
 
 The following endpoints are available for interacting with the SQLite database:
