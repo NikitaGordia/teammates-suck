@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, request
+from flask_caching import Cache
 from flask_cors import CORS
 import random
 from datetime import datetime, timedelta
+from utils.digest import load_latest_digest, get_latest_digest_dir
 from utils import db
 import os
 from dotenv import load_dotenv
@@ -22,6 +24,9 @@ last_refresh_time = None
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
+app.config["CACHE_TYPE"] = "SimpleCache"
+
+cache = Cache(app)
 
 
 def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
@@ -352,3 +357,29 @@ def submit_game():
         return jsonify({"error": str(ve)}), 400
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+def update_digest_cache():
+    cache.delete("digest")
+    cached_data = load_latest_digest()
+    if cached_data is not None:
+        cache.set("digest", cached_data)
+    return cached_data
+
+
+@app.route("/api/digest")
+def digest():
+    cached_data = cache.get("digest")
+
+    if cached_data is None:
+        app.logger.info("Cache miss for digest. Loading from file.")
+        cached_data = update_digest_cache()
+    else:
+        latest_digest_date = get_latest_digest_dir().name.split("_to_")[0]
+
+        if latest_digest_date != cached_data["metadata"]["period_start_date"]:
+            app.logger.info("Cache invalidated. Loading new digest.")
+            cached_data = update_digest_cache()
+        else:
+            app.logger.info("Cache hit for digest.")
+    return cached_data if cached_data is not None else {"error": "No digest found"}

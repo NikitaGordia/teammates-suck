@@ -8,8 +8,8 @@ import typer
 import matplotlib.pyplot as plt
 import subprocess
 
-from src.utils.user import clean_user_history
-from src.utils.spreadsheet import SCORES, SheetScoreFetcher
+from utils.user import clean_user_history
+from utils.spreadsheet import SCORES, SheetScoreFetcher
 
 from . import db
 
@@ -744,8 +744,31 @@ def generate(
 
 def get_latest_digest_dir():
     digest_path = Path(os.getenv("DIGEST_PATH"))
+
+    first = next(digest_path.iterdir(), None)
+    if first is None:
+        return None
+
     latest_digest_dir = max(digest_path.iterdir())
+    print(f"Latest digest dir: {latest_digest_dir}")
     return latest_digest_dir
+
+
+def load_digest(digest_dir: Path):
+    try:
+        with open(digest_dir / "raw_digest.json", "r") as f:
+            raw_digest = json.load(f)
+        return raw_digest
+    except Exception as e:
+        app.logger.error(f"Error loading JSON from file: {e}")
+        return None  # Or raise error, or return default
+
+
+def load_latest_digest():
+    digest_dir = get_latest_digest_dir()
+    if digest_dir is None:
+        return None
+    return load_digest(digest_dir)
 
 
 @app.command(
@@ -754,10 +777,12 @@ def get_latest_digest_dir():
 )
 def apply():
     digest_dir = get_latest_digest_dir()
+    if digest_dir is None:
+        print("No digest found. Exiting.")
+        return
 
     print(f"Processing the latest digest at {digest_dir} ...")
-    with open(digest_dir / "raw_digest.json", "r") as f:
-        raw_digest = json.load(f)
+    raw_digest = load_digest(digest_dir)
 
     print("Fetching current player scores...")
     load_dotenv()
