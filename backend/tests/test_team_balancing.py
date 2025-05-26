@@ -1,5 +1,7 @@
+from src.app import balance_teams
+from src.utils.balance import Balancer
+import json
 import pytest
-from backend.src.app import balance_teams
 import random
 
 
@@ -38,23 +40,8 @@ def test_balance_teams_odd_players():
         "Player5": 6,
     }
 
-    result = balance_teams(user_scores, randomness=0)
-
-    # Check that all players are assigned
-    all_players = [player["nickname"] for player in result["teamA"] + result["teamB"]]
-    assert sorted(all_players) == sorted(list(user_scores.keys()))
-
-    # Check that one team has one more player
-    assert abs(len(result["teamA"]) - len(result["teamB"])) == 1
-    assert len(result["teamA"]) + len(result["teamB"]) == 5
-
-    # Calculate team totals
-    team_a_total = sum(player["score"] for player in result["teamA"])
-    team_b_total = sum(player["score"] for player in result["teamB"])
-
-    # Check that teams are reasonably balanced
-    # With odd players, we expect more imbalance
-    assert abs(team_a_total - team_b_total) <= 6
+    with pytest.raises(AssertionError):
+        _ = balance_teams(user_scores, randomness=0)
 
 
 def test_balance_teams_with_randomness():
@@ -90,23 +77,16 @@ def test_balance_teams_with_randomness():
 
 def test_balance_teams_empty_input():
     """Test balancing with empty input."""
-    result = balance_teams({}, randomness=0)
-
-    assert result["teamA"] == []
-    assert result["teamB"] == []
+    with pytest.raises(AssertionError):
+        _ = balance_teams({}, randomness=0)
 
 
 def test_balance_teams_single_player():
     """Test balancing with a single player."""
     user_scores = {"Player1": 10}
 
-    result = balance_teams(user_scores, randomness=0)
-
-    # The single player should be in one team
-    assert len(result["teamA"]) == 1
-    assert len(result["teamB"]) == 0
-    assert result["teamA"][0]["nickname"] == "Player1"
-    assert result["teamA"][0]["score"] == 10
+    with pytest.raises(AssertionError):
+        _ = balance_teams(user_scores, randomness=0)
 
 
 def test_balance_teams_equal_skill_levels():
@@ -313,3 +293,22 @@ def test_balance_teams_large_player_count():
     # The lowest skilled players should also be distributed
     lowest_players = sorted(user_scores.values())[:2]
     assert lowest_players[0] in (team_a_scores[-1], team_b_scores[-1])
+
+
+def test_balancer_find_solutions():
+    balancer = Balancer()
+
+    with open("tests/files/balance_tests.json", "r") as f:
+        tests = json.load(f)
+
+    for test in tests:
+        min_diff, solutions = balancer.find_solutions(test["nums"])
+        for solution in solutions:
+            team_a = sum(value for mask, value in zip(solution, test["nums"]) if mask)
+            team_b = sum(
+                value for mask, value in zip(solution, test["nums"]) if not mask
+            )
+            assert abs(abs(team_a - team_b) - min_diff) < 1e-4
+            assert sum(solution) == len(test["nums"]) // 2
+        assert round(min_diff, 4) == test["diff"]
+        assert len(test) % 2 == 0

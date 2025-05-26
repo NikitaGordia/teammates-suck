@@ -18,6 +18,7 @@ services:
       - ./backend/src:/app/src
       - ./backend/scripts:/app/scripts
       - ./backend/data:/app/data
+      - ./backend/tests:/app/tests
     command: flask run --port=5050 --debug --host=0.0.0.0
 
   frontend:

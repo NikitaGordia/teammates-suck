@@ -1,5 +1,5 @@
 import pytest
-from backend.src.app import app as flask_app
+from src.app import app as flask_app
 import os
 import json
 import sys

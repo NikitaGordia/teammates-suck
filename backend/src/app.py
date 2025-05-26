@@ -8,6 +8,7 @@ from utils import db
 import os
 from dotenv import load_dotenv
 from utils.spreadsheet import SheetScoreFetcher
+from utils.balance import Balancer
 
 load_dotenv()
 
@@ -27,6 +28,8 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config["CACHE_TYPE"] = "SimpleCache"
 
 cache = Cache(app)
+
+balancer = Balancer()
 
 
 def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
@@ -74,34 +77,11 @@ def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
             }
         )
 
-    # Shuffle the players randomly first to ensure random distribution when scores are equal
-    random.shuffle(players)
+    _, solutions = balancer.find_solutions([p["randomized_score"] for p in players])
 
-    # Sort players by randomized score in descending order
-    players.sort(key=lambda x: (x["randomized_score"], x["nickname"]), reverse=True)
-
-    # Initialize teams and their total scores
-    team_a = []
-    team_b = []
-    team_a_total = 0
-    team_b_total = 0
-
-    max_players_per_team = len(players) // 2
-
-    # Pair players and distribute them between teams
-    for player in players:
-        if len(team_b) >= max_players_per_team:
-            team_a.append(player)
-            team_a_total += player["randomized_score"]
-        elif len(team_a) >= max_players_per_team:
-            team_b.append(player)
-            team_b_total += player["randomized_score"]
-        elif team_a_total <= team_b_total:
-            team_a.append(player)
-            team_a_total += player["randomized_score"]
-        else:
-            team_b.append(player)
-            team_b_total += player["randomized_score"]
+    solution = random.choice(solutions)
+    team_a = [player for team, player in zip(solution, players) if team]
+    team_b = [player for team, player in zip(solution, players) if not team]
 
     team_a.sort(key=lambda x: x["score"], reverse=True)
     team_b.sort(key=lambda x: x["score"], reverse=True)
