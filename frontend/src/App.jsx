@@ -392,6 +392,7 @@ function App() {
             isLoading={isLoading}
             randomness={randomness}
             onRandomnessChange={handleRandomnessChange}
+            playerCount={players.length}
           />
 
           {/* All known players toggle */}

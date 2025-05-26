@@ -1,9 +1,27 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChange }) => {
+const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChange, playerCount = 0 }) => {
   const { t } = useTranslation();
   const sliderRef = useRef(null);
+
+  // Validation logic for button state
+  const isValidPlayerCount = playerCount >= 2 && playerCount <= 30 && playerCount % 2 === 0;
+  const isButtonDisabled = isLoading || !isValidPlayerCount;
+
+  // Get validation message for tooltip/display
+  const getValidationMessage = () => {
+    if (playerCount < 2) {
+      return t('balance.needAtLeastTwoPlayers');
+    }
+    if (playerCount > 30) {
+      return t('balance.tooManyPlayers');
+    }
+    if (playerCount % 2 !== 0) {
+      return t('balance.needEvenNumberOfPlayers');
+    }
+    return '';
+  };
 
   // Function to snap value to nearest fixed percentage
   const snapToFixedPercentage = (value) => {
@@ -82,14 +100,15 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
         {/* Balance button */}
         <button
           onClick={onBalanceTeams}
-          disabled={isLoading}
+          disabled={isButtonDisabled}
+          title={!isValidPlayerCount ? getValidationMessage() : ''}
           style={{
             padding: '12px 24px',
-            backgroundColor: isLoading ? '#9E9E9E' : '#673AB7',
+            backgroundColor: isButtonDisabled ? '#9E9E9E' : '#673AB7',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
+            cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
             fontSize: '16px',
             fontWeight: 'bold',
             width: '48%',
@@ -146,11 +165,11 @@ const BalanceButton = ({ onBalanceTeams, isLoading, randomness, onRandomnessChan
                   appearance: 'none',
                   backgroundColor: '#e0e0e0',
                   outline: 'none',
-                  opacity: isLoading ? '0.7' : '1',
+                  opacity: isButtonDisabled ? '0.7' : '1',
                   transition: 'opacity 0.2s',
-                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
                 }}
-                disabled={isLoading}
+                disabled={isButtonDisabled}
               />
             </div>
           </div>
