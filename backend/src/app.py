@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_caching import Cache
 from flask_cors import CORS
 import random
@@ -363,3 +363,9 @@ def digest():
         else:
             app.logger.info("Cache hit for digest.")
     return cached_data if cached_data is not None else {"error": "No digest found"}
+
+
+@app.route("/api/digest/games")
+def digest_file():
+    dir_path = ".." / get_latest_digest_dir()
+    return send_from_directory(dir_path, "games.xls")

@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import typer
 import matplotlib.pyplot as plt
 import subprocess
+import pandas as pd
 
 from utils.user import clean_user_history
 from utils.spreadsheet import SCORES, SheetScoreFetcher
@@ -164,6 +165,81 @@ def get_top_admins_by_contribution(start_date_str=None, end_date_str=None, top_n
         print(f"Database error in get_top_admins_by_contribution: {e}")
     except Exception as e:
         print(f"An unexpected error occurred in get_top_admins_by_contribution: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+    return results
+
+
+def get_all_unique_games(start_date_str=None, end_date_str=None):
+    """
+    Retrieves all unique game events, including game name, datetime,
+    and admin name.
+    Assumes 'events.admin' stores the admin's ID as a TEXT string
+    and 'events.event_date' stores the datetime.
+
+    Args:
+        start_date_str (str, optional): Start date of the period (YYYY-MM-DD).
+        end_date_str (str, optional): End date of the period (YYYY-MM-DD).
+
+    Returns:
+        list: A list of dictionaries, where each dictionary contains
+              'game_name', 'datetime', and 'admin_name'.
+              Example: [{'game_name': 'GameA', 'datetime': '2024-05-26 10:00:00',
+                         'admin_name': 'AdminX'}, ...]
+              Returns an empty list on error or if no data.
+    """
+    # *** Assumption: The datetime column in 'events' is named 'event_date'. ***
+    # Using DISTINCT to ensure each row (game, datetime, admin) is unique.
+    base_sql = """
+        SELECT DISTINCT
+            e.game_name,
+            e.game_datetime,
+            a.name AS admin_name
+        FROM
+            events e
+        JOIN
+            admins a ON e.admin = CAST(a.id AS TEXT)
+    """
+
+    final_query_parts = [base_sql]
+    final_params = []
+
+    # Add date range filtering if specified
+    # Ensure the date column name matches your schema ('e.event_date' used here)
+    date_where_clause, date_params = _build_date_range_clause(
+        start_date_str, end_date_str
+    )
+    if date_where_clause:
+        final_query_parts.append(date_where_clause)
+        final_params.extend(date_params)
+
+    # Add an ORDER BY clause for predictable results
+    final_query_parts.append("""
+        ORDER BY
+            e.game_datetime DESC
+    """)
+
+    sql_query = " ".join(final_query_parts)
+
+    conn = None
+    results = []
+    try:
+        conn = db.get_db_connection()
+        if not conn:
+            return []  # Return empty if connection fails
+
+        cursor = conn.cursor()
+        cursor.execute(sql_query, tuple(final_params))
+        rows = cursor.fetchall()
+        for row in rows:
+            # Convert row object to dictionary
+            results.append(dict(row))
+    except sqlite3.Error as e:
+        print(f"Database error in get_all_unique_games: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred in get_all_unique_games: {e}")
     finally:
         if conn:
             conn.close()
@@ -735,14 +811,20 @@ def generate(
     try:
         with open(json_filepath, "w") as f:
             json.dump(raw_digest, f, indent=4)
-        print(f"\nAggregated data report saved to: {json_filepath}")
+        print(f"\n🗂️  Aggregated data report saved to: {json_filepath}")
     except IOError as e:
         print(f"Error saving data to JSON file {json_filepath}: {e}")
     except Exception as e:
         print(f"An unexpected error occurred while saving JSON to {json_filepath}: {e}")
 
+    games = get_all_unique_games(start, end)
+    df = pd.DataFrame(games)
+    games_path = digest_dir / "games.xls"
+    df.to_excel(games_path)
+    print(f"👾 All games from {start} to {end} is saved to {games_path}")
 
-def get_latest_digest_dir():
+
+def get_latest_digest_dir() -> Path:
     digest_path = Path(os.getenv("DIGEST_PATH"))
 
     first = next(digest_path.iterdir(), None)
@@ -750,7 +832,6 @@ def get_latest_digest_dir():
         return None
 
     latest_digest_dir = max(digest_path.iterdir())
-    print(f"Latest digest dir: {latest_digest_dir}")
     return latest_digest_dir
 
 
