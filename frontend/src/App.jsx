@@ -273,6 +273,24 @@ function App() {
     }
   };
 
+  // Function to get player count comment based on number of players
+  const getPlayerCountComment = (count) => {
+    if (count < 2) {
+      return t('players.countComments.waiting');
+    } else if (count >= 2 && count <= 6) {
+      return t('players.countComments.needMore');
+    } else if (count === 7) {
+      return t('players.countComments.almostHere');
+    } else if (count === 8) {
+      return t('players.countComments.letsGo');
+    } else if (count > 8 && count % 2 === 1) {
+      return t('players.countComments.findOneMore');
+    } else if (count > 8) {
+      return t('players.countComments.strange');
+    }
+    return "";
+  };
+
   const handleBalanceTeams = async () => {
     console.log('handleBalanceTeams called');
 
@@ -378,7 +396,44 @@ function App() {
       </div>
       <div className="main-container">
         <div className="players-section">
-          <h2>{t('app.players')} ({players.length})</h2>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px'
+          }}>
+            <h2 style={{ margin: 0 }}>
+              {t('app.players')} ({players.length})
+            </h2>
+            <div
+              key={getPlayerCountComment(players.length)} // Force re-render for animation
+              style={{
+                fontSize: '14px',
+                fontWeight: '500',
+                color: '#fff',
+                backgroundColor: '#007bff',
+                padding: '8px 16px',
+                borderRadius: '18px 18px 4px 18px',
+                position: 'relative',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 2px 8px rgba(0, 123, 255, 0.3)',
+                animation: 'messageSlideIn 0.3s ease-out',
+                transform: 'scale(1)',
+                transition: 'all 0.2s ease-in-out'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'scale(1.05)';
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 123, 255, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.boxShadow = '0 2px 8px rgba(0, 123, 255, 0.3)';
+              }}
+            >
+              {getPlayerCountComment(players.length)}
+              {/* Message bubble tail */}
+            </div>
+          </div>
           <PlayerTable
             players={players}
             onScoreChange={handleScoreChange}

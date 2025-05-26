@@ -17,7 +17,15 @@
     "showAllKnown": "Show all known players",
     "allKnownFromSheet": "All Known Players from Sheet",
     "noPlayersYet": "No players added yet. Use the form below to add players.",
-    "alreadyInList": "Player {{nickname}} is already in the list."
+    "alreadyInList": "Player {{nickname}} is already in the list.",
+    "countComments": {
+      "waiting": "⏳ Waiting...",
+      "needMore": "📢 WE NEED MORE PEOPLE",
+      "almostHere": "🔥 Almost here!",
+      "letsGo": "🚀 LETS GOOOO",
+      "strange": "😅 Thats strange, but okay",
+      "findOneMore": "🤔 Find one more to be even"
+    }
   },
   "teams": {
     "team1": "Team 1",
