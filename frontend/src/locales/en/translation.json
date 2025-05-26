@@ -95,5 +95,65 @@
     "github": "Github: MykytaHordia",
     "cossacks3": "Cossacks 3: \"mykyta.\"",
     "version": "Version: {{version}}"
+  },
+  "digest": {
+    "title": "Latest Digest",
+    "loading": "Generating digest...",
+    "error": "Failed to load digest data",
+    "close": "Close",
+    "downloadGames": "Download All Games Data",
+    "downloadInfo": "All provided infographics are based on games played between the specified dates. You can review these games in detail by downloading the complete dataset.",
+    "generatedOn": "Generated on {{date}}",
+    "period": "Period: {{start}} - {{end}}",
+    "sections": {
+      "rankChanges": "Changes in Ranks",
+      "topPlayers": "Top Active Players",
+      "topAdmins": "Top Admins by Contribution",
+      "activity": "Activity"
+    },
+    "charts": {
+      "rankChanges": {
+        "title": "Player Status Changes",
+        "promote": "Promote",
+        "demote": "Demote",
+        "noChanges": "No rank changes this period",
+        "gamesPlayed": "Games Played",
+        "wonGames": "Won Games",
+        "winRate": "Win Rate",
+        "currentScore": "Current Score",
+        "newScore": "New Score",
+        "status": "Status"
+      },
+      "topPlayers": {
+        "title": "Most Active Players",
+        "gamesCount": "Games Played",
+        "noData": "No player data available"
+      },
+      "topAdmins": {
+        "title": "Admin Contributions",
+        "gamesManaged": "Games Managed",
+        "noData": "No admin data available"
+      },
+      "activity": {
+        "hourly": "Games by Hour of Day",
+        "weekly": "Games by Day of Week",
+        "daily": "Daily Activity",
+        "hour": "Hour",
+        "day": "Day",
+        "month": "Month",
+        "dayOfMonth": "Day of Month",
+        "games": "Games",
+        "players": "Players",
+        "admins": "Admins",
+        "notAvailable": "N/A",
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+      }
+    }
   }
 }

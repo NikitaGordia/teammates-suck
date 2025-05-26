@@ -314,7 +314,7 @@
 
 .player-name {
   flex-grow: 1;
-  font-weight: 500;
+  font-weight: normal;
   display: flex;
   align-items: center;
   overflow: hidden;

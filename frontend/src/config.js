@@ -15,6 +15,8 @@ const API_CONFIG = {
     GET_MAPPINGS: '/users',
     BALANCE: '/balance',
     SUBMIT_GAME: '/submit_game',
+    DIGEST: '/digest',
+    DIGEST_GAMES: '/digest/games',
   },
 
   // Request timeout in milliseconds

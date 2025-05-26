@@ -8,6 +8,7 @@ import TeamCopyText, { copyTeamsToClipboard } from './components/TeamCopyText';
 import BalancingInfo from './components/BalancingInfo';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import LogoutButton from './components/LogoutButton';
+import DigestButton from './components/DigestButton';
 import { API_CONFIG, getApiUrl } from './config';
 import { handleApiResponse } from './utils/apiUtils';
 import './App.css';
@@ -411,12 +412,12 @@ function App() {
                 fontSize: '14px',
                 fontWeight: '500',
                 color: '#fff',
-                backgroundColor: '#007bff',
+                backgroundColor: '#607D8B',
                 padding: '8px 16px',
-                borderRadius: '18px 18px 4px 18px',
+                borderRadius: '18px 18px 18px 18px',
                 position: 'relative',
                 whiteSpace: 'nowrap',
-                boxShadow: '0 2px 8px rgba(0, 123, 255, 0.3)',
+                boxShadow: '0 2px 8px rgba(0, 123, 255, 0.13)',
                 animation: 'messageSlideIn 0.3s ease-out',
                 transform: 'scale(1)',
                 transition: 'all 0.2s ease-in-out'
@@ -565,9 +566,12 @@ function App() {
         </div>
       </div>
 
+      {/* Digest Button - centered between main content and developer contacts */}
+      <DigestButton />
+
       {/* Developer Contacts - outside of main-container and without a white tile */}
       <div style={{
-        marginTop: '30px',
+        marginTop: '10px',
         textAlign: 'center',
         color: '#555',
         fontSize: '14px',

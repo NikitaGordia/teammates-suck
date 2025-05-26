@@ -505,6 +505,12 @@ def get_player_promotion_demotion_candidates(
         )
         # Allow processing to continue, but this setup might be illogical.
 
+    load_dotenv()
+    fetcher = SheetScoreFetcher(
+        os.getenv("GOOGLE_API_KEY"), os.getenv("SPREADSHEET_ID")
+    )
+    scores = fetcher.fetch_all_scores()
+
     # SQL to get total games and wins per player
     # Assumes 'win' column in 'events' is 1 for TRUE (win) and 0 for FALSE (loss)
     base_sql = """
@@ -562,6 +568,14 @@ def get_player_promotion_demotion_candidates(
 
                 # Only include players who need promotion or demotion
                 if status == "Promote" or status == "Demote":
+                    score = scores.get(nickname, None)
+                    if score:
+                        ix = SCORES.index(score)
+                        new_ix = ix + (1 if status == "Promote" else -1)
+                        new_score = SCORES[new_ix]
+                    else:
+                        continue  # Skip players without a score
+
                     players_for_status_change.append(
                         {
                             "nickname": nickname,
@@ -570,6 +584,8 @@ def get_player_promotion_demotion_candidates(
                             "losses": total_games - total_wins,
                             "win_rate_percentage": round(win_rate_percentage, 2),
                             "status": status,
+                            "current_score": score,
+                            "new_score": new_score,
                         }
                     )
 
@@ -865,24 +881,13 @@ def apply():
     print(f"Processing the latest digest at {digest_dir} ...")
     raw_digest = load_digest(digest_dir)
 
-    print("Fetching current player scores...")
-    load_dotenv()
-    fetcher = SheetScoreFetcher(
-        os.getenv("GOOGLE_API_KEY"), os.getenv("SPREADSHEET_ID")
-    )
-    scores = fetcher.fetch_all_scores()
     changes = raw_digest["players_for_status_change"]
 
     print("Changes:")
     for change in changes:
         nickname = change["nickname"]
-        score = scores.get(nickname, None)
-        if score:
-            ix = SCORES.index(score)
-            new_ix = ix + (1 if change["status"] == "Promote" else -1)
-            new_score = SCORES[new_ix]
-        else:
-            new_score = None
+        score = change["current_score"]
+        new_score = change["new_score"]
 
         emoji = "🔼" if change["status"] == "Promote" else "🔻"
         print(f" - {nickname} {emoji}: {score} -> {new_score}")
