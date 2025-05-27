@@ -117,6 +117,16 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers,
                     <option value="3" style={{ color: getScoreColor(3), fontWeight: 'bold' }}>3</option>
                     <option value="3.5" style={{ color: getScoreColor(3.5), fontWeight: 'bold' }}>3.5</option>
                     <option value="4" style={{ color: getScoreColor(4), fontWeight: 'bold' }}>4</option>
+                    <option value="4.1" style={{ color: getScoreColor(4.1), fontWeight: 'bold' }}>4.1</option>
+                    <option value="4.2" style={{ color: getScoreColor(4.2), fontWeight: 'bold' }}>4.2</option>
+                    <option value="4.3" style={{ color: getScoreColor(4.3), fontWeight: 'bold' }}>4.3</option>
+                    <option value="4.4" style={{ color: getScoreColor(4.4), fontWeight: 'bold' }}>4.4</option>
+                    <option value="4.5" style={{ color: getScoreColor(4.5), fontWeight: 'bold' }}>4.5</option>
+                    <option value="4.6" style={{ color: getScoreColor(4.6), fontWeight: 'bold' }}>4.6</option>
+                    <option value="4.7" style={{ color: getScoreColor(4.7), fontWeight: 'bold' }}>4.7</option>
+                    <option value="4.8" style={{ color: getScoreColor(4.8), fontWeight: 'bold' }}>4.8</option>
+                    <option value="4.9" style={{ color: getScoreColor(4.9), fontWeight: 'bold' }}>4.9</option>
+                    <option value="5" style={{ color: getScoreColor(5), fontWeight: 'bold' }}>5</option>
                   </select>
                 </td>
                 <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
