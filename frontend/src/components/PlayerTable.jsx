@@ -112,10 +112,12 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers,
                     <option value="-1" style={{ color: getScoreColor(-1), fontWeight: 'bold' }}>-1</option>
                     <option value="0" style={{ color: getScoreColor(0), fontWeight: 'bold' }}>0</option>
                     <option value="1" style={{ color: getScoreColor(1), fontWeight: 'bold' }}>1</option>
+                    <option value="1.5" style={{ color: getScoreColor(1.5), fontWeight: 'bold' }}>1.5</option>
                     <option value="2" style={{ color: getScoreColor(2), fontWeight: 'bold' }}>2</option>
                     <option value="2.5" style={{ color: getScoreColor(2.5), fontWeight: 'bold' }}>2.5</option>
                     <option value="3" style={{ color: getScoreColor(3), fontWeight: 'bold' }}>3</option>
                     <option value="3.5" style={{ color: getScoreColor(3.5), fontWeight: 'bold' }}>3.5</option>
+                    <option value="3.3" style={{ color: getScoreColor(3.3), fontWeight: 'bold' }}>3.3</option>
                     <option value="4" style={{ color: getScoreColor(4), fontWeight: 'bold' }}>4</option>
                     <option value="4.1" style={{ color: getScoreColor(4.1), fontWeight: 'bold' }}>4.1</option>
                     <option value="4.2" style={{ color: getScoreColor(4.2), fontWeight: 'bold' }}>4.2</option>

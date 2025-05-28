@@ -34,12 +34,16 @@ export const getScoreColor = (score) => {
       return '#4CAF50'; // Green (original)
     case 3.5:
       return '#66BB6A'; // Between Green and Light Green
+    case 3.3:
+      return '#72BE5F'; // Light Green
     case 3:
       return '#8BC34A'; // Light Green
     case 2.5:
       return '#AED581'; // Between Light Green and Amber
     case 2:
       return '#FFC107'; // Amber
+    case 1.5:
+      return '#FFA602'; // Amber
     case 1:
       return '#FF9800'; // Orange
     case 0:

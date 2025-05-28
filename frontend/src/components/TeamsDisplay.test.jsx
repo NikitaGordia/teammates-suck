@@ -174,6 +174,12 @@ describe('TeamsDisplay Component', () => {
       expect(screen.getByText('teams.submissionSuccess')).toBeInTheDocument();
     });
 
+    // Confetti should be active when submission is successful
+    await waitFor(() => {
+      const confettiContainer = document.querySelector('.confetti-container');
+      expect(confettiContainer).toBeInTheDocument();
+    });
+
     // Check that the onGameSubmitted callback was called with the correct data
     expect(mockOnGameSubmitted).toHaveBeenCalledTimes(1);
     expect(mockOnGameSubmitted).toHaveBeenCalledWith({

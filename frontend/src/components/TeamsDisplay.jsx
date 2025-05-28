@@ -6,6 +6,7 @@ import { validateAdminSecret } from '../utils/adminUtils';
 import { getCookie, setCookie, COOKIE_NAMES } from '../utils/cookieUtils';
 import { getScoreColor } from '../utils/scoreUtils';
 import AdminSecretModal from './AdminSecretModal';
+import Confetti from './Confetti';
 import './TeamsDisplay.css';
 
 // --- Reducer Logic ---
@@ -234,7 +235,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
     if (state.status === 'success') {
       const timer = setTimeout(() => {
         dispatch({ type: ACTIONS.RESET_STATUS });
-      }, 2000); // Keep success message visible for 2 seconds
+      }, 3000); // Keep success message and confetti visible for 3 seconds
 
       return () => clearTimeout(timer); // Cleanup timer on unmount or status change
     }
@@ -456,6 +457,12 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
         onSubmit={handleAdminModalSubmit}
         // Pass error message specifically related to modal input failure
         error={state.status === 'awaitingSecret' && state.error ? state.error : null}
+      />
+
+      {/* Confetti effect for successful game submission */}
+      <Confetti
+        isActive={state.status === 'success'}
+        duration={3000}
       />
     </div>
   );
