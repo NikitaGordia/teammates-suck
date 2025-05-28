@@ -19,14 +19,14 @@
     "noPlayersYet": "No players added yet. Use the form below to add players.",
     "alreadyInList": "Player {{nickname}} is already in the list.",
     "countComments": {
-      "waiting": "⏳ Waiting...",
-      "needMore": "📢 WE NEED MORE PEOPLE",
-      "continue": "🍻 Keep going",
-      "almostHere": "🔥 Almost here!",
+      "waiting": "waiting...",
+      "needMore": "📢 WE NEED MORE PEOPLE!",
+      "continue": "keep going",
+      "almostHere": "almost here!",
       "letsGo": "🚀 LETS GOOOO",
-      "strange": "😅 Thats strange, but okay",
-      "findOneMore": "🤔 Find one more to be even",
-      "tooMany": "❌ Too many players"
+      "strange": "😅 thats strange, but okay",
+      "findOneMore": "🤔 find one more to be even",
+      "tooMany": "❌ too many players"
     }
   },
   "teams": {
