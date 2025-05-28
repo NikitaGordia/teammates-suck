@@ -278,16 +278,20 @@ function App() {
   const getPlayerCountComment = (count) => {
     if (count < 2) {
       return t('players.countComments.waiting');
-    } else if (count >= 2 && count <= 6) {
+    } else if (count >= 2 && count <= 4) {
       return t('players.countComments.needMore');
+    } else if (count >= 5 && count <= 6) {
+      return t('players.countComments.continue');
     } else if (count === 7) {
       return t('players.countComments.almostHere');
     } else if (count === 8) {
       return t('players.countComments.letsGo');
-    } else if (count > 8 && count % 2 === 1) {
+    } else if (count > 8 && count <= 30 &&count % 2 === 1) {
       return t('players.countComments.findOneMore');
-    } else if (count > 8) {
+    } else if (count > 8 && count <= 30) {
       return t('players.countComments.strange');
+    } else if (count > 30) {
+      return t('players.countComments.tooMany');
     }
     return "";
   };
@@ -398,43 +402,67 @@ function App() {
       <div className="main-container">
         <div className="players-section">
           <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '15px'
-          }}>
-            <h2 style={{ margin: 0 }}>
-              {t('app.players')} ({players.length})
-            </h2>
-            <div
-              key={getPlayerCountComment(players.length)} // Force re-render for animation
-              style={{
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#fff',
-                backgroundColor: '#607D8B',
-                padding: '8px 16px',
-                borderRadius: '18px 18px 18px 18px',
-                position: 'relative',
-                whiteSpace: 'nowrap',
-                boxShadow: '0 2px 8px rgba(0, 123, 255, 0.13)',
-                animation: 'messageSlideIn 0.3s ease-out',
-                transform: 'scale(1)',
-                transition: 'all 0.2s ease-in-out'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'scale(1.05)';
-                e.target.style.boxShadow = '0 4px 12px rgba(0, 123, 255, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.boxShadow = '0 2px 8px rgba(0, 123, 255, 0.3)';
-              }}
-            >
-              {getPlayerCountComment(players.length)}
-              {/* Message bubble tail */}
-            </div>
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: '15px'
+}}>
+  <h2 style={{ margin: 0 }}>
+    {t('app.players')} ({players.length})
+  </h2>
+
+  {/* Container for the bubble and the robot */}
+       <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '15px',
+        padding: '10px', // Added padding to see the tail better
+        background: 'white' // Ensure background is white for tail effect
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div
+            key={getPlayerCountComment(players.length)}
+            className="ios-mine-bubble" // Apply the main CSS class
+            style={{
+              // Keep essential styles, override/add others with CSS
+              fontSize: '14px',
+              fontWeight: '500',
+              padding: '8px 15px', // iOS padding
+              whiteSpace: 'nowrap',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.15)', // More subtle shadow
+              animation: 'messageSlideIn 0.3s ease-out',
+              transform: 'scale(1)',
+              transition: 'all 0.2s ease-in-out',
+              // Increased margin to make space for the 10px tail + spacing
+              marginRight: '15px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.03)';
+              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.15)';
+            }}
+          >
+            {getPlayerCountComment(players.length)}
           </div>
+
+          <div style={{
+              fontSize: '32px',
+              lineHeight: '1',
+              marginTop: '8px',
+              transition: 'transform 0.2s ease-in-out'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+          >
+            🤖
+          </div>
+        </div>
+      </div>
+      </div>
           <PlayerTable
             players={players}
             onScoreChange={handleScoreChange}

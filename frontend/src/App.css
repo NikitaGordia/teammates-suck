@@ -144,6 +144,40 @@ h2 {
   background-color: #1976D2;
 }
 
+.ios-mine-bubble {
+      color: black;
+      background: rgb(230, 230, 230);
+      border-radius: 20px; /* iOS uses a rounder radius */
+      position: relative; /* Essential for the tail positioning */
+    }
+
+    /* Tail Part 1: The main blue shape */
+    .ios-mine-bubble::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      bottom: 0;
+      right: -8px; /* Position right outside the bubble */
+      height: 20px;
+      width: 20px;
+      background: rgb(230, 230, 230);
+      border-bottom-left-radius: 15px; /* The crucial curve */
+    }
+
+    /* Tail Part 2: The 'cutout' (Assumes white background) */
+    .ios-mine-bubble::after {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      bottom: 0;
+      right: -10px; /* Position slightly further out */
+      width: 10px;
+      height: 20px;
+      /* IMPORTANT: This MUST match your page/container background */
+      background: white;
+      border-bottom-left-radius: 10px; /* Curve to match */
+    }
+
 /* Animation for fade in effect - kept for potential future use */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
