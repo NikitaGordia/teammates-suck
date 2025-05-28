@@ -54,7 +54,8 @@
     "submissionSuccess": "Game result submitted successfully!",
     "submissionError": "Error submitting game result",
     "notEnoughPlayers": "Both teams need players to submit a game result",
-    "clickToSelect": "Click to select winner",
+    "clickToSelect": "👑 Click to select winner",
+    "clickToSelectOverlay": "Click to select winner 🏆 ⬇️",
     "secretRequired": "Admin secret required to submit game result"
   },
   "balance": {

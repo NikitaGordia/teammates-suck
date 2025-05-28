@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import PlayerTable from './components/PlayerTable';
 import AddPlayerForm from './components/AddPlayerForm';
@@ -39,6 +39,16 @@ function App() {
 
   // Randomness slider state (0-100%)
   const [randomness, setRandomness] = useState(0);
+
+  // Dimming state for 10-minute timer after Balance button click
+  const [isDimmed, setIsDimmed] = useState(false);
+  const dimTimerRef = useRef(null);
+
+  // Ref for teams-section to measure its position
+  const teamsSectionRef = useRef(null);
+
+  // State to track teams section position for overlay
+  const [teamsSectionPosition, setTeamsSectionPosition] = useState({ top: 0, left: 0 });
 
   // Function to ensure randomness is always one of the five snap points (0, 25, 50, 75, 100)
   const handleRandomnessChange = (value) => {
@@ -197,6 +207,9 @@ function App() {
     setPlayers([]);
     // Also clear teams when removing all players
     setTeams({ team1: [], team2: [] });
+    // Clear dimming since teams are cleared
+    setIsDimmed(false);
+    clearDimTimer();
   };
 
   const handleReorderPlayers = (newPlayers) => {
@@ -243,6 +256,10 @@ function App() {
 
       // Clear the current teams
       setTeams({ team1: [], team2: [] });
+
+      // Clear dimming since admin has chosen a winner
+      setIsDimmed(false);
+      clearDimTimer();
 
       // Update existing players with fresh data while maintaining their order
       const updatedPlayers = players.map(player => {
@@ -295,6 +312,61 @@ function App() {
     }
     return "";
   };
+
+  // Function to update teams section position for overlay
+  const updateTeamsSectionPosition = () => {
+    if (teamsSectionRef.current) {
+      const rect = teamsSectionRef.current.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setTeamsSectionPosition({
+        top: rect.top + scrollTop,
+        left: rect.left + (rect.width / 2)
+      });
+    }
+  };
+
+  // Function to start the 10-minute dimming timer
+  const startDimTimer = () => {
+    // Clear any existing timer
+    if (dimTimerRef.current) {
+      clearTimeout(dimTimerRef.current);
+    }
+
+    // Start new 10-minute timer
+    dimTimerRef.current = setTimeout(() => {
+      setIsDimmed(true);
+    }, 10 * 60 * 1000); // 10 minutes in milliseconds
+  };
+
+  // Function to clear the dimming timer
+  const clearDimTimer = () => {
+    if (dimTimerRef.current) {
+      clearTimeout(dimTimerRef.current);
+      dimTimerRef.current = null;
+    }
+  };
+
+  // Function to handle dimming overlay click (dismiss dimming)
+  const handleDimOverlayClick = () => {
+    setIsDimmed(false);
+    clearDimTimer();
+  };
+
+  // Cleanup timer on component unmount and handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (isDimmed) {
+        updateTeamsSectionPosition();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearDimTimer();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isDimmed]);
 
   const handleBalanceTeams = async () => {
     console.log('handleBalanceTeams called');
@@ -372,6 +444,11 @@ function App() {
       };
 
       setTeams(balancedTeams);
+
+      updateTeamsSectionPosition();
+
+      // Start the 10-minute dimming timer after successful balancing
+      startDimTimer();
 
       // Automatically copy teams to clipboard if there are players
       if ((balancedTeams.team1.length > 0 || balancedTeams.team2.length > 0) &&
@@ -583,7 +660,7 @@ function App() {
           <BalancingInfo />
         </div>
 
-        <div className="teams-section">
+        <div className="teams-section" ref={teamsSectionRef}>
           <h2>{t('app.balancedTeams')}</h2>
           <TeamsDisplay
             teams={teams}
@@ -591,6 +668,8 @@ function App() {
           />
           <TeamCopyText teams={teams} autocopied={teamsCopied} />
         </div>
+
+        {/* Show "So who has won?" text when teams are present - under teams-section */}
       </div>
 
       {/* Digest Button - centered between main content and developer contacts */}
@@ -610,6 +689,35 @@ function App() {
         <div>{t('developer.cossacks3')}</div>
         <div>{t('developer.version', { version: import.meta.env.VITE_BUILD_TAG || 'dev' })}</div>
       </div>
+
+      {/* Text overlay below teams-section when dimmed */}
+      {isDimmed && (
+        <div
+          className="teams-overlay-text"
+          style={{
+            position: 'absolute',
+            top: `${teamsSectionPosition.top - 32}px`,
+            left: `${teamsSectionPosition.left}px`,
+            transform: 'translateX(-50%)',
+            zIndex: 1001,
+            color: 'white',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)',
+            pointerEvents: 'none',
+            animation: 'slideUpFromBottom 0.6s ease-out'
+          }}
+        >
+          {t('teams.clickToSelectOverlay')}
+        </div>
+      )}
+
+      {/* Dimming overlay - appears after 10 minutes of Balance button click */}
+      {isDimmed && (
+        <div className="dim-overlay" onClick={handleDimOverlayClick}>
+        </div>
+      )}
     </div>
   );
 }

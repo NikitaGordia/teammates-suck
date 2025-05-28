@@ -1,6 +1,8 @@
 /* TeamsDisplay.css */
 .teams-container {
   margin-bottom: 20px;
+  position: relative;
+  z-index: 1000; /* Ensure teams stay above dimming overlay */
 }
 
 .teams-grid {
@@ -581,7 +583,7 @@
   z-index: 10;
   text-align: center;
   pointer-events: none; /* Allow clicks to pass through */
-  width: 100%;
+  width: 90%;
 }
 
 .click-text {
