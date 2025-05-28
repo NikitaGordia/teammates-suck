@@ -405,7 +405,6 @@ function App() {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  marginBottom: '15px'
 }}>
   <h2 style={{ margin: 0 }}>
     {t('app.players')} ({players.length})
@@ -416,7 +415,7 @@ function App() {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '15px',
+        marginBottom: '6px',
         padding: '10px', // Added padding to see the tail better
         background: 'white' // Ensure background is white for tail effect
       }}>
