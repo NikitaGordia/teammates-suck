@@ -1,6 +1,18 @@
 from googleapiclient.discovery import build
+import os
+import json
 
-SCORES = [-1, 0, 1, 1.5, 2, 2.5, 3, 3.3, 3.5, 4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5]
+
+def get_scores():
+    """Get scores from environment variable APP_SCORES, with fallback to default values."""
+    scores_env = os.getenv("APP_SCORES")
+    if scores_env:
+        return json.loads(scores_env)
+    else:
+        raise ValueError("APP_SCORES environment variable is not set")
+
+
+SCORES = get_scores()
 
 
 class SheetScoreFetcher:

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getScoreColor } from '../utils/scoreUtils';
+import { getScoreColor, SCORES } from '../utils/scoreUtils';
 import './AddPlayerForm.css';
 
 const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false }) => {
@@ -238,26 +238,15 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
                   }}
                   required
                 >
-                  <option value="-1" style={{ color: getScoreColor(-1), fontWeight: 'bold' }}>-1</option>
-                  <option value="0" style={{ color: getScoreColor(0), fontWeight: 'bold' }}>0</option>
-                  <option value="1" style={{ color: getScoreColor(1), fontWeight: 'bold' }}>1</option>
-                  <option value="1.5" style={{ color: getScoreColor(1.5), fontWeight: 'bold' }}>1.5</option>
-                  <option value="2" style={{ color: getScoreColor(2), fontWeight: 'bold' }}>2</option>
-                  <option value="2.5" style={{ color: getScoreColor(2.5), fontWeight: 'bold' }}>2.5</option>
-                  <option value="3" style={{ color: getScoreColor(3), fontWeight: 'bold' }}>3</option>
-                  <option value="3.3" style={{ color: getScoreColor(3.3), fontWeight: 'bold' }}>3.3</option>
-                  <option value="3.5" style={{ color: getScoreColor(3.5), fontWeight: 'bold' }}>3.5</option>
-                  <option value="4" style={{ color: getScoreColor(4), fontWeight: 'bold' }}>4</option>
-                  <option value="4.1" style={{ color: getScoreColor(4.1), fontWeight: 'bold' }}>4.1</option>
-                  <option value="4.2" style={{ color: getScoreColor(4.2), fontWeight: 'bold' }}>4.2</option>
-                  <option value="4.3" style={{ color: getScoreColor(4.3), fontWeight: 'bold' }}>4.3</option>
-                  <option value="4.4" style={{ color: getScoreColor(4.4), fontWeight: 'bold' }}>4.4</option>
-                  <option value="4.5" style={{ color: getScoreColor(4.5), fontWeight: 'bold' }}>4.5</option>
-                  <option value="4.6" style={{ color: getScoreColor(4.6), fontWeight: 'bold' }}>4.6</option>
-                  <option value="4.7" style={{ color: getScoreColor(4.7), fontWeight: 'bold' }}>4.7</option>
-                  <option value="4.8" style={{ color: getScoreColor(4.8), fontWeight: 'bold' }}>4.8</option>
-                  <option value="4.9" style={{ color: getScoreColor(4.9), fontWeight: 'bold' }}>4.9</option>
-                  <option value="5" style={{ color: getScoreColor(5), fontWeight: 'bold' }}>5</option>
+                  {SCORES.map(score => (
+                    <option
+                      key={score}
+                      value={score}
+                      style={{ color: getScoreColor(score), fontWeight: 'bold' }}
+                    >
+                      {score}
+                    </option>
+                  ))}
                 </select>
               </td>
               <td style={{ padding: '8px', textAlign: 'center', width: '100px' }}>

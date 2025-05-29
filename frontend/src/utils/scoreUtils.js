@@ -3,6 +3,24 @@
  */
 
 /**
+ * Get scores from environment variable APP_SCORES, with fallback to default values
+ * @returns {number[]} Array of score values
+ */
+export const getScores = () => {
+  const scoresEnv = import.meta.env.VITE_APP_SCORES;
+  if (scoresEnv) {
+    return JSON.parse(scoresEnv);
+  } else {
+    throw new Error("VITE_APP_SCORES environment variable is not set");
+  }
+};
+
+/**
+ * Get the available scores as a cached value
+ */
+export const SCORES = getScores();
+
+/**
  * Get color based on score value
  *
  * @param {number|string} score - The score value

@@ -19,6 +19,7 @@ services:
       - SPREADSHEET_ID=${SPREADSHEET_ID}
       - DB_PATH=data/database.sqlite
       - DIGEST_PATH=data/digest
+      - APP_SCORES=${SCORES}
     volumes:
       - db:/app/data
 
@@ -35,6 +36,8 @@ services:
     container_name: team-balancer-frontend-prod
     image: ${REGISTRY_URL}/teammates-suck-frontend:${BUILD_TAG}
     restart: unless-stopped
+    environment:
+      - VITE_APP_SCORES=${SCORES}
     ports:
       - "80:80"
     depends_on:
