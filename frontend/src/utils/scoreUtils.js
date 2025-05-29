@@ -74,3 +74,19 @@ export const getScoreColor = (score) => {
       return '#000000'; // Black
   }
 };
+
+/**
+ * Get text color based on score value for optimal readability
+ *
+ * @param {number|string} score - The score value
+ * @returns {string} - The text color (white or black) for the score
+ */
+export const getScoreTextColor = (score) => {
+  const numScore = Number(score);
+  // Use white text for scores starting with 4 (4.0 and above) due to dark backgrounds
+  if (numScore >= 4) {
+    return '#ffffff'; // White
+  }
+  // Use black text for all other scores
+  return '#000000'; // Black
+};

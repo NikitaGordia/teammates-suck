@@ -4,7 +4,7 @@ import { API_CONFIG, getApiUrl } from '../config';
 import { handleApiResponse } from '../utils/apiUtils';
 import { validateAdminSecret } from '../utils/adminUtils';
 import { getCookie, setCookie, COOKIE_NAMES } from '../utils/cookieUtils';
-import { getScoreColor } from '../utils/scoreUtils';
+import { getScoreColor, getScoreTextColor } from '../utils/scoreUtils';
 import AdminSecretModal from './AdminSecretModal';
 import Confetti from './Confetti';
 import './TeamsDisplay.css';
@@ -329,7 +329,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
                           <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{player.wins}</span> / <span style={{ color: '#F44336', fontWeight: 'bold' }}>{player.losses}</span>
                         </span>
                       )}
-                      <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
+                      <span className="player-score" style={{ backgroundColor: getScoreColor(player.score), color: getScoreTextColor(player.score) }}>
                         {player.score}
                       </span>
                     </div>
@@ -392,7 +392,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
                            <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{player.wins}</span> / <span style={{ color: '#F44336', fontWeight: 'bold' }}>{player.losses}</span>
                          </span>
                        )}
-                       <span className="player-score" style={{ backgroundColor: getScoreColor(player.score) }}>
+                       <span className="player-score" style={{ backgroundColor: getScoreColor(player.score), color: getScoreTextColor(player.score) }}>
                          {player.score}
                        </span>
                      </div>
