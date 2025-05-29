@@ -33,11 +33,10 @@ services:
       args:
         - VITE_API_BASE_URL=/api
         - VITE_BUILD_TAG=${BUILD_TAG}
+        - VITE_APP_SCORES=${SCORES}
     container_name: team-balancer-frontend-prod
     image: ${REGISTRY_URL}/teammates-suck-frontend:${BUILD_TAG}
     restart: unless-stopped
-    environment:
-      - VITE_APP_SCORES=${SCORES}
     ports:
       - "80:80"
     depends_on:
