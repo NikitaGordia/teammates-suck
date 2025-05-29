@@ -114,7 +114,7 @@ def get_top_admins_by_contribution(start_date_str=None, end_date_str=None, top_n
     base_sql = """
         SELECT
             a.name AS admin_name,
-            COUNT(DISTINCT e.game_name) AS distinct_games_count
+            COUNT(DISTINCT e.game_name || '|' || e.game_datetime) AS distinct_games_count
         FROM
             events e
         JOIN
@@ -313,7 +313,7 @@ def get_game_activity_by_hour(start_date_str=None, end_date_str=None):
     """
     hourly_activity = [{"hour_of_day": f"{h:02d}", "game_count": 0} for h in range(24)]
 
-    base_sql = "SELECT strftime('%H', game_datetime) as hour_str, COUNT(DISTINCT game_name) as game_count FROM events"
+    base_sql = "SELECT strftime('%H', game_datetime) as hour_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
 
     where_clause, params = _build_date_range_clause(start_date_str, end_date_str)
     sql_query = base_sql + where_clause + " GROUP BY hour_str ORDER BY hour_str"
@@ -372,7 +372,7 @@ def get_game_activity_by_day_of_week(start_date_str=None, end_date_str=None):
         {"day_numeric": i, "day_name": day_names[i], "game_count": 0} for i in range(7)
     ]
 
-    base_sql = "SELECT strftime('%w', game_datetime) as day_w_str, COUNT(DISTINCT game_name) as game_count FROM events"
+    base_sql = "SELECT strftime('%w', game_datetime) as day_w_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
 
     where_clause, params = _build_date_range_clause(start_date_str, end_date_str)
     sql_query = base_sql + where_clause + " GROUP BY day_w_str ORDER BY day_w_str"
@@ -422,7 +422,7 @@ def get_game_activity_by_day_of_month(start_date_str=None, end_date_str=None):
         {"day_of_month": f"{d:02d}", "game_count": 0} for d in range(1, 32)
     ]
 
-    base_sql = "SELECT strftime('%d', game_datetime) as day_m_str, COUNT(DISTINCT game_name) as game_count FROM events"
+    base_sql = "SELECT strftime('%d', game_datetime) as day_m_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
 
     where_clause, params = _build_date_range_clause(start_date_str, end_date_str)
     sql_query = base_sql + where_clause + " GROUP BY day_m_str ORDER BY day_m_str"
@@ -780,7 +780,11 @@ def generate(
     weekly_activity = get_game_activity_by_day_of_week(start, end)
     monthly_activity = get_game_activity_by_day_of_month(start, end)
     players_for_status_change = get_player_promotion_demotion_candidates(
-        min_games_threshold=10, promotion_win_rate_pct=60.0, demotion_win_rate_pct=40.0
+        min_games_threshold=10,
+        promotion_win_rate_pct=60.0,
+        demotion_win_rate_pct=40.0,
+        start_date_str=start,
+        end_date_str=end,
     )
 
     # 2. Print raw data (as in your original function)
