@@ -124,9 +124,9 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
   const balancePercentage = totalScore === 0 ? 100 : Math.max(0, 100 - (scoreDifference / totalScore * 100));
   let balanceQuality = '';
   let balanceDescription = '';
-  if (balancePercentage >= 95) { balanceQuality = 'meter-perfect'; balanceDescription = t('teams.balancePerfect'); }
-  else if (balancePercentage >= 85) { balanceQuality = 'meter-good'; balanceDescription = t('teams.balanceGood'); }
-  else if (balancePercentage >= 70) { balanceQuality = 'meter-fair'; balanceDescription = t('teams.balanceFair'); }
+  if (balancePercentage >= 99) { balanceQuality = 'meter-perfect'; balanceDescription = t('teams.balancePerfect'); }
+  else if (balancePercentage >= 96) { balanceQuality = 'meter-good'; balanceDescription = t('teams.balanceGood'); }
+  else if (balancePercentage >= 93) { balanceQuality = 'meter-fair'; balanceDescription = t('teams.balanceFair'); }
   else { balanceQuality = 'meter-poor'; balanceDescription = t('teams.balancePoor'); }
   const team1Higher = team1Score > team2Score;
   const team2Higher = team2Score > team1Score;
@@ -346,7 +346,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
               <div className="paycheck-amount">
                 <span className="paycheck-label">{t('teams.total')}:</span>
                 <div>
-                  <span className="paycheck-value">{team1Score}</span>
+                  <span className="paycheck-value">{team1Score.toFixed(1)}</span>
                    {team1Higher && !equalScores && (<span className="paycheck-badge higher-score">{t('teams.higher')}</span>)}
                    {team2Higher && !equalScores && (<span className="paycheck-badge lower-score">{t('teams.lower')}</span>)}
                    {equalScores && totalScore > 0 && (<span className="paycheck-badge equal-score">{t('teams.equal')}</span>)}
@@ -409,7 +409,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
                <div className="paycheck-amount">
                  <span className="paycheck-label">{t('teams.total')}:</span>
                  <div>
-                   <span className="paycheck-value">{team2Score}</span>
+                   <span className="paycheck-value">{team2Score.toFixed(1)}</span>
                    {team2Higher && !equalScores && (<span className="paycheck-badge higher-score">{t('teams.higher')}</span>)}
                    {team1Higher && !equalScores && (<span className="paycheck-badge lower-score">{t('teams.lower')}</span>)}
                    {equalScores && totalScore > 0 && (<span className="paycheck-badge equal-score">{t('teams.equal')}</span>)}
@@ -445,7 +445,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
           </div>
           <div className="meter-value">
             {t('teams.balancePercentage', { percentage: balancePercentage.toFixed(1) })}
-            {scoreDifference > 0 && t('teams.pointDifference', { difference: scoreDifference })}
+            {scoreDifference > 0 && t('teams.pointDifference', { difference: scoreDifference.toFixed(1) })}
           </div>
          </div>
       )}
