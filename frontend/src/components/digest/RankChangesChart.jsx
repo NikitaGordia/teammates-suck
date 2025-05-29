@@ -9,6 +9,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { getScoreColor, getScoreTextColor } from '../../utils/scoreUtils';
 
 ChartJS.register(
   CategoryScale,
@@ -136,12 +137,28 @@ const RankChangesChart = ({ data }) => {
               <div className="digest-score-change">
                 <div className="digest-score-item current">
                   <span className="digest-score-label">{t('digest.charts.rankChanges.currentScore')}:</span>
-                  <span className="digest-score-value">{player.current_score || t('digest.charts.activity.notAvailable')}</span>
+                  <span
+                    className="digest-score-value"
+                    style={{
+                      backgroundColor: player.current_score ? getScoreColor(player.current_score) : undefined,
+                      color: player.current_score ? getScoreTextColor(player.current_score) : undefined
+                    }}
+                  >
+                    {player.current_score || t('digest.charts.activity.notAvailable')}
+                  </span>
                 </div>
                 <div className="digest-score-arrow">→</div>
                 <div className="digest-score-item new">
                   <span className="digest-score-label">{t('digest.charts.rankChanges.newScore')}:</span>
-                  <span className="digest-score-value">{player.new_score || t('digest.charts.activity.notAvailable')}</span>
+                  <span
+                    className="digest-score-value"
+                    style={{
+                      backgroundColor: player.new_score ? getScoreColor(player.new_score) : undefined,
+                      color: player.new_score ? getScoreTextColor(player.new_score) : undefined
+                    }}
+                  >
+                    {player.new_score || t('digest.charts.activity.notAvailable')}
+                  </span>
                 </div>
               </div>
             </div>
