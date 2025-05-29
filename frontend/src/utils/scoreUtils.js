@@ -29,35 +29,37 @@ export const SCORES = getScores();
 export const getScoreColor = (score) => {
   switch (Number(score)) {
     case 5:
-      return '#1B5E20'; // Dark Green (highest skill)
+      return '#0b1a07'; // Dark Green (highest skill)
     case 4.9:
-      return '#2E7D32'; // Very Dark Green
+      return '#0b1a07'; // Very Dark Green
     case 4.8:
-      return '#388E3C'; // Dark Green
+      return '#0b1a07'; // Dark Green
     case 4.7:
-      return '#43A047'; // Medium Dark Green
+      return '#0b1a07'; // Medium Dark Green
     case 4.6:
-      return '#4CAF50'; // Green (original 4 color)
+      return '#0b1a07'; // Green (original 4 color)
     case 4.5:
-      return '#56C85A'; // Light Green
+      return '#0B1A07'; // Light Green
     case 4.4:
-      return '#60D164'; // Lighter Green
+      return '#1E3411'; // Lighter Green
     case 4.3:
-      return '#6ADA6E'; // Even Lighter Green
+      return '#324E1C'; // Even Lighter Green
     case 4.2:
-      return '#74E378'; // Very Light Green
+      return '#456826'; // Very Light Green
     case 4.1:
-      return '#7EEC82'; // Lightest Green
+      return '#4D722A'; // Lightest Green
     case 4:
-      return '#4CAF50'; // Green (original)
+      return '#547C2E'; // Green (original)
     case 3.5:
-      return '#66BB6A'; // Between Green and Light Green
+      return '#5E8933'; // Between Green and Light Green
     case 3.3:
-      return '#72BE5F'; // Light Green
+      return '#75A63F'; // Light Green
     case 3:
       return '#8BC34A'; // Light Green
+    case 2.7:
+      return '#B9C22F'; // Light Green
     case 2.5:
-      return '#AED581'; // Between Light Green and Amber
+      return '#D1C222'; // Between Light Green and Amber
     case 2:
       return '#FFC107'; // Amber
     case 1.5:
