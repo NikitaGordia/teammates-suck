@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -9,10 +9,11 @@ import matplotlib.pyplot as plt
 import subprocess
 import pandas as pd
 
+from utils.dates import get_last_month_date_range
 from utils.user import clean_user_history
 from utils.spreadsheet import SCORES, SheetScoreFetcher
 
-from . import db
+from utils import db
 
 
 app = typer.Typer(help="Generate monthly digests")
@@ -127,7 +128,7 @@ def get_top_admins_by_contribution(start_date_str=None, end_date_str=None, top_n
     final_params = []
 
     # Add date range filtering if specified
-    date_where_clause, date_params = _build_date_range_clause(
+    date_where_clause, date_params = db._build_date_range_clause(
         start_date_str, end_date_str
     )
     if date_where_clause:  # date_where_clause is empty or starts with " WHERE "
@@ -208,7 +209,7 @@ def get_all_unique_games(start_date_str=None, end_date_str=None):
 
     # Add date range filtering if specified
     # Ensure the date column name matches your schema ('e.event_date' used here)
-    date_where_clause, date_params = _build_date_range_clause(
+    date_where_clause, date_params = db._build_date_range_clause(
         start_date_str, end_date_str
     )
     if date_where_clause:
@@ -247,58 +248,6 @@ def get_all_unique_games(start_date_str=None, end_date_str=None):
     return results
 
 
-def get_last_month_date_range(days_shift=0):
-    """
-    Calculates the start and end dates for the entirety of the previous month.
-
-    Returns:
-        tuple: A tuple containing two strings (start_date_str, end_date_str)
-               for the last month, formatted as 'YYYY-MM-DD'.
-               Example: ('2025-04-01', '2025-04-30') if today is in May 2025.
-    """
-    today = date.today() + timedelta(days=days_shift)
-    # First day of the current month
-    first_day_current_month = today.replace(day=1)
-    # Last day of the previous month (is first day of current month minus one day)
-    end = first_day_current_month - timedelta(days=1)
-    # First day of the previous month (is the last day of previous month, with day set to 1)
-    start = end.replace(day=1)
-
-    return start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d")
-
-
-def _build_date_range_clause(start_date_str, end_date_str):
-    """Helper to build WHERE clause and params for date ranges."""
-    conditions = []
-    params = []
-    if start_date_str:
-        try:
-            datetime.strptime(start_date_str, "%Y-%m-%d")  # Validate format
-            conditions.append("game_datetime >= ?")
-            params.append(f"{start_date_str} 00:00:00")
-        except ValueError:
-            print(
-                f"Warning: Invalid start_date_str format: {start_date_str}. Should be YYYY-MM-DD."
-            )
-            # Fallback or raise error if critical
-    if end_date_str:
-        try:
-            datetime.strptime(end_date_str, "%Y-%m-%d")  # Validate format
-            conditions.append("game_datetime <= ?")
-            params.append(f"{end_date_str} 23:59:59")
-        except ValueError:
-            print(
-                f"Warning: Invalid end_date_str format: {end_date_str}. Should be YYYY-MM-DD."
-            )
-            # Fallback or raise error if critical
-
-    where_clause = ""
-    if conditions:
-        where_clause = " WHERE " + " AND ".join(conditions)
-
-    return where_clause, params
-
-
 def get_game_activity_by_hour(start_date_str=None, end_date_str=None):
     """
     Aggregates counts of distinct games played by hour of the day (00-23).
@@ -315,7 +264,7 @@ def get_game_activity_by_hour(start_date_str=None, end_date_str=None):
 
     base_sql = "SELECT strftime('%H', game_datetime) as hour_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
 
-    where_clause, params = _build_date_range_clause(start_date_str, end_date_str)
+    where_clause, params = db._build_date_range_clause(start_date_str, end_date_str)
     sql_query = base_sql + where_clause + " GROUP BY hour_str ORDER BY hour_str"
 
     conn = None
@@ -374,7 +323,7 @@ def get_game_activity_by_day_of_week(start_date_str=None, end_date_str=None):
 
     base_sql = "SELECT strftime('%w', game_datetime) as day_w_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
 
-    where_clause, params = _build_date_range_clause(start_date_str, end_date_str)
+    where_clause, params = db._build_date_range_clause(start_date_str, end_date_str)
     sql_query = base_sql + where_clause + " GROUP BY day_w_str ORDER BY day_w_str"
 
     conn = None
@@ -424,7 +373,7 @@ def get_game_activity_by_day_of_month(start_date_str=None, end_date_str=None):
 
     base_sql = "SELECT strftime('%d', game_datetime) as day_m_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
 
-    where_clause, params = _build_date_range_clause(start_date_str, end_date_str)
+    where_clause, params = db._build_date_range_clause(start_date_str, end_date_str)
     sql_query = base_sql + where_clause + " GROUP BY day_m_str ORDER BY day_m_str"
 
     conn = None
@@ -527,7 +476,7 @@ def get_player_promotion_demotion_candidates(
 
     # Add date range filtering if specified.
     # For this query, game_datetime doesn't need a table alias if 'events' is the only table.
-    date_where_clause, date_params = _build_date_range_clause(
+    date_where_clause, date_params = db._build_date_range_clause(
         start_date_str, end_date_str
     )
     if date_where_clause:

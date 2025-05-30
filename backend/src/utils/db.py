@@ -3,11 +3,14 @@ Database module for SQLite support.
 This module handles all database operations for the application.
 """
 
+from datetime import datetime
 import sqlite3
 import os
 from pathlib import Path
 import hashlib
 from dotenv import load_dotenv
+
+from utils.dates import date_month_ago
 
 # Load environment variables
 load_dotenv()
@@ -67,6 +70,38 @@ def init_db():
         print(f"Error initializing database: {e}")
     finally:
         conn.close()
+
+
+def _build_date_range_clause(start_date_str=None, end_date_str=None):
+    """Helper to build WHERE clause and params for date ranges."""
+    conditions = []
+    params = []
+    if start_date_str:
+        try:
+            datetime.strptime(start_date_str, "%Y-%m-%d")  # Validate format
+            conditions.append("game_datetime >= ?")
+            params.append(f"{start_date_str} 00:00:00")
+        except ValueError:
+            print(
+                f"Warning: Invalid start_date_str format: {start_date_str}. Should be YYYY-MM-DD."
+            )
+            # Fallback or raise error if critical
+    if end_date_str:
+        try:
+            datetime.strptime(end_date_str, "%Y-%m-%d")  # Validate format
+            conditions.append("game_datetime <= ?")
+            params.append(f"{end_date_str} 23:59:59")
+        except ValueError:
+            print(
+                f"Warning: Invalid end_date_str format: {end_date_str}. Should be YYYY-MM-DD."
+            )
+            # Fallback or raise error if critical
+
+    where_clause = ""
+    if conditions:
+        where_clause = " WHERE " + " AND ".join(conditions)
+
+    return where_clause, params
 
 
 def verify_admin_credentials(admin_passcode):
@@ -198,11 +233,11 @@ def get_player_stats(nicknames):
                    SUM(CASE WHEN win = 1 THEN 1 ELSE 0 END) as wins,
                    SUM(CASE WHEN win = 0 THEN 1 ELSE 0 END) as losses
             FROM events
-            WHERE nickname IN ({placeholders})
+            WHERE nickname IN ({placeholders}) AND game_datetime >= ?
             GROUP BY nickname
         """
 
-        cursor.execute(query, nicknames)
+        cursor.execute(query, nicknames + [date_month_ago()])
 
         # Process results
         for row in cursor.fetchall():
