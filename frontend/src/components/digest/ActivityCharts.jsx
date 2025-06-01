@@ -24,6 +24,51 @@ ChartJS.register(
   Legend
 );
 
+function convertHoursUtcToLocal(hourlyDataUTC) {
+  if (!hourlyDataUTC || hourlyDataUTC.length === 0) {
+    return [];
+  }
+
+  // Use a consistent reference date for UTC to local conversion.
+  // The specific date doesn't affect the hour conversion itself,
+  // but provides the necessary context for the Date object.
+  const refDate = new Date();
+  const refYear = refDate.getUTCFullYear();
+  const refMonth = refDate.getUTCMonth(); // 0-11
+  const refDay = refDate.getUTCDate();
+
+  const transformedList = hourlyDataUTC
+    .map(item => {
+      const utcHourString = item.hour_of_day;
+      const gameCount = item.game_count || 0; // Default to 0 if undefined
+
+      const utcHour = parseInt(utcHourString, 10);
+
+      // Validate the parsed UTC hour
+      if (isNaN(utcHour) || utcHour < 0 || utcHour > 23) {
+        console.warn(`Invalid UTC hour_of_day encountered: "${utcHourString}". Skipping this item.`);
+        return null; // Mark for filtering
+      }
+
+      // Create a Date object representing the specific UTC hour on the reference date
+      const dateInUtc = new Date(Date.UTC(refYear, refMonth, refDay, utcHour, 0, 0));
+
+      // .getHours() will return the hour in the browser's local timezone (as a number 0-23)
+      const localHourNumber = dateInUtc.getHours();
+
+      return {
+        hour_of_day: String(localHourNumber).padStart(2, '0'), // Format as "HH" string
+        game_count: gameCount
+      };
+    })
+    .filter(item => item !== null); // Remove items that were marked as null due to invalid hour
+
+  // Sort the resulting list by the local hour_of_day
+  transformedList.sort((a, b) => a.hour_of_day.localeCompare(b.hour_of_day));
+
+  return transformedList;
+}
+
 const ActivityCharts = ({ hourlyData, weeklyData, monthlyData, dailyData }) => {
   const { t } = useTranslation();
 
@@ -37,13 +82,15 @@ const ActivityCharts = ({ hourlyData, weeklyData, monthlyData, dailyData }) => {
     t('digest.charts.activity.saturday'),
   ];
 
+  const localHourlyData = convertHoursUtcToLocal(hourlyData);
+
   // Hourly activity chart
   const hourlyChartData = {
-    labels: hourlyData?.map(item => `${item.hour_of_day}:00`) || [],
+    labels: localHourlyData?.map(item => `${item.hour_of_day}:00`) || [],
     datasets: [
       {
         label: t('digest.charts.activity.games'),
-        data: hourlyData?.map(item => item.game_count) || [],
+        data: localHourlyData?.map(item => item.game_count) || [],
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 2,
