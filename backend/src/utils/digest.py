@@ -295,13 +295,20 @@ def get_game_activity_by_hour(start_date_str=None, end_date_str=None):
     return hourly_activity
 
 
-def get_game_activity_by_day_of_week(start_date_str=None, end_date_str=None):
+def get_game_activity_by_day_of_week(
+    start_date_str=None, end_date_str=None, hours_shift=0
+):
     """
-    Aggregates counts of distinct games played by day of the week (Sunday-Saturday).
+    Aggregates counts of distinct games played by day of the week (Sunday-Saturday),
+    allowing for a shift in the start hour of each day.
 
     Args:
         start_date_str (str, optional): Start date 'YYYY-MM-DD'. Defaults to None.
         end_date_str (str, optional): End date 'YYYY-MM-DD'. Defaults to None.
+        hours_shift (int, optional): Number of hours to shift the start of the day.
+                                     For example, hours_shift=4 means a "day" runs from
+                                     04:00:00 to 03:59:59 of the next calendar day.
+                                     Defaults to 0 (no shift, day starts at 00:00:00).
 
     Returns:
         list: List of dicts [{'day_numeric': D, 'day_name': 'Name', 'game_count': N}],
@@ -321,21 +328,39 @@ def get_game_activity_by_day_of_week(start_date_str=None, end_date_str=None):
         {"day_numeric": i, "day_name": day_names[i], "game_count": 0} for i in range(7)
     ]
 
-    base_sql = "SELECT strftime('%w', game_datetime) as day_w_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
+    # Prepare the time shift modifier for the SQL query.
+    # This will be a string like '-4 hours'.
+    # int() conversion ensures hours_shift is treated as a number.
+    time_shift_modifier = f"-{int(hours_shift)} hours"
 
-    where_clause, params = db._build_date_range_clause(start_date_str, end_date_str)
+    # The first '?' in the SELECT clause is for the time_shift_modifier.
+    # We adjust game_datetime by subtracting 'hours_shift' hours before determining its day of the week.
+    base_sql = "SELECT strftime('%w', datetime(game_datetime, ?)) as day_w_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
+
+    # The _build_date_range_clause filters on the original, unshifted game_datetime.
+    # Its parameters will follow the time_shift_modifier parameter.
+    where_clause, date_filter_params = db._build_date_range_clause(
+        start_date_str, end_date_str
+    )
+    # If your _build_date_range_clause might need the column name:
+    # where_clause, date_filter_params = db._build_date_range_clause(start_date_str, end_date_str, datetime_column_name='game_datetime')
+
     sql_query = base_sql + where_clause + " GROUP BY day_w_str ORDER BY day_w_str"
+
+    # The first parameter in final_params corresponds to the '?' in datetime(game_datetime, ?).
+    # The subsequent parameters (date_filter_params) correspond to '?'s in the where_clause.
+    final_params = [time_shift_modifier] + date_filter_params
+
+    print(sql_query, final_params)
 
     conn = None
     try:
         conn = db.get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(sql_query, params)
+        cursor.execute(sql_query, final_params)
         rows = cursor.fetchall()
 
-        db_results = {
-            int(row["day_w_str"]): row["game_count"] for row in rows
-        }  # Convert '0'-'6' to int
+        db_results = {int(row["day_w_str"]): row["game_count"] for row in rows}
 
         for item in weekly_activity:
             if item["day_numeric"] in db_results:
@@ -354,38 +379,62 @@ def get_game_activity_by_day_of_week(start_date_str=None, end_date_str=None):
     return weekly_activity
 
 
-def get_game_activity_by_day_of_month(start_date_str=None, end_date_str=None):
+def get_game_activity_by_day_of_month(
+    start_date_str=None, end_date_str=None, hours_shift=0
+):
     """
-    Aggregates counts of distinct games played by day of the month (01-31).
+    Aggregates counts of distinct games played by day of the month (01-31),
+    allowing for a shift in the start hour of each day.
     This function groups activity for the Nth day across all months in the selected period.
 
     Args:
         start_date_str (str, optional): Start date 'YYYY-MM-DD'. Defaults to None.
         end_date_str (str, optional): End date 'YYYY-MM-DD'. Defaults to None.
+        hours_shift (int, optional): Number of hours to shift the start of the day.
+                                     For example, hours_shift=4 means a "day" (e.g., the 15th)
+                                     runs from 04:00:00 on the 15th to 03:59:59 on the 16th.
+                                     Defaults to 0 (no shift, day starts at 00:00:00).
 
     Returns:
         list: List of dicts [{'day_of_month': 'DD', 'game_count': N}],
-              for all 31 potential days. Returns empty list on database error.
+              for all 31 potential days (01-31). Returns empty list on database error.
     """
     monthly_activity_by_day = [
         {"day_of_month": f"{d:02d}", "game_count": 0} for d in range(1, 32)
     ]
 
-    base_sql = "SELECT strftime('%d', game_datetime) as day_m_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
+    # Prepare the time shift modifier for the SQL query.
+    time_shift_modifier = f"-{int(hours_shift)} hours"
 
-    where_clause, params = db._build_date_range_clause(start_date_str, end_date_str)
+    # The first '?' in the SELECT clause is for the time_shift_modifier.
+    # We adjust game_datetime by subtracting 'hours_shift' hours before extracting the day of the month.
+    base_sql = "SELECT strftime('%d', datetime(game_datetime, ?)) as day_m_str, COUNT(DISTINCT game_name || '|' || game_datetime) as game_count FROM events"
+
+    # The _build_date_range_clause filters on the original, unshifted game_datetime.
+    where_clause, date_filter_params = db._build_date_range_clause(
+        start_date_str, end_date_str
+    )
+    # If your _build_date_range_clause might need the column name:
+    # where_clause, date_filter_params = db._build_date_range_clause(start_date_str, end_date_str, datetime_column_name='game_datetime')
+
     sql_query = base_sql + where_clause + " GROUP BY day_m_str ORDER BY day_m_str"
+
+    # The first parameter in final_params corresponds to the '?' in datetime(game_datetime, ?).
+    # The subsequent parameters (date_filter_params) correspond to '?'s in the where_clause.
+    final_params = [time_shift_modifier] + date_filter_params
 
     conn = None
     try:
         conn = db.get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(sql_query, params)
+        cursor.execute(sql_query, final_params)
         rows = cursor.fetchall()
 
+        # Results from DB will have day_m_str as strings like '01', '02', ..., '31'
         db_results = {row["day_m_str"]: row["game_count"] for row in rows}
 
         for item in monthly_activity_by_day:
+            # item["day_of_month"] is also '01', '02', ...
             if item["day_of_month"] in db_results:
                 item["game_count"] = db_results[item["day_of_month"]]
 
@@ -714,6 +763,12 @@ def generate(
     days_shift: int = typer.Option(
         0, "-d", "--days-shift", help="Number of days to shift the date range"
     ),
+    late_night_shift: int = typer.Option(
+        0,
+        "-ln",
+        "--late-night-shift",
+        help="Number of hours to shift the start of the day for weekly activity",
+    ),
     no_plots: bool = typer.Option(
         False, "-np", "--no-plots", help="Don't generate plots"
     ),
@@ -726,8 +781,12 @@ def generate(
     top_players = get_top_active_players(start, end, top_n=10)
     admin_contributions = get_top_admins_by_contribution(start, end, top_n=10)
     hourly_activity = get_game_activity_by_hour(start, end)
-    weekly_activity = get_game_activity_by_day_of_week(start, end)
-    monthly_activity = get_game_activity_by_day_of_month(start, end)
+    weekly_activity = get_game_activity_by_day_of_week(
+        start, end, hours_shift=late_night_shift
+    )
+    monthly_activity = get_game_activity_by_day_of_month(
+        start, end, hours_shift=late_night_shift
+    )
     players_for_status_change = get_player_promotion_demotion_candidates(
         min_games_threshold=10,
         promotion_win_rate_pct=60.0,

@@ -188,7 +188,7 @@ docker compose exec backend python -m src.utils.user clean "nickname"
 ## Digest guide
 
 1. Generate digest for the previous month locally with:
-`docker compose exec backend python -m src.utils.digest generate --no-plots`
+`docker compose exec backend python -m src.utils.digest generate --no-plots --late-night-shift 4`
 2. Start applying process:
 `docker compose exec backend python -m src.utils.digest apply`
 3. Adjust scores for promoted/devoted players according to the calculations
