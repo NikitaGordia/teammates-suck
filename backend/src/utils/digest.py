@@ -351,8 +351,6 @@ def get_game_activity_by_day_of_week(
     # The subsequent parameters (date_filter_params) correspond to '?'s in the where_clause.
     final_params = [time_shift_modifier] + date_filter_params
 
-    print(sql_query, final_params)
-
     conn = None
     try:
         conn = db.get_db_connection()
