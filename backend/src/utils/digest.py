@@ -10,12 +10,10 @@ import subprocess
 import pandas as pd
 
 from utils.dates import get_last_month_date_range
-from utils.user import clean_user_history
 from utils.spreadsheet import SCORES, SheetScoreFetcher
+from utils import db as db_utils
 
-from utils import db
-
-
+db = db_utils.Database()
 app = typer.Typer(help="Generate monthly digests")
 
 
@@ -903,7 +901,9 @@ def apply():
         print(f" - {nickname} {emoji}: {score} -> {new_score}")
 
     players = [change["nickname"] for change in changes]
-    clear_history = typer.confirm(f"🧹Clear history for players? ({players})")
+    clear_history = typer.confirm(
+        f"✍️ Add new scores for {len(players)} players? ({players})"
+    )
     if clear_history:
         result = subprocess.run(
             ["./scripts/backup.sh"], check=True, capture_output=True, text=True
@@ -911,14 +911,17 @@ def apply():
         if result.stdout:
             print(result.stdout)
 
-        total_events_deleted = 0
-        for player in players:
-            events_deleted = clean_user_history(player)
-            total_events_deleted += events_deleted
-            print(f"Deleted {events_deleted} events for {player}")
-
-        print(f"\n - Total events deleted: {total_events_deleted} events")
-        print("✅ History cleared for selected players.")
+        for change in changes:
+            db.add_rank_change(
+                nickname=change["nickname"],
+                change_type="promotion"
+                if change["status"] == "Promote"
+                else "demotion",
+                old_rank=change["current_score"],
+                new_rank=change["new_score"],
+                change_date=raw_digest["metadata"]["period_end_date"],
+            )
+        print("✅ Rank changes added to the database.")
     else:
         print("Okay, bruh.😒")
 

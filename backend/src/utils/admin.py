@@ -25,7 +25,9 @@ import hashlib
 import secrets
 import typer
 
-from . import db
+from utils import db as db_utils
+
+db = db_utils.Database()
 
 
 def generate_salt():

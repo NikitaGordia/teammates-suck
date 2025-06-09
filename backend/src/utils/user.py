@@ -17,9 +17,9 @@ Environment Variables:
 
 import typer
 
-from . import db
+from utils import db as db_utils
 
-
+db = db_utils.Database()
 app = typer.Typer(help="Manage user data in the database")
 
 

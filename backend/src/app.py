@@ -4,7 +4,7 @@ from flask_cors import CORS
 import random
 from datetime import datetime, timedelta
 from utils.digest import load_latest_digest, get_latest_digest_dir
-from utils import db
+from utils import db as db_utils
 import os
 from dotenv import load_dotenv
 from utils.spreadsheet import SheetScoreFetcher
@@ -30,6 +30,8 @@ app.config["CACHE_TYPE"] = "SimpleCache"
 cache = Cache(app)
 
 balancer = Balancer()
+
+db = db_utils.Database()
 
 
 def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
