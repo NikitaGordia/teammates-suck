@@ -10,7 +10,7 @@ from pathlib import Path
 import hashlib
 from dotenv import load_dotenv
 
-from utils.dates import date_month_ago
+from utils.dates import date_days_ago, date_month_ago
 
 
 def _build_date_range_clause(start_date_str=None, end_date_str=None):
@@ -458,9 +458,8 @@ class Database:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                SELECT rc.change_type, rc.old_rank, rc.new_rank, rc.change_date, a.name as admin_name
+                SELECT rc.change_type, rc.old_rank, rc.new_rank, rc.change_date
                 FROM rank_changes rc
-                JOIN admins a ON rc.admin_id = a.id
                 WHERE rc.nickname = ?
                 ORDER BY rc.change_date DESC
                 """,
@@ -471,6 +470,38 @@ class Database:
             return history
         except Exception as e:
             print(f"Error getting player rank history: {e}")
+            return []
+        finally:
+            conn.close()
+
+    def get_player_games_history(self, nickname):
+        """
+        Retrieves the full game history for a given player.
+
+        Args:
+            nickname (str): The player's nickname.
+
+        Returns:
+            list: A list of dictionaries, where each dictionary is a game event.
+                Returns an empty list if no history is found.
+        """
+        conn = self.get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT game_datetime, game_name, win, a.name as admin_name
+                FROM events e
+                JOIN admins a ON e.admin = CAST(a.id AS TEXT)
+                WHERE e.nickname = ? and e.game_datetime >= ?
+                ORDER BY e.game_datetime DESC
+                """,
+                (nickname, date_days_ago(60)),
+            )
+            history = [dict(row) for row in cursor.fetchall()]
+            return history
+        except Exception as e:
+            print(f"Error getting player games history: {e}")
             return []
         finally:
             conn.close()
