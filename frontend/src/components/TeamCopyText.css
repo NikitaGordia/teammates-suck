@@ -3,8 +3,15 @@
   margin-top: 20px;
 }
 
-.copy-container h3 {
+.copy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
+}
+
+.copy-container h3 {
+  margin: 0;
   font-size: 1.2rem;
   color: #444;
   position: relative;
@@ -20,6 +27,35 @@
   height: 3px;
   background: linear-gradient(90deg, #673AB7, #3F51B5);
   border-radius: 2px;
+}
+
+.nations-button {
+  padding: 6px 12px;
+  background-color: #4caf4f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nations-button:hover:not(:disabled) {
+  background-color: #257528;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nations-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.nations-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .copy-text-box {
@@ -193,4 +229,19 @@
   left: 4px;
   top: 0;
   transform: rotate(-45deg);
+}
+
+/* Nations section styling */
+.nations-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+}
+
+.nation-assignment {
+  margin-bottom: 6px;
+  font-family: monospace;
+  color: #555;
+  font-weight: 500;
+  padding: 2px 0;
 }

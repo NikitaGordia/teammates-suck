@@ -1,9 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './TeamCopyText.css';
 
+// Nations pool for random assignment
+const NATIONS_POOL = [
+  'Austria', 'France', 'England', 'Spain', 'Russia', 'Ukraine', 'Poland',
+  'Sweden', 'Prussia', 'Venice', 'Turkey', 'Algeria', 'Netherlands',
+  'Denmark', 'Portugal', 'Piedmont', 'Saxony', 'Bavaria', 'Hungary',
+  'Switzerland', 'Scotland'
+];
+
+// Utility function to generate random nations assignments - exported for use in other components
+export const generateNationsAssignments = (teams) => {
+  // Shuffle using Array.prototype.sort and Math.random
+  const team1Shuffled = [...teams.team1].sort(() => Math.random() - 0.5);
+  const team2Shuffled = [...teams.team2].sort(() => Math.random() - 0.5);
+
+  const playersPerTeam = Math.max(team1Shuffled.length, team2Shuffled.length);
+  if (playersPerTeam === 0) return [];
+
+  // Randomly select nations (with replacement), like Python's random.choice
+  const selectedNations = Array.from({ length: playersPerTeam }, () => 
+    NATIONS_POOL[Math.floor(Math.random() * NATIONS_POOL.length)]
+  );
+
+  // Create nation assignments
+  const assignments = [];
+  for (let i = 0; i < playersPerTeam; i++) {
+    const team1Player = team1Shuffled[i]?.nickname || '';
+    const team2Player = team2Shuffled[i]?.nickname || '';
+    const nation = selectedNations[i];
+
+    if (team1Player && team2Player) {
+      assignments.push(`${nation} - ${team1Player}/${team2Player}`);
+    } else if (team1Player) {
+      assignments.push(`${nation} - ${team1Player}`);
+    } else if (team2Player) {
+      assignments.push(`${nation} - ${team2Player}`);
+    }
+  }
+
+  return assignments;
+};
+
 // Utility function to generate clipboard text - exported for use in other components
-export const generateClipboardText = (teams) => {
+export const generateClipboardText = (teams, withNations = false) => {
   // Create team strings with different color prefixes for each team
   const team1ColorPrefix = "%color(2196F3)%"; // Blue for Team 1
   const team2ColorPrefix = "%color(FFC107)%"; // Yellow for Team 2
@@ -18,28 +59,65 @@ export const generateClipboardText = (teams) => {
     ? `${team2ColorPrefix}${teams.team2.map(player => `${player.nickname}-2`).join(',')}`
     : '';
 
-  // Join teams with newlines, filtering out empty teams, and add a newline at the beginning
-  const teamsText = ['', team1String, team2String]
+  // Join teams with newlines, filtering out empty teams
+  const teamsText = [team1String, team2String]
     .filter(teamStr => teamStr.length > 0)
     .join('\n');
 
-  // Add a newline at the beginning if there's any team content
-  return teamsText.length > 0 ? `\n${teamsText}` : '';
+  let result = teamsText.length > 0 ? `\n${teamsText}` : '';
+
+  if (withNations && (teams.team1.length > 0 || teams.team2.length > 0)) {
+    const nationsAssignments = generateNationsAssignments(teams);
+    if (nationsAssignments.length > 0) {
+      result += '\n' + nationsAssignments.join('\n');
+    }
+  }
+
+  return result;
 };
 
 // Utility function to copy teams to clipboard - exported for use in other components
-export const copyTeamsToClipboard = (teams) => {
-  const clipboardText = generateClipboardText(teams);
+export const copyTeamsToClipboard = (teams, withNations = false) => {
+  const clipboardText = generateClipboardText(teams, withNations);
   navigator.clipboard.writeText(clipboardText);
   return clipboardText;
 };
 
 const TeamCopyText = ({ teams, autocopied = false }) => {
+
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const [withNations, setWithNations] = useState(false);
+  const [nationsAssignments, setNationsAssignments] = useState([]);
+
+  useEffect(() => {
+    setWithNations(false);
+    setNationsAssignments([]);
+  }, [teams]);
 
   const handleCopy = () => {
-    copyTeamsToClipboard(teams);
+    copyTeamsToClipboard(teams, withNations);
+    setCopied(true);
+
+    // Reset copied state after 2 seconds
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
+  const handleAddNations = () => {
+    const newNationsAssignments = generateNationsAssignments(teams);
+    console.log(newNationsAssignments);
+    const translatedAssignments = newNationsAssignments.map(pair => {
+      // Split the pair into player and nation
+      const [nation, player] = pair.split(' - ');
+      return t('nations.' + nation.toLowerCase()) + ' - ' + player;
+    });
+    setNationsAssignments(translatedAssignments);
+    setWithNations(true);
+
+    // Automatically copy to clipboard with nations
+    copyTeamsToClipboard(teams, true);
     setCopied(true);
 
     // Reset copied state after 2 seconds
@@ -53,7 +131,16 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
 
   return (
     <div className="copy-container">
-      <h3>{t('teams.copyTeams')}</h3>
+      <div className="copy-header">
+        <h3>{t('teams.copyTeams')}</h3>
+        <button
+          onClick={handleAddNations}
+          className="nations-button"
+          disabled={teams.team1.length === 0 && teams.team2.length === 0}
+        >
+          {t('teams.addNations')}
+        </button>
+      </div>
       <div className="copy-text-box">
         <div className="clipboard-section">
           <strong>{t('teams.format')}</strong><br />
@@ -80,6 +167,17 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
             {/* Show message if no teams */}
             {teams.team1.length === 0 && teams.team2.length === 0 && (
               <div>{t('teams.noPlayers')}</div>
+            )}
+
+            {/* Display nations assignments if they exist */}
+            {withNations && nationsAssignments.length > 0 && (
+              <div className="nations-section">
+                {nationsAssignments.map((assignment, index) => (
+                  <div key={index} className="nation-assignment">
+                    {assignment}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
