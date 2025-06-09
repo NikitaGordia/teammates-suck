@@ -38,25 +38,23 @@ const DigestButton = () => {
 
   return (
     <>
-      <div className="digest-button-container">
-        <button
-          className={`digest-button ${isDigestLoading ? 'loading' : ''}`}
-          onClick={handleDigestClick}
-          disabled={isDigestLoading}
-        >
-          {isDigestLoading ? (
-            <>
-              <span className="digest-spinner"></span>
-              {t('digest.loading')}
-            </>
-          ) : (
-            <>
-              📊 {t('digest.title')}
-            </>
-          )}
-        </button>
-      </div>
-      
+      <button
+        className={`digest-button ${isDigestLoading ? 'loading' : ''}`}
+        onClick={handleDigestClick}
+        disabled={isDigestLoading}
+      >
+        {isDigestLoading ? (
+          <>
+            <span className="digest-spinner"></span>
+            {t('digest.loading')}
+          </>
+        ) : (
+          <>
+            📊 {t('digest.title')}
+          </>
+        )}
+      </button>
+
       <DigestModal
         isOpen={isDigestModalOpen}
         onClose={closeDigestModal}

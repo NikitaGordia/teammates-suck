@@ -1,7 +1,5 @@
-
-
-.digest-button {
-  background: linear-gradient(135deg, #673AB7, #9C27B0);
+.leaderboard-button {
+  background: linear-gradient(135deg, #FF9800, #FF5722);
   color: white;
   border: none;
   border-radius: 8px;
@@ -13,27 +11,27 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 16px rgba(103, 58, 183, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 152, 0, 0.3);
   white-space: nowrap;
   min-width: 200px;
   justify-content: center;
 }
 
-.digest-button:hover:not(:disabled) {
+.leaderboard-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(103, 58, 183, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
 }
 
-.digest-button:disabled {
+.leaderboard-button:disabled {
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-.digest-button.loading {
+.leaderboard-button.loading {
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-.digest-spinner {
+.leaderboard-spinner {
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -58,13 +56,9 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .digest-button {
+  .leaderboard-button {
     padding: 10px 20px;
     font-size: 14px;
     min-width: 180px;
-  }
-  
-  .digest-button-container {
-    margin: 20px 0 15px 0;
   }
 }

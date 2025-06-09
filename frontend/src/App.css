@@ -77,6 +77,16 @@ h2 {
   animation: fadeIn 0.5s ease-in-out;
 }
 
+/* Buttons container for digest and leaderboard */
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 30px 0 20px 0;
+  padding: 0 10px;
+  flex-wrap: wrap;
+}
+
 /* Responsive layout */
 @media (max-width: 768px) {
   .main-container {
@@ -95,6 +105,11 @@ h2 {
 
   .App {
     padding: 0 10px 20px 10px;
+  }
+
+  .buttons-container {
+    gap: 15px;
+    margin: 20px 0 15px 0;
   }
 }
 

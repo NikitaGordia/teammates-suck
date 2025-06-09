@@ -9,6 +9,7 @@ import BalancingInfo from './components/BalancingInfo';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import LogoutButton from './components/LogoutButton';
 import DigestButton from './components/DigestButton';
+import LeaderboardButton from './components/LeaderboardButton';
 import { API_CONFIG, getApiUrl } from './config';
 import { handleApiResponse } from './utils/apiUtils';
 import './App.css';
@@ -672,8 +673,11 @@ function App() {
         {/* Show "So who has won?" text when teams are present - under teams-section */}
       </div>
 
-      {/* Digest Button - centered between main content and developer contacts */}
-      <DigestButton />
+      {/* Buttons container - centered between main content and developer contacts */}
+      <div className="buttons-container">
+        <DigestButton />
+        <LeaderboardButton />
+      </div>
 
       {/* Developer Contacts - outside of main-container and without a white tile */}
       <div style={{

@@ -123,6 +123,23 @@
     "cossacks3": "Cossacks 3: \"mykyta.\"",
     "version": "Version: {{version}}"
   },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "loading": "Loading leaderboard...",
+    "error": "Failed to load leaderboard data",
+    "close": "Close",
+    "placement": "Placement",
+    "rank": "Rank",
+    "nickname": "Nickname",
+    "winRate": "Win Rate",
+    "totalGames": "Total Games",
+    "percentile": "Percentile",
+    "noData": "No player data available",
+    "winRateInfo": "Win rate based on activity from the latest 30 days",
+    "totalGamesInfo": "Total games based on activity from the latest 30 days",
+    "promoted": "Recently promoted",
+    "demoted": "Recently demoted"
+  },
   "digest": {
     "title": "Latest Digest",
     "loading": "Generating digest...",
