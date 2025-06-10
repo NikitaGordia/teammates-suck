@@ -49,6 +49,7 @@ def balance_teams(user_scores, randomness=DEFAULT_RANDOMNESS):
     """
     # Convert the user_scores dictionary to a list of player objects
     players = []
+
     for username, score in user_scores.items():
         # Create a copy of the original score for balancing
         original_score = score
@@ -159,19 +160,16 @@ def get_users():
         # Add information about whether a forced refresh was prevented due to time constraints
         force_refresh_prevented = force_refresh and not can_force_refresh
 
-        # Get all unique nicknames from the score mappings
-        nicknames = list(score_mappings.keys())
-
         # Get win/loss statistics for all nicknames directly from the database
-        user_stats = {}
-        if nicknames:
-            user_stats = db.get_player_stats(nicknames)
+        user_stats = db.get_all_player_stats()
 
         # Combine scores and statistics into a single users dictionary
         users = {}
+        print(user_stats)
         for nickname, score in score_mappings.items():
-            stats = user_stats.get(nickname, {"wins": 0, "losses": 0})
+            stats = user_stats.get(nickname, {"id": -1, "wins": 0, "losses": 0})
             users[nickname] = {
+                "id": stats["id"],
                 "score": score,
                 "wins": stats["wins"],
                 "losses": stats["losses"],
@@ -222,11 +220,6 @@ def balance():
                 }
             ), 400
 
-        # Validate that all scores are numbers
-        for username, score in user_scores.items():
-            if not isinstance(score, (int, float)):
-                user_scores[username] = 0  # Convert non-numeric scores to 0
-
         # Get randomness parameter if provided, otherwise use default
         randomness = DEFAULT_RANDOMNESS
         if "randomness" in data:
@@ -243,6 +236,11 @@ def balance():
                 ), 400
 
         balanced_teams = balance_teams(user_scores, randomness)
+        map_ids = db.get_or_create_player_ids(list(user_scores.keys()))
+
+        for team in ["teamA", "teamB"]:
+            for player in balanced_teams[team]:
+                player["id"] = map_ids[player["nickname"]]
 
         return jsonify(balanced_teams)
 
@@ -256,8 +254,8 @@ def submit_game():
     Endpoint to submit a new game with two teams and record the results in the database.
 
     Expected request body: {
-        'teamA': [{'nickname': 'player1'}, {'nickname': 'player2'}, ...],
-        'teamB': [{'nickname': 'player3'}, {'nickname': 'player4'}, ...],
+        'teamA': [30, 87, ...],
+        'teamB': [12, 99, ...],
         'winningTeam': 'A' or 'B',
         'gameName': 'Game name',
         'adminPasscode': 'admin_passcode'
@@ -294,37 +292,29 @@ def submit_game():
         if data["winningTeam"] not in ["A", "B"]:
             return jsonify({"error": "winningTeam must be either 'A' or 'B'"}), 400
 
-        # Extract player nicknames from both teams
-        team_a_nicknames = [
-            player.get("nickname") for player in data["teamA"] if player.get("nickname")
-        ]
-        team_b_nicknames = [
-            player.get("nickname") for player in data["teamB"] if player.get("nickname")
-        ]
-
         # Validate that we have at least one player in each team
-        if not team_a_nicknames or not team_b_nicknames:
+        if not data["teamA"] or not data["teamB"]:
             return jsonify(
                 {"error": "Each team must have at least one player with a nickname"}
             ), 400
 
         # Combine all players and determine win/loss status
-        all_nicknames = []
+        all_ids = []
         all_wins = []
 
         # Add Team A players
-        for nickname in team_a_nicknames:
-            all_nicknames.append(nickname)
+        for player_id in data["teamA"]:
+            all_ids.append(player_id)
             all_wins.append(data["winningTeam"] == "A")
 
         # Add Team B players
-        for nickname in team_b_nicknames:
-            all_nicknames.append(nickname)
+        for player_id in data["teamB"]:
+            all_ids.append(player_id)
             all_wins.append(data["winningTeam"] == "B")
 
         # Call the database function directly to add events in batch
         events_added = db.add_events_batch(
-            nicknames=all_nicknames,
+            ids=all_ids,
             game_datetime=data["gameDatetime"],
             game_name=data["gameName"],
             wins=all_wins,

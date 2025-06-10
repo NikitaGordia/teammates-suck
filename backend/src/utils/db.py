@@ -8,6 +8,7 @@ import sqlite3
 import os
 from pathlib import Path
 import hashlib
+from typing import Any, Dict, List
 from dotenv import load_dotenv
 
 from utils.dates import date_days_ago, date_month_ago
@@ -83,13 +84,14 @@ class Database:
             # Create events table
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS events (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nickname TEXT NOT NULL,
-                    game_datetime DATETIME NOT NULL,
-                    game_name TEXT NOT NULL,
-                    win BOOLEAN NOT NULL,
-                    admin TEXT NOT NULL
-                )
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                game_datetime DATETIME NOT NULL,
+                game_name TEXT NOT NULL,
+                win BOOLEAN NOT NULL,
+                admin TEXT NOT NULL,
+                FOREIGN KEY (player_id) REFERENCES players (id)
+            )
             """)
 
             # Create admins table
@@ -104,11 +106,19 @@ class Database:
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS rank_changes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nickname TEXT NOT NULL,
+                player_id INTEGER NOT NULL,
                 change_type TEXT NOT NULL CHECK(change_type IN ('promotion', 'demotion')),
                 old_rank TEXT NOT NULL,
                 new_rank TEXT NOT NULL,
-                change_date TEXT NOT NULL
+                change_date TEXT NOT NULL,
+                FOREIGN KEY (player_id) REFERENCES players(id)
+            )
+            """)
+
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS players (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nickname TEXT NOT NULL UNIQUE
             )
             """)
 
@@ -177,14 +187,12 @@ class Database:
         finally:
             conn.close()
 
-    def add_events_batch(
-        self, nicknames, game_datetime, game_name, wins, admin_passcode
-    ):
+    def add_events_batch(self, ids, game_datetime, game_name, wins, admin_passcode):
         """
         Add multiple events with the same game and admin.
 
         Args:
-            nicknames (list): List of player nicknames
+            ids (list): List of player IDs)
             game_datetime (str): Datetime of the game (e.g., "YYYY-MM-DD HH:MM:SS" or "YYYY-MM-DD")
             game_name (str): Name of the game in "TeamA|VS|TeamB" format
             wins (list): List of boolean values indicating win/loss for each player
@@ -196,7 +204,7 @@ class Database:
         Raises:
             ValueError: If admin credentials are invalid or if lists have different lengths
         """
-        if len(nicknames) != len(wins):
+        if len(ids) != len(wins):
             raise ValueError("Length of nicknames and wins lists must match")
 
         is_valid, admin_id, error_message = self.verify_admin_credentials(
@@ -210,12 +218,12 @@ class Database:
             cursor = conn.cursor()
 
             batch_params = [
-                (nickname, game_datetime, game_name, win, admin_id)
-                for nickname, win in zip(nicknames, wins)
+                (player_id, game_datetime, game_name, win, admin_id)
+                for player_id, win in zip(ids, wins)
             ]
 
             cursor.executemany(
-                "INSERT INTO events (nickname, game_datetime, game_name, win, admin) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO events (player_id, game_datetime, game_name, win, admin) VALUES (?, ?, ?, ?, ?)",
                 batch_params,
             )
             conn.commit()
@@ -227,51 +235,53 @@ class Database:
         finally:
             conn.close()
 
-    def get_player_stats(self, nicknames):
+    def get_all_player_stats(self) -> Dict[str, Any]:
         """
-        Get total wins and losses for each nickname in the request.
+        Get total wins and losses over the last 30 days for ALL players.
 
-        Args:
-            nicknames (list): List of player nicknames to get stats for
+        This function joins the players and events tables to calculate statistics,
+        ensuring all players are returned, even those with no recent activity.
 
         Returns:
-            dict: Dictionary with nickname as key and stats as value
-                Format: {nickname: {'wins': count, 'losses': count}}
+            list: A list of dictionaries, where each dictionary contains a player's
+                  id, nickname, and their win/loss stats.
+                  Format: [{'id': 1, 'nickname': 'p1', 'stats': {'wins': 10, 'losses': 5}}, ...]
         """
         conn = self.get_db_connection()
         try:
             cursor = conn.cursor()
-            result = {}
 
-            # Use placeholders for the IN clause
-            placeholders = ", ".join(["?"] * len(nicknames))
-            query = f"""
-                SELECT nickname,
-                    SUM(CASE WHEN win = 1 THEN 1 ELSE 0 END) as wins,
-                    SUM(CASE WHEN win = 0 THEN 1 ELSE 0 END) as losses
-                FROM events
-                WHERE nickname IN ({placeholders}) AND game_datetime >= ?
-                GROUP BY nickname
+            # A LEFT JOIN ensures all players are included, even if they have no events.
+            # The date filter is applied to the JOIN condition to correctly calculate stats.
+            query = """
+                SELECT
+                    p.id,
+                    p.nickname,
+                    SUM(CASE WHEN e.win = 1 THEN 1 ELSE 0 END) as wins,
+                    SUM(CASE WHEN e.win = 0 THEN 1 ELSE 0 END) as losses
+                FROM
+                    players AS p
+                LEFT JOIN
+                    events AS e ON p.id = e.player_id AND e.game_datetime >= ?
+                GROUP BY
+                    p.id;
             """
 
-            cursor.execute(query, nicknames + [date_month_ago()])
+            cursor.execute(query, [date_month_ago()])
 
-            # Process results
+            results = {}
             for row in cursor.fetchall():
-                result[row["nickname"]] = {
-                    "wins": row["wins"] or 0,  # Handle NULL values
+                results[row["nickname"]] = {
+                    "id": row["id"],
+                    "nickname": row["nickname"],
+                    "wins": row["wins"] or 0,
                     "losses": row["losses"] or 0,
                 }
 
-            # Add entries with zero stats for nicknames not found in the database
-            for nickname in nicknames:
-                if nickname not in result:
-                    result[nickname] = {"wins": 0, "losses": 0}
-
-            return result
+            return results
         except Exception as e:
-            print(f"Error getting player stats: {e}")
-            return {nickname: {"wins": 0, "losses": 0} for nickname in nicknames}
+            print(f"Error getting all player stats: {e}")
+            return []
         finally:
             conn.close()
 
@@ -505,3 +515,58 @@ class Database:
             return []
         finally:
             conn.close()
+
+    def get_or_create_player_ids(self, nicknames: List[str]) -> Dict[str, int]:
+        """
+        Retrieves player IDs for a list of nicknames, creating new players if they don't exist.
+
+        Args:
+            nicknames: A list of player nicknames to fetch or create.
+
+        Returns:
+            A dictionary mapping each nickname to its integer player ID.
+        """
+        unique_nicknames = list(set(nicknames))
+        if not unique_nicknames:
+            return {}
+
+        connection = None
+        try:
+            connection = self.get_db_connection()
+            cursor = connection.cursor()
+
+            # Start a transaction for atomicity
+            cursor.execute("BEGIN")
+
+            # Step 1: UPSERT all nicknames.
+            # This single operation ensures every nickname exists in the table.
+            # It's faster because we don't need to check for existence first.
+            new_players_data = [(name,) for name in unique_nicknames]
+            cursor.executemany(
+                "INSERT OR IGNORE INTO players (nickname) VALUES (?)", new_players_data
+            )
+
+            # Step 2: SELECT all IDs at once.
+            # Now that all players are guaranteed to exist, fetch their IDs in one go.
+            placeholders = ", ".join(["?"] * len(unique_nicknames))
+            query = (
+                f"SELECT id, nickname FROM players WHERE nickname IN ({placeholders})"
+            )
+
+            cursor.execute(query, unique_nicknames)
+
+            # Commit the transaction after all operations are queued
+            connection.commit()
+
+            # Use a dictionary comprehension for a concise and fast mapping
+            return {nickname: player_id for player_id, nickname in cursor.fetchall()}
+
+        except sqlite3.Error as e:
+            print(f"❌ An error occurred: {e}")
+            if connection:
+                connection.rollback()
+            return {}
+
+        finally:
+            if connection:
+                connection.close()

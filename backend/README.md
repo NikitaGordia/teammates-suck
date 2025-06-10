@@ -188,7 +188,7 @@ Request body:
 Parameters:
 - `teamA` (array, required): Array of player objects for team A
 - `teamB` (array, required): Array of player objects for team B
-- `winningTeam` (string, required): Either "A" or "B" to indicate the winning team
+- `winningTeam` (string, required): Either "A" or "B" to indicate  the winning team
 - `gameName` (string, required): Name of the game
 - `gameDatetime` (string, required): Datetime of the game
 - `adminPasscode` (string, required): Admin credentials in the format "admin:password"
@@ -415,6 +415,10 @@ For more details about the tests, see the [tests README](tests/README.md).
 ## Migrations
 
 `v2`: Added `game_datetime` column to `events` table and transformed `game_name` format to "TeamA|VS|TeamB". Replace admin's hash with admin's ID in `events` table.
+`v3`: Nickname -> player_id. Edit events and added rank_changes table as well as players table. How to migrate:
+1. Run `python -m src.utils.migrations.v3 refactor-user-schema -d data/database.sqlite` to change events and add all tables
+2. Run `python -m src.utils.digest generate --no-plots --late-night-shift 4` to generate new digest with player_id
+3. Run `python -m src.utils.digest apply` to populate rank_changes table with the changes from the lastest digest
 
 ## Google Sheets Setup
 
