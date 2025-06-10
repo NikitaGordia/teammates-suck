@@ -146,6 +146,14 @@
   transition: background-color 0.2s ease;
 }
 
+.leaderboard-table tbody tr.leaderboard-row {
+  cursor: pointer;
+}
+
+.leaderboard-table tbody tr.leaderboard-row:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
 .placement-cell {
   font-weight: 700;
   color: #FF9800;

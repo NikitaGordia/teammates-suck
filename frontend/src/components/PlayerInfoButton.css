@@ -1,0 +1,60 @@
+.player-info-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.player-info-button:hover {
+  transform: scale(1.05);
+}
+
+.player-info-button:active {
+  transform: scale(0.95);
+}
+
+/* Specific styles for different contexts */
+.player-info-button.wins-losses {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+}
+
+.player-info-button.wins-losses:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.player-info-button.leaderboard-row {
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  padding: 0;
+  background: transparent;
+}
+
+.player-info-button.leaderboard-row:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.player-info-button.digest-item {
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  text-align: left;
+  width: 100%;
+  padding: 0;
+}
+
+.player-info-button.digest-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}

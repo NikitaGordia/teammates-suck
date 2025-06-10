@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getScoreColor, SCORES } from '../utils/scoreUtils';
+import PlayerInfoButton from './PlayerInfoButton';
 
 const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers, onRemoveAllPlayers }) => {
   const { t } = useTranslation();
@@ -122,11 +123,17 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers,
                 </td>
                 <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
                   {player.wins !== undefined && player.losses !== undefined ? (
-                    <div style={{ display: 'inline-block', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                      <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{player.wins}</span>
-                      <span style={{ margin: '0 2px' }}>/</span>
-                      <span style={{ color: '#F44336', fontWeight: 'bold' }}>{player.losses}</span>
-                    </div>
+                    <PlayerInfoButton
+                      playerId={player.id || -1}
+                      nickname={player.nickname}
+                      className="wins-losses"
+                    >
+                      <div style={{ display: 'inline-block', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                        <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{player.wins}</span>
+                        <span style={{ margin: '0 2px' }}>/</span>
+                        <span style={{ color: '#F44336', fontWeight: 'bold' }}>{player.losses}</span>
+                      </div>
+                    </PlayerInfoButton>
                   ) : (
                     <span style={{ color: '#999', fontSize: '12px' }}>-</span>
                   )}

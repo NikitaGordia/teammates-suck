@@ -9,6 +9,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import PlayerInfoButton from '../PlayerInfoButton';
 
 ChartJS.register(
   CategoryScale,
@@ -113,11 +114,18 @@ const TopPlayersChart = ({ data }) => {
       </div>
       <div className="digest-top-players-list">
         {data.slice(0, 5).map((player, index) => (
-          <div key={player.id || index} className="digest-top-player-item">
-            <span className="digest-rank">#{index + 1}</span>
-            <span className="digest-top-player-name">{player.nickname}</span>
-            <span className="digest-game-count">{player.game_count} {t('digest.charts.activity.games').toLowerCase()}</span>
-          </div>
+          <PlayerInfoButton
+            key={player.id || index}
+            playerId={player.id || -1}
+            nickname={player.nickname}
+            className="digest-item"
+          >
+            <div className="digest-top-player-item">
+              <span className="digest-rank">#{index + 1}</span>
+              <span className="digest-top-player-name">{player.nickname}</span>
+              <span className="digest-game-count">{player.game_count} {t('digest.charts.activity.games').toLowerCase()}</span>
+            </div>
+          </PlayerInfoButton>
         ))}
       </div>
     </div>

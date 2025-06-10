@@ -10,6 +10,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { getScoreColor, getScoreTextColor } from '../../utils/scoreUtils';
+import PlayerInfoButton from '../PlayerInfoButton';
 
 ChartJS.register(
   CategoryScale,
@@ -117,13 +118,19 @@ const RankChangesChart = ({ data }) => {
         {sortedData.map((player, index) => {
           const statusEmoji = player.status.toLowerCase() === 'promote' ? '📈' : '📉';
           return (
-            <div key={player.id || index} className={`digest-rank-change-card ${player.status.toLowerCase()}`}>
-              <div className="digest-player-header">
-                <div className="digest-player-name">{player.nickname}</div>
-                <div className="digest-status-badge">
-                  {statusEmoji} {t(`digest.charts.rankChanges.${player.status.toLowerCase()}`)}
+            <PlayerInfoButton
+              key={player.player_id || player.id || index}
+              playerId={player.player_id || player.id || -1}
+              nickname={player.nickname}
+              className="digest-item"
+            >
+              <div className={`digest-rank-change-card ${player.status.toLowerCase()}`}>
+                <div className="digest-player-header">
+                  <div className="digest-player-name">{player.nickname}</div>
+                  <div className="digest-status-badge">
+                    {statusEmoji} {t(`digest.charts.rankChanges.${player.status.toLowerCase()}`)}
+                  </div>
                 </div>
-              </div>
               <div className="digest-player-stats">
                 <div className="digest-stat-item">
                   <span className="digest-stat-label">{t('digest.charts.rankChanges.winRate')}:</span>
@@ -161,7 +168,8 @@ const RankChangesChart = ({ data }) => {
                   </span>
                 </div>
               </div>
-            </div>
+              </div>
+            </PlayerInfoButton>
           );
         })}
       </div>

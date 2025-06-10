@@ -199,5 +199,42 @@
         "saturday": "Saturday"
       }
     }
+  },
+  "playerInfo": {
+    "title": "Player Information",
+    "loading": "Loading player information...",
+    "error": "Failed to load player data",
+    "close": "Close",
+    "noInfo": "No info",
+    "charts": {
+      "dailyActivity": "Daily Activity (Last 30 Days)",
+      "winRate": "Win Rate Over Time",
+      "wins": "Wins",
+      "losses": "Losses",
+      "winRateOverTime": "Win Rate"
+    },
+    "sections": {
+      "rankHistory": "Rank History",
+      "gamesHistory": "Games History"
+    },
+    "rankHistory": {
+      "date": "Date",
+      "change": "Change",
+      "from": "From",
+      "to": "To",
+      "promotion": "Promotion",
+      "demotion": "Demotion",
+      "noChanges": "No rank changes"
+    },
+    "gamesHistory": {
+      "date": "Date",
+      "game": "Game",
+      "result": "Result",
+      "admin": "Admin",
+      "win": "Win",
+      "loss": "Loss",
+      "noGames": "No games",
+      "andMore": "and {{count}} more games"
+    }
   }
 }

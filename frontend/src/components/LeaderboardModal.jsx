@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getScoreColor, getScoreTextColor } from '../utils/scoreUtils';
+import { usePlayerInfo } from '../contexts/PlayerInfoContext';
 import './LeaderboardModal.css';
 
 const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoading, error }) => {
   const { t } = useTranslation();
+  const { openPlayerInfo } = usePlayerInfo();
   const modalRef = useRef(null);
 
   // Handle click outside to close modal
@@ -144,7 +146,12 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
                 </thead>
                 <tbody>
                   {processedData.map((player) => (
-                    <tr key={player.nickname} className={player.statusChange ? `status-${player.statusChange.status}` : ''}>
+                    <tr
+                      key={player.nickname}
+                      className={`leaderboard-row ${player.statusChange ? `status-${player.statusChange.status}` : ''}`}
+                      onClick={() => openPlayerInfo(player.id, player.nickname)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <td className="placement-cell">#{player.placement}</td>
                       <td className="rank-cell">
                         <span

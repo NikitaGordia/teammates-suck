@@ -10,6 +10,8 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import LogoutButton from './components/LogoutButton';
 import DigestButton from './components/DigestButton';
 import LeaderboardButton from './components/LeaderboardButton';
+import PlayerInfoButton from './components/PlayerInfoButton';
+import { PlayerInfoProvider } from './contexts/PlayerInfoContext';
 import { API_CONFIG, getApiUrl } from './config';
 import { handleApiResponse } from './utils/apiUtils';
 import './App.css';
@@ -476,7 +478,8 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <PlayerInfoProvider>
+      <div className="App">
       <div className="app-header">
         <LanguageSwitcher />
         <LogoutButton />
@@ -626,11 +629,17 @@ function App() {
                         <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>{nickname}</td>
                         <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'right' }}>{user.score}</td>
                         <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
-                          <div style={{ display: 'inline-block', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                            <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{user.wins}</span>
-                            <span style={{ margin: '0 2px' }}>/</span>
-                            <span style={{ color: '#F44336', fontWeight: 'bold' }}>{user.losses}</span>
-                          </div>
+                          <PlayerInfoButton
+                            playerId={user.id || -1}
+                            nickname={nickname}
+                            className="wins-losses"
+                          >
+                            <div style={{ display: 'inline-block', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                              <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>{user.wins}</span>
+                              <span style={{ margin: '0 2px' }}>/</span>
+                              <span style={{ color: '#F44336', fontWeight: 'bold' }}>{user.losses}</span>
+                            </div>
+                          </PlayerInfoButton>
                         </td>
                         <td style={{ padding: '8px', borderBottom: '1px solid #ddd', textAlign: 'center' }}>
                           <button
@@ -726,7 +735,8 @@ function App() {
         <div className="dim-overlay" onClick={handleDimOverlayClick}>
         </div>
       )}
-    </div>
+      </div>
+    </PlayerInfoProvider>
   );
 }
 

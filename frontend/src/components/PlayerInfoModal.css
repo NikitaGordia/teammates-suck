@@ -1,0 +1,334 @@
+.player-info-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.player-info-modal-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  width: 95%;
+  max-width: 1200px;
+  max-height: 95vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease-out;
+  position: relative;
+}
+
+.player-info-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.player-info-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.player-info-modal-close-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.player-info-modal-close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.player-info-modal-content {
+  padding: 24px;
+  color: white;
+}
+
+.player-info-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.player-info-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+/* Epic nickname display */
+.player-info-nickname {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.epic-nickname {
+  font-size: 3rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s ease-in-out infinite;
+  text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+/* Charts section */
+.player-info-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.chart-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.chart-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+}
+
+.chart-container {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Two sections layout */
+.player-info-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.player-info-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.player-info-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Rank history styles */
+.rank-history-container,
+.games-history-container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.rank-change-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid;
+}
+
+.rank-change-item.promotion {
+  border-left-color: #4CAF50;
+}
+
+.rank-change-item.demotion {
+  border-left-color: #F44336;
+}
+
+.rank-change-date {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 4px;
+}
+
+.rank-change-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rank-change-type {
+  font-weight: bold;
+}
+
+.rank-change-scores {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rank-score {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.rank-arrow {
+  color: white;
+  font-weight: bold;
+}
+
+/* Games history styles */
+.game-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid;
+}
+
+.game-item.win {
+  border-left-color: #4CAF50;
+}
+
+.game-item.loss {
+  border-left-color: #F44336;
+}
+
+.game-date {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 4px;
+}
+
+.game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.game-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+  word-break: break-word;
+}
+
+.game-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.game-result.win {
+  color: #4CAF50;
+}
+
+.game-result.loss {
+  color: #F44336;
+}
+
+.game-admin {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.games-history-more {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  margin-top: 8px;
+}
+
+.no-data-message {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  padding: 20px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .player-info-charts,
+  .player-info-sections {
+    grid-template-columns: 1fr;
+  }
+  
+  .epic-nickname {
+    font-size: 2rem;
+  }
+  
+  .player-info-modal-container {
+    width: 98%;
+    margin: 10px;
+  }
+}
