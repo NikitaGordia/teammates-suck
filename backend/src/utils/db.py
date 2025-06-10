@@ -410,12 +410,12 @@ class Database:
         finally:
             conn.close()
 
-    def add_rank_change(self, nickname, change_type, old_rank, new_rank, change_date):
+    def add_rank_change(self, player_id, change_type, old_rank, new_rank, change_date):
         """
         Adds a promotion or demotion event for a player.
 
         Args:
-            nickname (str): The player's nickname.
+            player_id (str): The player's id.
             change_type (str): Type of change ('promotion' or 'demotion').
             old_rank (str): The player's rank before the change.
             new_rank (str): The player's rank after the change.
@@ -438,10 +438,10 @@ class Database:
             cursor.execute(
                 """
                 INSERT INTO rank_changes 
-                    (nickname, change_type, old_rank, new_rank, change_date)
+                    (player_id, change_type, old_rank, new_rank, change_date)
                 VALUES (?, ?, ?, ?, ?)
                 """,
-                (nickname, change_type, old_rank, new_rank, change_date),
+                (player_id, change_type, old_rank, new_rank, change_date),
             )
             conn.commit()
             return cursor.lastrowid
@@ -452,7 +452,7 @@ class Database:
         finally:
             conn.close()
 
-    def get_player_rank_history(self, nickname):
+    def get_player_rank_history(self, player_id):
         """
         Retrieves the full promotion/demotion history for a given player.
 
@@ -470,10 +470,10 @@ class Database:
                 """
                 SELECT rc.change_type, rc.old_rank, rc.new_rank, rc.change_date
                 FROM rank_changes rc
-                WHERE rc.nickname = ?
+                WHERE rc.player_id = ?
                 ORDER BY rc.change_date DESC
                 """,
-                (nickname,),
+                (player_id,),
             )
             # Convert rows to dictionaries for easier use
             history = [dict(row) for row in cursor.fetchall()]
@@ -484,7 +484,7 @@ class Database:
         finally:
             conn.close()
 
-    def get_player_games_history(self, nickname):
+    def get_player_games_history(self, player_id):
         """
         Retrieves the full game history for a given player.
 
@@ -503,10 +503,10 @@ class Database:
                 SELECT game_datetime, game_name, win, a.name as admin_name
                 FROM events e
                 JOIN admins a ON e.admin = CAST(a.id AS TEXT)
-                WHERE e.nickname = ? and e.game_datetime >= ?
+                WHERE e.player_id = ? and e.game_datetime >= ?
                 ORDER BY e.game_datetime DESC
                 """,
-                (nickname, date_days_ago(60)),
+                (player_id, date_days_ago(60)),
             )
             history = [dict(row) for row in cursor.fetchall()]
             return history

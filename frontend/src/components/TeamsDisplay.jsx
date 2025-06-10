@@ -319,7 +319,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
             {teams.team1.length > 0 ? (
               <ul className="player-list">
                 {teams.team1.map((player, index) => (
-                   <li key={index} className={`player-item ${index === 0 ? 'player-leader' : ''}`}>
+                   <li key={player.id || index} className={`player-item ${index === 0 ? 'player-leader' : ''}`}>
                     <span className="player-name">
                       {player.nickname}
                     </span>
@@ -382,7 +382,7 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
              {teams.team2.length > 0 ? (
               <ul className="player-list">
                  {teams.team2.map((player, index) => (
-                   <li key={index} className={`player-item ${index === 0 ? 'player-leader' : ''}`}>
+                   <li key={player.id || index} className={`player-item ${index === 0 ? 'player-leader' : ''}`}>
                      <span className="player-name">
                        {player.nickname}
                      </span>

@@ -362,11 +362,11 @@ def digest_file():
     return send_from_directory(dir_path, "games.xls")
 
 
-@app.route("/api/user_history/<nickname>")
-def user_history(nickname):
+@app.route("/api/user/<player_id>")
+def user_history(player_id):
     try:
-        rank_history = db.get_player_rank_history(nickname)
-        games_history = db.get_player_games_history(nickname)
+        rank_history = db.get_player_rank_history(player_id)
+        games_history = db.get_player_games_history(player_id)
         return {"rank_history": rank_history, "games_history": games_history}
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
