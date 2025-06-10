@@ -117,7 +117,7 @@ const RankChangesChart = ({ data }) => {
         {sortedData.map((player, index) => {
           const statusEmoji = player.status.toLowerCase() === 'promote' ? '📈' : '📉';
           return (
-            <div key={index} className={`digest-rank-change-card ${player.status.toLowerCase()}`}>
+            <div key={player.id || index} className={`digest-rank-change-card ${player.status.toLowerCase()}`}>
               <div className="digest-player-header">
                 <div className="digest-player-name">{player.nickname}</div>
                 <div className="digest-status-badge">

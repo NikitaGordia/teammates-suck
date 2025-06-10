@@ -191,8 +191,8 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
           const gameName = `${team1Names}|VS|${team2Names}`;
 
           const requestData = {
-            teamA: teams.team1.map(player => ({ nickname: player.nickname })),
-            teamB: teams.team2.map(player => ({ nickname: player.nickname })),
+            teamA: teams.team1.map(player => player.id), // Use player IDs instead of nickname objects
+            teamB: teams.team2.map(player => player.id), // Use player IDs instead of nickname objects
             winningTeam: state.selectedTeamForSubmission === 'team1' ? 'A' : 'B',
             gameName: gameName,
             gameDatetime: gameDatetime,
@@ -213,8 +213,8 @@ const TeamsDisplay = ({ teams, onGameSubmitted }) => {
 
           if (onGameSubmitted && typeof onGameSubmitted === 'function') {
             onGameSubmitted({
-              teamA: requestData.teamA.map(player => player.nickname),
-              teamB: requestData.teamB.map(player => player.nickname),
+              teamA: teams.team1.map(player => player.nickname), // Use original team data for callback
+              teamB: teams.team2.map(player => player.nickname), // Use original team data for callback
               winningTeam: requestData.winningTeam
             });
           }

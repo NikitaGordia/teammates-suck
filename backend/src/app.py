@@ -165,7 +165,6 @@ def get_users():
 
         # Combine scores and statistics into a single users dictionary
         users = {}
-        print(user_stats)
         for nickname, score in score_mappings.items():
             stats = user_stats.get(nickname, {"id": -1, "wins": 0, "losses": 0})
             users[nickname] = {

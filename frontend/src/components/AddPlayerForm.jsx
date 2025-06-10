@@ -53,11 +53,12 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
         ? Number(scoreMappings[nickname])
         : Number(score);
 
-      // Get wins and losses from window.userData if available
+      // Get wins, losses, and ID from window.userData if available
       const wins = window.userData && window.userData[nickname] ? window.userData[nickname].wins : 0;
       const losses = window.userData && window.userData[nickname] ? window.userData[nickname].losses : 0;
+      const id = window.userData && window.userData[nickname] ? window.userData[nickname].id : -1;
 
-      onAddPlayer({ nickname, score: playerScore, wins, losses });
+      onAddPlayer({ nickname, score: playerScore, wins, losses, id });
       setNickname('');
       setScore(3);
       setShowSuggestions(false);
@@ -71,16 +72,17 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
     }
     setShowSuggestions(false);
 
-    // Get wins and losses from window.userData if available
+    // Get wins, losses, and ID from window.userData if available
     const wins = window.userData && window.userData[suggestion] ? window.userData[suggestion].wins : 0;
     const losses = window.userData && window.userData[suggestion] ? window.userData[suggestion].losses : 0;
+    const id = window.userData && window.userData[suggestion] ? window.userData[suggestion].id : -1;
 
     // Submit the form with the selected player
     const playerScore = scoreMappings[suggestion] !== undefined
       ? Number(scoreMappings[suggestion])
       : Number(score);
 
-    onAddPlayer({ nickname: suggestion, score: playerScore, wins, losses });
+    onAddPlayer({ nickname: suggestion, score: playerScore, wins, losses, id });
 
     // Reset the form
     setNickname('');
@@ -117,16 +119,17 @@ const AddPlayerForm = ({ onAddPlayer, scoreMappings = {}, noPlayersAdded = false
         }
         setShowSuggestions(false);
 
-        // Get wins and losses from window.userData if available
+        // Get wins, losses, and ID from window.userData if available
         const wins = window.userData && window.userData[selectedSuggestion] ? window.userData[selectedSuggestion].wins : 0;
         const losses = window.userData && window.userData[selectedSuggestion] ? window.userData[selectedSuggestion].losses : 0;
+        const id = window.userData && window.userData[selectedSuggestion] ? window.userData[selectedSuggestion].id : -1;
 
         // Submit the form with the selected player
         const playerScore = scoreMappings[selectedSuggestion] !== undefined
           ? Number(scoreMappings[selectedSuggestion])
           : Number(score);
 
-        onAddPlayer({ nickname: selectedSuggestion, score: playerScore, wins, losses });
+        onAddPlayer({ nickname: selectedSuggestion, score: playerScore, wins, losses, id });
 
         // Reset the form
         setNickname('');

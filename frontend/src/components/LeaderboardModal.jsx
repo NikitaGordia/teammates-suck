@@ -53,7 +53,8 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
       digest.players_for_status_change.forEach(player => {
         statusChanges[player.nickname] = {
           status: player.status.toLowerCase(), // 'promote' or 'demote'
-          emoji: player.status.toLowerCase() === 'promote' ? '⬆️' : '⬇️'
+          emoji: player.status.toLowerCase() === 'promote' ? '⬆️' : '⬇️',
+          id: player.id || -1 // Include player ID from digest data
         };
       });
     }
@@ -69,6 +70,7 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
         losses: stats.losses,
         totalGames,
         winRate,
+        id: stats.id || -1, // Include player ID for future use
         statusChange: statusChanges[nickname] || null
       };
     });

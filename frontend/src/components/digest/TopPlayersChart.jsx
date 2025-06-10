@@ -20,6 +20,7 @@ ChartJS.register(
 );
 
 const TopPlayersChart = ({ data }) => {
+
   const { t } = useTranslation();
 
   if (!data || data.length === 0) {
@@ -112,7 +113,7 @@ const TopPlayersChart = ({ data }) => {
       </div>
       <div className="digest-top-players-list">
         {data.slice(0, 5).map((player, index) => (
-          <div key={index} className="digest-top-player-item">
+          <div key={player.id || index} className="digest-top-player-item">
             <span className="digest-rank">#{index + 1}</span>
             <span className="digest-top-player-name">{player.nickname}</span>
             <span className="digest-game-count">{player.game_count} {t('digest.charts.activity.games').toLowerCase()}</span>

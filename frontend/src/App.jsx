@@ -167,11 +167,12 @@ function App() {
       const score = Number(userData[nickname].score);
       const wins = userData[nickname].wins;
       const losses = userData[nickname].losses;
+      const id = userData[nickname].id || -1; // Use ID from backend, default to -1 for new users
 
       // Check if player already exists
       const playerExists = players.some(player => player.nickname === nickname);
       if (!playerExists) {
-        setPlayers([...players, { nickname, score, wins, losses }]);
+        setPlayers([...players, { nickname, score, wins, losses, id }]);
       } else {
         alert(t('players.alreadyInList', { nickname }));
       }
@@ -270,7 +271,8 @@ function App() {
             ...player,
             score: freshUserData[player.nickname].score || player.score,
             wins: freshUserData[player.nickname].wins || 0,
-            losses: freshUserData[player.nickname].losses || 0
+            losses: freshUserData[player.nickname].losses || 0,
+            id: freshUserData[player.nickname].id || player.id || -1 // Preserve or update ID
           };
         }
         return player;
@@ -422,7 +424,7 @@ function App() {
 
       // Map the API response to the expected format for the teams state
       // API returns { teamA: [], teamB: [] } but our components expect { team1: [], team2: [] }
-      // Also add wins/losses data to each player
+      // Also add wins/losses data to each player and preserve IDs from API response
       const balancedTeams = {
         team1: (data.teamA || []).map(player => {
           // Find the player in our local data to get wins/losses
@@ -430,7 +432,8 @@ function App() {
           return {
             ...player,
             wins: localPlayer ? localPlayer.wins : 0,
-            losses: localPlayer ? localPlayer.losses : 0
+            losses: localPlayer ? localPlayer.losses : 0,
+            id: player.id || localPlayer?.id || -1 // Use ID from API response, fallback to local, then -1
           };
         }),
         team2: (data.teamB || []).map(player => {
@@ -439,7 +442,8 @@ function App() {
           return {
             ...player,
             wins: localPlayer ? localPlayer.wins : 0,
-            losses: localPlayer ? localPlayer.losses : 0
+            losses: localPlayer ? localPlayer.losses : 0,
+            id: player.id || localPlayer?.id || -1 // Use ID from API response, fallback to local, then -1
           };
         })
       };
