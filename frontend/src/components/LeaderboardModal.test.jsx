@@ -8,6 +8,13 @@ vi.mock('../utils/scoreUtils', () => ({
   getScoreTextColor: vi.fn((score) => '#ffffff')
 }));
 
+// Mock the PlayerInfo context
+vi.mock('../contexts/PlayerInfoContext', () => ({
+  usePlayerInfo: vi.fn(() => ({
+    openPlayerInfo: vi.fn()
+  }))
+}));
+
 describe('LeaderboardModal Component', () => {
   const mockLeaderboardData = {
     users: {
@@ -136,7 +143,7 @@ describe('LeaderboardModal Component', () => {
     expect(totalGamesCells).toHaveLength(3); // Should have 3 players with 15 games each
   });
 
-  it('handles players with no games played', () => {
+  it('handles players with no games played when filter is disabled', () => {
     const dataWithNoGames = {
       users: {
         'newPlayer': { score: 2, wins: 0, losses: 0 }
@@ -144,6 +151,10 @@ describe('LeaderboardModal Component', () => {
     };
 
     render(<LeaderboardModal {...defaultProps} leaderboardData={dataWithNoGames} digestData={null} />);
+
+    // First uncheck the filter to show players with 0 games
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
 
     expect(screen.getByText('N/A')).toBeInTheDocument(); // Win rate should be N/A
     expect(screen.getByText('0')).toBeInTheDocument(); // Total games should be 0
