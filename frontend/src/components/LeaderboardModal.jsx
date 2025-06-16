@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getScoreColor, getScoreTextColor } from '../utils/scoreUtils';
 import { usePlayerInfo } from '../contexts/PlayerInfoContext';
@@ -8,6 +8,9 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
   const { t } = useTranslation();
   const { openPlayerInfo } = usePlayerInfo();
   const modalRef = useRef(null);
+
+  // State for minimum games filter (default: true to hide players with less than 3 games)
+  const [filterMinGames, setFilterMinGames] = useState(true);
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -27,7 +30,7 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
   }, [isOpen, onClose]);
 
   // Process leaderboard data
-  const processLeaderboardData = (data, digest) => {
+  const processLeaderboardData = (data, digest, applyMinGamesFilter = false) => {
     if (!data || !data.users) return [];
 
     // Create a map of players with status changes from digest
@@ -42,7 +45,7 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
       });
     }
 
-    const players = Object.entries(data.users).map(([nickname, stats]) => {
+    let players = Object.entries(data.users).map(([nickname, stats]) => {
       const totalGames = stats.wins + stats.losses;
       const winRate = totalGames > 0 ? (stats.wins / totalGames) * 100 : 0;
 
@@ -57,6 +60,11 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
         statusChange: statusChanges[nickname] || null
       };
     });
+
+    // Apply minimum games filter if enabled
+    if (applyMinGamesFilter) {
+      players = players.filter(player => player.totalGames >= 3);
+    }
 
     // Sort by score (rank) first, then by win rate
     players.sort((a, b) => {
@@ -74,15 +82,32 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
     }));
   };
 
+  // Handle filter checkbox change
+  const handleFilterChange = (event) => {
+    setFilterMinGames(event.target.checked);
+  };
+
   if (!isOpen) return null;
 
-  const processedData = leaderboardData ? processLeaderboardData(leaderboardData, digestData) : [];
+  const processedData = leaderboardData ? processLeaderboardData(leaderboardData, digestData, filterMinGames) : [];
 
   return (
     <div className="leaderboard-modal-overlay">
       <div className="leaderboard-modal-container" ref={modalRef}>
         <div className="leaderboard-modal-header">
           <h2>🏆 {t('leaderboard.title')}</h2>
+          <div className="leaderboard-filter-container" title={t('leaderboard.filterMinGamesInfo')}>
+            <input
+              type="checkbox"
+              id="filter-min-games"
+              className="leaderboard-filter-checkbox"
+              checked={filterMinGames}
+              onChange={handleFilterChange}
+            />
+            <label htmlFor="filter-min-games" className="leaderboard-filter-label">
+              {t('leaderboard.filterMinGames')}
+            </label>
+          </div>
           <button className="leaderboard-modal-close-button" onClick={onClose}>×</button>
         </div>
 

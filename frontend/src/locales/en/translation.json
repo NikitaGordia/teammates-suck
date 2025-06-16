@@ -138,7 +138,9 @@
     "winRateInfo": "Win rate based on activity from the latest 30 days",
     "totalGamesInfo": "Total games based on activity from the latest 30 days",
     "promoted": "Recently promoted",
-    "demoted": "Recently demoted"
+    "demoted": "Recently demoted",
+    "filterMinGames": "Hide non-active players",
+    "filterMinGamesInfo": "Filter out players who have played fewer than 3 games"
   },
   "digest": {
     "title": "Latest Digest",

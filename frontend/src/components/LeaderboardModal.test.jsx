@@ -148,4 +148,55 @@ describe('LeaderboardModal Component', () => {
     expect(screen.getByText('N/A')).toBeInTheDocument(); // Win rate should be N/A
     expect(screen.getByText('0')).toBeInTheDocument(); // Total games should be 0
   });
+
+  it('renders filter checkbox with correct default state', () => {
+    render(<LeaderboardModal {...defaultProps} />);
+
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeInTheDocument();
+    expect(checkbox).toBeChecked(); // Should be checked by default
+    expect(screen.getByText(/leaderboard.filterMinGames/)).toBeInTheDocument();
+  });
+
+  it('filters players with less than 3 games when checkbox is checked', () => {
+    const dataWithMixedGames = {
+      users: {
+        'player1': { score: 4, wins: 10, losses: 5 }, // 15 games - should show
+        'player2': { score: 3, wins: 1, losses: 1 }, // 2 games - should be filtered
+        'player3': { score: 2, wins: 2, losses: 1 }, // 3 games - should show
+        'player4': { score: 1, wins: 0, losses: 0 } // 0 games - should be filtered
+      }
+    };
+
+    render(<LeaderboardModal {...defaultProps} leaderboardData={dataWithMixedGames} />);
+
+    // With filter enabled (default), only players with 3+ games should show
+    expect(screen.getByText('player1')).toBeInTheDocument();
+    expect(screen.queryByText('player2')).not.toBeInTheDocument();
+    expect(screen.getByText('player3')).toBeInTheDocument();
+    expect(screen.queryByText('player4')).not.toBeInTheDocument();
+  });
+
+  it('shows all players when filter checkbox is unchecked', () => {
+    const dataWithMixedGames = {
+      users: {
+        'player1': { score: 4, wins: 10, losses: 5 }, // 15 games
+        'player2': { score: 3, wins: 1, losses: 1 }, // 2 games
+        'player3': { score: 2, wins: 2, losses: 1 }, // 3 games
+        'player4': { score: 1, wins: 0, losses: 0 } // 0 games
+      }
+    };
+
+    render(<LeaderboardModal {...defaultProps} leaderboardData={dataWithMixedGames} />);
+
+    // Uncheck the filter
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.click(checkbox);
+
+    // Now all players should be visible
+    expect(screen.getByText('player1')).toBeInTheDocument();
+    expect(screen.getByText('player2')).toBeInTheDocument();
+    expect(screen.getByText('player3')).toBeInTheDocument();
+    expect(screen.getByText('player4')).toBeInTheDocument();
+  });
 });
