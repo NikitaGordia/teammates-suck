@@ -365,8 +365,15 @@ def digest_file():
 @app.route("/api/user/<player_id>")
 def user_history(player_id):
     try:
+        nickname = db.get_player_nickname(player_id)
         rank_history = db.get_player_rank_history(player_id)
         games_history = db.get_player_games_history(player_id)
-        return {"rank_history": rank_history, "games_history": games_history}
+        print(nickname)
+        print(score_mappings)
+        return {
+            "score": score_mappings[nickname] if nickname in score_mappings else None,
+            "rank_history": rank_history,
+            "games_history": games_history,
+        }
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500

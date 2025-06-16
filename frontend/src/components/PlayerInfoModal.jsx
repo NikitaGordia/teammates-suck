@@ -187,6 +187,8 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
     );
   }
 
+  console.log('playerData', playerData)
+
   if (isLoading) {
     return (
       <div className="player-info-modal-overlay">
@@ -235,7 +237,22 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
           {/* Fancy nickname display with 30-day stats */}
           <div className="player-info-nickname">
             <div className="nickname-container">
-              <h1 className="epic-nickname">{nickname}</h1>
+               <div className="nickname-stats">
+                <h1 className="epic-nickname">{nickname}</h1>
+                {playerData.score !== undefined && (
+                    <div className="stats-item">
+                      <span
+                        className="rank-score-header"
+                        style={{
+                          backgroundColor: getScoreColor(playerData.score),
+                          color: getScoreTextColor(playerData.score),
+                        }}
+                      >
+                        {playerData.score}
+                      </span>
+                    </div>
+                  )}
+               </div>
               <div className="nickname-stats">
                 <div className="stats-item">
                   <span className="stats-label">{t('playerInfo.stats.last30Days')}:</span>
@@ -510,22 +527,29 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
                   <div className="games-history-list">
                     {playerData.games_history.slice(0, 20).map((game, index) => {
                       const gameDate = convertToLocalDate(game.game_datetime);
+                      const teams = game.game_name.split('|VS|');
                       return (
                         <div key={index} className={`game-item ${game.win ? 'win' : 'loss'}`}>
-                          <div className="game-date">
-                            {gameDate.toLocaleDateString()} {gameDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
-                          </div>
-                          <div className="game-info">
-                            <div className="game-name" title={game.game_name}>
-                              {game.game_name.length > 50 ? game.game_name.substring(0, 50) + '...' : game.game_name}
-                            </div>
-                            <div className="game-details">
+                          <div className="game-details">
+                              <span>
+                                <div className="game-date">
+                                  {gameDate.toLocaleDateString()} {gameDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                </div>
+                              </span>
                               <span className={`game-result ${game.win ? 'win' : 'loss'}`}>
                                 {game.win ? '🏆' : '💔'} {t(`playerInfo.gamesHistory.${game.win ? 'win' : 'loss'}`)}
                               </span>
                               <span className="game-admin">
                                 👤 {game.admin_name}
                               </span>
+                            </div>
+                          <div className="game-info">
+                            <div className="game-name" title={game.game_name}>
+                              {teams[0].length > 50 ? teams[0].substring(0, 50) + '...' : teams[0]}
+                            </div>
+                            VS
+                            <div className="game-name" title={game.game_name}>
+                              {teams[1].length > 50 ? teams[1].substring(0, 50) + '...' : teams[1]}
                             </div>
                           </div>
                         </div>

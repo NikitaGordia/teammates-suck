@@ -570,3 +570,27 @@ class Database:
         finally:
             if connection:
                 connection.close()
+
+    def get_player_nickname(self, player_id):
+        """
+        Retrieves the nickname for a given player ID.
+
+        Args:
+            player_id: The player's ID.
+
+        Returns:
+            The player's nickname, or None if not found.
+        """
+        connection = None
+        try:
+            connection = self.get_db_connection()
+            cursor = connection.cursor()
+            cursor.execute("SELECT nickname FROM players WHERE id = ?", (player_id,))
+            result = cursor.fetchone()
+            return result[0] if result else None
+        except sqlite3.Error as e:
+            print(f"❌ An error occurred: {e}")
+            return None
+        finally:
+            if connection:
+                connection.close()

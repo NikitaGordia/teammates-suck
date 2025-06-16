@@ -128,10 +128,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 8px 16px;
-  border-radius: 20px;
-  backdrop-filter: blur(5px);
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -257,6 +253,13 @@
   gap: 8px;
 }
 
+.rank-score-header {
+  padding: 4px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1.8rem;
+}
+
 .rank-score {
   padding: 4px 8px;
   border-radius: 4px;
@@ -309,14 +312,23 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .game-result.win {
   color: #4CAF50;
+  font-weight: bold;
 }
 
 .game-result.loss {
   color: #F44336;
+  font-weight: bold;
 }
 
 .game-admin {
