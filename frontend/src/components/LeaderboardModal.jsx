@@ -9,25 +9,6 @@ const LeaderboardModal = ({ isOpen, onClose, leaderboardData, digestData, isLoad
   const { openPlayerInfo } = usePlayerInfo();
   const modalRef = useRef(null);
 
-  // Handle click outside to close modal
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen, onClose]);
-
   // Handle ESC key to close modal
   useEffect(() => {
     const handleEscKey = (event) => {
