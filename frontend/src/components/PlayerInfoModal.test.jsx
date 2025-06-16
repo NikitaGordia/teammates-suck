@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import PlayerInfoModal from './PlayerInfoModal';
 
+// Mock react-i18next
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key) => key, // Return the key as the translation
+  }),
+}));
+
 // Mock react-chartjs-2
 vi.mock('react-chartjs-2', () => ({
   Bar: ({ data, options }) => <div data-testid="bar-chart">Bar Chart</div>,
@@ -21,6 +28,17 @@ vi.mock('chart.js', () => ({
   Title: {},
   Tooltip: {},
   Legend: {}
+}));
+
+// Mock chartjs-plugin-annotation
+vi.mock('chartjs-plugin-annotation', () => ({
+  default: {}
+}));
+
+// Mock scoreUtils
+vi.mock('../utils/scoreUtils', () => ({
+  getScoreColor: (score) => `rgb(${score * 50}, ${score * 30}, ${score * 20})`,
+  getScoreTextColor: (score) => score > 4 ? 'white' : 'black'
 }));
 
 const mockPlayerData = {
@@ -74,22 +92,26 @@ describe('PlayerInfoModal', () => {
 
   it('renders error state', () => {
     render(<PlayerInfoModal {...defaultProps} isOpen={true} error="Test error" />);
-    expect(screen.getByText('playerInfo.error')).toBeInTheDocument();
+    expect(screen.getByText((content, element) => content.includes('playerInfo.error'))).toBeInTheDocument();
     expect(screen.getByText('Test error')).toBeInTheDocument();
   });
 
   it('renders no info state', () => {
     render(<PlayerInfoModal {...defaultProps} isOpen={true} />);
-    expect(screen.getByText('playerInfo.noInfo')).toBeInTheDocument();
+    expect(screen.getByText((content, element) => content.includes('playerInfo.noInfo'))).toBeInTheDocument();
   });
 
   it('renders player data correctly', () => {
     render(<PlayerInfoModal {...defaultProps} isOpen={true} playerData={mockPlayerData} />);
-    
-    expect(screen.getByText('playerInfo.title')).toBeInTheDocument();
+
+    expect(screen.getByText((content, element) => content.includes('playerInfo.title'))).toBeInTheDocument();
     expect(screen.getByText('TestPlayer')).toBeInTheDocument();
     expect(screen.getByTestId('bar-chart')).toBeInTheDocument();
     expect(screen.getByTestId('line-chart')).toBeInTheDocument();
+
+    // Check that 30-day stats are displayed
+    expect(screen.getByText((content, element) => content.includes('playerInfo.stats.last30Days'))).toBeInTheDocument();
+    expect(screen.getByText((content, element) => content.includes('playerInfo.stats.winRate'))).toBeInTheDocument();
   });
 
   it('calls onClose when close button is clicked', () => {

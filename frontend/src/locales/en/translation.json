@@ -206,12 +206,18 @@
     "error": "Failed to load player data",
     "close": "Close",
     "noInfo": "No info",
+    "stats": {
+      "last30Days": "Last 30 days",
+      "winRate": "Win rate"
+    },
     "charts": {
       "dailyActivity": "Daily Activity (Last 30 Days)",
       "winRate": "Win Rate Over Time",
       "wins": "Wins",
       "losses": "Losses",
-      "winRateOverTime": "Win Rate"
+      "winRateOverTime": "Win Rate",
+      "promotionThreshold": "Promotion threshold",
+      "demotionThreshold": "Demotion threshold"
     },
     "sections": {
       "rankHistory": "Rank History",

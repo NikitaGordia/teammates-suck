@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Chart as ChartJS,
@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import { Bar, Line } from 'react-chartjs-2';
 import { getScoreColor, getScoreTextColor } from '../utils/scoreUtils';
 import './PlayerInfoModal.css';
@@ -23,7 +24,8 @@ ChartJS.register(
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  annotationPlugin
 );
 
 const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickname }) => {
@@ -70,6 +72,41 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
   const convertToLocalDate = (utcDateString) => {
     const utcDate = new Date(utcDateString + 'Z'); // Add Z to ensure UTC parsing
     return utcDate;
+  };
+
+  // Calculate 30-day wins, losses, and win rate
+  const calculate30DayStats = (gamesHistory) => {
+    if (!gamesHistory || gamesHistory.length === 0) {
+      return { wins: 0, losses: 0, winRate: 0, totalGames: 0 };
+    }
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentGames = gamesHistory.filter(game => {
+      const gameDate = convertToLocalDate(game.game_datetime);
+      return gameDate >= thirtyDaysAgo;
+    });
+
+    const wins = recentGames.filter(game => game.win).length;
+    const losses = recentGames.length - wins;
+    const totalGames = recentGames.length;
+    const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
+
+    return { wins, losses, winRate, totalGames };
+  };
+
+  // Find recent rank changes within the last 30 days
+  const findRecentRankChanges = (rankHistory) => {
+    if (!rankHistory || rankHistory.length === 0) return [];
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    return rankHistory.filter(change => {
+      const changeDate = convertToLocalDate(change.change_date);
+      return changeDate >= thirtyDaysAgo;
+    });
   };
 
   // Generate daily activity data for the last 30 days
@@ -203,6 +240,8 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
 
   const dailyActivity = generateDailyActivityData(playerData.games_history);
   const winRateOverTime = generateWinRateData(playerData.games_history);
+  const thirtyDayStats = calculate30DayStats(playerData.games_history);
+  const recentRankChanges = findRecentRankChanges(playerData.rank_history);
 
   return (
     <div className="player-info-modal-overlay">
@@ -212,9 +251,23 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
           <button className="player-info-modal-close-button" onClick={onClose}>×</button>
         </div>
         <div className="player-info-modal-content">
-          {/* Fancy nickname display */}
+          {/* Fancy nickname display with 30-day stats */}
           <div className="player-info-nickname">
-            <h1 className="epic-nickname">{nickname}</h1>
+            <div className="nickname-container">
+              <h1 className="epic-nickname">{nickname}</h1>
+              <div className="nickname-stats">
+                <div className="stats-item">
+                  <span className="stats-label">{t('playerInfo.stats.last30Days')}:</span>
+                  <span className="stats-wins">{thirtyDayStats.wins}W</span>
+                  <span className="stats-separator">/</span>
+                  <span className="stats-losses">{thirtyDayStats.losses}L</span>
+                </div>
+                <div className="stats-item">
+                  <span className="stats-label">{t('playerInfo.stats.winRate')}:</span>
+                  <span className="stats-winrate">{thirtyDayStats.winRate.toFixed(1)}%</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Charts section */}
@@ -249,6 +302,31 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
                       legend: {
                         display: true,
                       },
+                      annotation: {
+                        annotations: recentRankChanges.reduce((acc, change, index) => {
+                          const changeDate = convertToLocalDate(change.change_date);
+                          const dateLabel = `${changeDate.getDate()}/${changeDate.getMonth() + 1}`;
+                          const labelIndex = dailyActivity.labels.indexOf(dateLabel);
+
+                          if (labelIndex !== -1) {
+                            acc[`rankChange${index}`] = {
+                              type: 'point',
+                              xValue: labelIndex,
+                              yValue: Math.max(...dailyActivity.wins, ...dailyActivity.losses) + 1,
+                              backgroundColor: change.change_type === 'promotion' ? 'rgba(76, 175, 80, 0.8)' : 'rgba(244, 67, 54, 0.8)',
+                              borderColor: change.change_type === 'promotion' ? 'rgba(76, 175, 80, 1)' : 'rgba(244, 67, 54, 1)',
+                              borderWidth: 2,
+                              radius: 8,
+                              label: {
+                                content: change.change_type === 'promotion' ? '📈' : '📉',
+                                enabled: true,
+                                position: 'top'
+                              }
+                            };
+                          }
+                          return acc;
+                        }, {})
+                      }
                     },
                     scales: {
                       x: {
@@ -297,6 +375,73 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
                       legend: {
                         display: false,
                       },
+                      annotation: {
+                        annotations: {
+                          // Demotion line at 40%
+                          demotionLine: {
+                            type: 'line',
+                            yMin: 40,
+                            yMax: 40,
+                            borderColor: 'rgba(244, 67, 54, 0.8)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                              content: t('playerInfo.charts.demotionThreshold') + ' (40%)',
+                              enabled: true,
+                              position: 'end',
+                              backgroundColor: 'rgba(244, 67, 54, 0.8)',
+                              color: 'white',
+                              font: {
+                                size: 10
+                              }
+                            }
+                          },
+                          // Promotion line at 60%
+                          promotionLine: {
+                            type: 'line',
+                            yMin: 60,
+                            yMax: 60,
+                            borderColor: 'rgba(76, 175, 80, 0.8)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                              content: t('playerInfo.charts.promotionThreshold') + ' (60%)',
+                              enabled: true,
+                              position: 'end',
+                              backgroundColor: 'rgba(76, 175, 80, 0.8)',
+                              color: 'white',
+                              font: {
+                                size: 10
+                              }
+                            }
+                          },
+                          // Rank change marks
+                          ...recentRankChanges.reduce((acc, change, index) => {
+                            const changeDate = convertToLocalDate(change.change_date);
+                            const dateLabel = `${changeDate.getDate()}/${changeDate.getMonth() + 1}`;
+                            const labelIndex = winRateOverTime.labels.indexOf(dateLabel);
+
+                            if (labelIndex !== -1) {
+                              const winRateAtDate = winRateOverTime.winRates[labelIndex] || 50;
+                              acc[`rankChangeWinRate${index}`] = {
+                                type: 'point',
+                                xValue: labelIndex,
+                                yValue: winRateAtDate,
+                                backgroundColor: change.change_type === 'promotion' ? 'rgba(76, 175, 80, 0.8)' : 'rgba(244, 67, 54, 0.8)',
+                                borderColor: change.change_type === 'promotion' ? 'rgba(76, 175, 80, 1)' : 'rgba(244, 67, 54, 1)',
+                                borderWidth: 2,
+                                radius: 8,
+                                label: {
+                                  content: change.change_type === 'promotion' ? '📈' : '📉',
+                                  enabled: true,
+                                  position: 'top'
+                                }
+                              };
+                            }
+                            return acc;
+                          }, {})
+                        }
+                      }
                     },
                     scales: {
                       x: {

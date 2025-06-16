@@ -95,6 +95,13 @@
   backdrop-filter: blur(10px);
 }
 
+.nickname-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
 .epic-nickname {
   font-size: 3rem;
   font-weight: bold;
@@ -107,6 +114,51 @@
   text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
   margin: 0;
   letter-spacing: 2px;
+}
+
+.nickname-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stats-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.stats-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.stats-wins {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.stats-losses {
+  color: #F44336;
+  font-weight: bold;
+}
+
+.stats-separator {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: bold;
+}
+
+.stats-winrate {
+  color: #FFD700;
+  font-weight: bold;
 }
 
 /* Charts section */
@@ -322,11 +374,21 @@
   .player-info-sections {
     grid-template-columns: 1fr;
   }
-  
+
   .epic-nickname {
     font-size: 2rem;
   }
-  
+
+  .nickname-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .stats-item {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+
   .player-info-modal-container {
     width: 98%;
     margin: 10px;
