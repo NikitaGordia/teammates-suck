@@ -532,7 +532,7 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
                       return (
                         <div key={index} className={`game-item ${game.win ? 'win' : 'loss'}`}>
                           <div className="game-date">
-                            {gameDate.toLocaleDateString()} {gameDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {gameDate.toLocaleDateString()} {gameDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
                           </div>
                           <div className="game-info">
                             <div className="game-name" title={game.game_name}>
