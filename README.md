@@ -2,8 +2,12 @@
 
 ![Python](https://img.shields.io/badge/python-3.11-blue.svg) ![Flask](https://img.shields.io/badge/flask-2.3.3-lightgrey.svg) ![React](https://img.shields.io/badge/react-18.2.0-61DAFB.svg) ![Vite](https://img.shields.io/badge/vite-4.4.9-646CFF.svg) ![SQLite](https://img.shields.io/badge/sqlite-3-003B57.svg) ![Docker](https://img.shields.io/badge/docker-compose-2496ED.svg) ![License](https://img.shields.io/badge/license-MIT-green.svg) ![Language](https://img.shields.io/badge/language-Ukrainian/English-yellow.svg)
 
-![MVP Screenshot](readme_resources/demo_en.png)
-![MVP Screenshot](readme_resources/demo_digest_en.png)
+![MVP Screenshot](readme/demo_en.png)
+<p align="center">
+<img src="readme/demo_digest_en.png" width="33%">
+  <img src="readme/demo_leaderboard_en.png" width="33%">
+  <img src="readme/demo_profile_en.png" width="33%">
+</p>
 
 A web application for balancing teams based on player skill levels.
 
