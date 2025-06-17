@@ -4,9 +4,9 @@
 
 ![MVP Screenshot](readme/demo_en.png)
 <p align="center">
-<img src="readme/demo_digest_en.png" width="33%">
-  <img src="readme/demo_leaderboard_en.png" width="33%">
-  <img src="readme/demo_profile_en.png" width="33%">
+<img src="readme/demo_digest_en.png" width="31%">
+  <img src="readme/demo_leaderboard_en.png" width="31%">
+  <img src="readme/demo_profile_en.png" width="31%">
 </p>
 
 A web application for balancing teams based on player skill levels.
