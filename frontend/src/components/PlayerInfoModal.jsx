@@ -56,25 +56,23 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
   };
 
   // Calculate 30-day wins, losses, and win rate
-  const calculate30DayStats = (gamesHistory) => {
-    if (!gamesHistory || gamesHistory.length === 0) {
-      return { wins: 0, losses: 0, winRate: 0, totalGames: 0 };
-    }
+  const calculate30DayStats = (winRateData, dailyData) => {
+    // For the win rate, we use the single LAST VALUE from the winRateData list.
+    // This is correct because it represents the 30-day rolling average ending today.
+    const winRate = winRateData.winRates.slice(-1)[0] || 0;
 
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // For total wins and losses, we sum the entire list of daily results.
+    // This is necessary to get the total over all 30 days.
+    const wins = dailyData.wins.reduce((sum, current) => sum + current, 0);
+    const losses = dailyData.losses.reduce((sum, current) => sum + current, 0);
+    const totalGames = wins + losses;
 
-    const recentGames = gamesHistory.filter(game => {
-      const gameDate = convertToLocalDate(game.game_datetime);
-      return gameDate >= thirtyDaysAgo;
-    });
-
-    const wins = recentGames.filter(game => game.win).length;
-    const losses = recentGames.length - wins;
-    const totalGames = recentGames.length;
-    const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
-
-    return { wins, losses, winRate, totalGames };
+    return {
+      wins,
+      losses,
+      totalGames,
+      winRate, // This is the last value from the other calculation.
+    };
   };
 
   // Find recent rank changes within the last 30 days
@@ -90,83 +88,71 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
     });
   };
 
-  // Generate daily activity data for the last 30 days
   const generateDailyActivityData = (gamesHistory) => {
-    if (!gamesHistory || gamesHistory.length === 0) return { labels: [], wins: [], losses: [] };
+    if (!gamesHistory?.length) return { labels: [], wins: [], losses: [] };
 
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const toYMD = (date) => new Date(date).toISOString().split('T')[0];
 
-    const dailyData = {};
+    // 1. Aggregate game stats by day using reduce for a compact summary
+    const statsByDay = gamesHistory.reduce((stats, { game_datetime, win }) => {
+      const dayKey = toYMD(game_datetime);
+      const s = stats.get(dayKey) || { wins: 0, losses: 0 };
+      win ? s.wins++ : s.losses++;
+      stats.set(dayKey, s);
+      return stats;
+    }, new Map());
 
-    // Initialize all days with 0 wins and losses
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(thirtyDaysAgo);
-      date.setDate(thirtyDaysAgo.getDate() + i);
-      const dateKey = date.toISOString().split('T')[0];
-      dailyData[dateKey] = { wins: 0, losses: 0 };
-    }
-
-    // Count wins and losses for each day
-    gamesHistory.forEach(game => {
-      const gameDate = convertToLocalDate(game.game_datetime);
-      const dateKey = gameDate.toISOString().split('T')[0];
-      
-      if (dailyData[dateKey]) {
-        if (game.win) {
-          dailyData[dateKey].wins++;
-        } else {
-          dailyData[dateKey].losses++;
-        }
-      }
-    });
-
-    const labels = Object.keys(dailyData).map(dateKey => {
-      const date = new Date(dateKey);
-      return `${date.getDate()}/${date.getMonth() + 1}`;
-    });
-
-    const wins = Object.values(dailyData).map(day => day.wins);
-    const losses = Object.values(dailyData).map(day => day.losses);
-
-    return { labels, wins, losses };
+    // 2. Build the final chart data over the last 30 days
+    return Array.from({ length: 30 }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (29 - i)); // Generate dates from 29 days ago to today
+      return date;
+    }).reduce((chartData, date) => {
+      const { wins = 0, losses = 0 } = statsByDay.get(toYMD(date)) || {};
+      chartData.labels.push(date.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' }));
+      chartData.wins.push(wins);
+      chartData.losses.push(losses);
+      return chartData;
+    }, { labels: [], wins: [], losses: [] });
   };
 
-  // Generate win rate over time data
   const generateWinRateData = (gamesHistory) => {
-    if (!gamesHistory || gamesHistory.length === 0) return { labels: [], winRates: [] };
+    if (!gamesHistory?.length) return { labels: [], winRates: [] };
 
-    const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const toYMD = (date) => new Date(date).toISOString().split('T')[0];
 
-    const winRateData = [];
-    const labels = [];
+    // 1. Aggregate all game stats by day in a single pass
+    const dailyStats = gamesHistory.reduce((stats, { game_datetime, win }) => {
+      const dayKey = toYMD(game_datetime);
+      const s = stats.get(dayKey) || { wins: 0, total: 0 };
+      stats.set(dayKey, { wins: s.wins + (win ? 1 : 0), total: s.total + 1 });
+      return stats;
+    }, new Map());
 
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(thirtyDaysAgo);
-      date.setDate(thirtyDaysAgo.getDate() + i);
-      
-      const windowStart = new Date(date);
-      windowStart.setDate(date.getDate() - 30);
-      
-      const gamesInWindow = gamesHistory.filter(game => {
-        const gameDate = convertToLocalDate(game.game_datetime);
-        return gameDate >= windowStart && gameDate <= date;
-      });
+    // 2. Create the date range for the last 30 days
+    const chartDates = Array.from({ length: 30 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d;
+    }).reverse();
 
-      let winRate = 0;
-      if (gamesInWindow.length > 0) {
-        const wins = gamesInWindow.filter(game => game.win).length;
-        winRate = (wins / gamesInWindow.length) * 100;
+    // 3. For each date, calculate its 30-day rolling win rate
+    const winRates = chartDates.map(endDate => {
+      let windowWins = 0, windowTotal = 0;
+      for (let j = 0; j < 30; j++) {
+        const day = new Date(endDate);
+        day.setDate(endDate.getDate() - j);
+        const { wins = 0, total = 0 } = dailyStats.get(toYMD(day)) || {};
+        windowWins += wins;
+        windowTotal += total;
       }
-
-      labels.push(`${date.getDate()}/${date.getMonth() + 1}`);
-      winRateData.push(winRate);
-    }
-
-    return { labels, winRates: winRateData };
+      return windowTotal ? (windowWins / windowTotal) * 100 : 0;
+    });
+    
+    return {
+      labels: chartDates.map(d => d.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })),
+      winRates,
+    };
   };
 
   if (!isOpen) return null;
@@ -186,8 +172,6 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
       </div>
     );
   }
-
-  console.log('playerData', playerData)
 
   if (isLoading) {
     return (
@@ -223,7 +207,7 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
 
   const dailyActivity = generateDailyActivityData(playerData.games_history);
   const winRateOverTime = generateWinRateData(playerData.games_history);
-  const thirtyDayStats = calculate30DayStats(playerData.games_history);
+  const thirtyDayStats = calculate30DayStats(winRateOverTime, dailyActivity);
   const recentRankChanges = findRecentRankChanges(playerData.rank_history);
 
   return (

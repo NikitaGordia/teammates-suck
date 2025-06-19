@@ -77,7 +77,7 @@ const PlayerTable = ({ players, onScoreChange, onRemovePlayer, onReorderPlayers,
           {players.length > 0 ? (
             players.map((player, index) => (
               <tr
-                key={player.id || index}
+                key={player.nickname}
                 draggable={true}
                 onDragStart={() => handleDragStart(index)}
                 onDragOver={(e) => handleDragOver(e, index)}

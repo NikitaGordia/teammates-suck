@@ -10,124 +10,136 @@ const NATIONS_POOL = [
   'Switzerland', 'Scotland'
 ];
 
-// Utility function to generate random nations assignments - exported for use in other components
+// Utility function to generate random nations assignments as a Map
 export const generateNationsAssignments = (teams) => {
-  // Shuffle using Array.prototype.sort and Math.random
   const team1Shuffled = [...teams.team1].sort(() => Math.random() - 0.5);
   const team2Shuffled = [...teams.team2].sort(() => Math.random() - 0.5);
 
   const playersPerTeam = Math.max(team1Shuffled.length, team2Shuffled.length);
-  if (playersPerTeam === 0) return [];
+  if (playersPerTeam === 0) return new Map();
 
-  // Randomly select nations (with replacement), like Python's random.choice
-  const selectedNations = Array.from({ length: playersPerTeam }, () => 
-    NATIONS_POOL[Math.floor(Math.random() * NATIONS_POOL.length)]
-  );
-
-  // Create nation assignments
-  const assignments = [];
+  const availableNations = [...NATIONS_POOL];
+  const selectedNations = [];
   for (let i = 0; i < playersPerTeam; i++) {
-    const team1Player = team1Shuffled[i]?.nickname || '';
-    const team2Player = team2Shuffled[i]?.nickname || '';
+    if (availableNations.length === 0) break;
+    const randomIndex = Math.floor(Math.random() * availableNations.length);
+    selectedNations.push(availableNations.splice(randomIndex, 1)[0]);
+  }
+  
+  const assignments = new Map();
+  for (let i = 0; i < playersPerTeam; i++) {
     const nation = selectedNations[i];
-
-    if (team1Player && team2Player) {
-      assignments.push(`${nation} - ${team1Player}/${team2Player}`);
-    } else if (team1Player) {
-      assignments.push(`${nation} - ${team1Player}`);
-    } else if (team2Player) {
-      assignments.push(`${nation} - ${team2Player}`);
+    if (nation) {
+        if (team1Shuffled[i]) {
+            assignments.set(team1Shuffled[i].id, nation);
+        }
+        if (team2Shuffled[i]) {
+            // This assumes players are paired up and get the same nation.
+            // If a player from team 1 and team 2 exist at the same index, they share a nation.
+            assignments.set(team2Shuffled[i].id, nation);
+        }
     }
   }
 
   return assignments;
 };
 
-// Utility function to generate clipboard text - exported for use in other components
-export const generateClipboardText = (teams, withNations = false) => {
-  // Create team strings with different color prefixes for each team
-  const team1ColorPrefix = "%color(2196F3)%"; // Blue for Team 1
-  const team2ColorPrefix = "%color(FFC107)%"; // Yellow for Team 2
+// Utility function to generate clipboard text with inline nations
+export const generateClipboardText = (teams, nationsAssignments = null) => {
+  const team1ColorPrefix = "%color(2196F3)%";
+  const team2ColorPrefix = "%color(FFC107)%";
 
-  // Format Team 1 players
-  const team1String = teams.team1.length > 0
-    ? `${team1ColorPrefix}${teams.team1.map(player => `${player.nickname}-1`).join(',')}`
-    : '';
+  const hasNations = nationsAssignments instanceof Map && nationsAssignments.size > 0;
 
-  // Format Team 2 players
-  const team2String = teams.team2.length > 0
-    ? `${team2ColorPrefix}${teams.team2.map(player => `${player.nickname}-2`).join(',')}`
-    : '';
+  const team1Players = teams.team1.map(player => 
+    `${player.nickname}-1` + (hasNations && nationsAssignments.get(player.id) ? `(${nationsAssignments.get(player.id)})` : '')
+  );
 
-  // Join teams with newlines, filtering out empty teams
+  const team2Players = teams.team2.map(player => 
+    `${player.nickname}-2` + (hasNations && nationsAssignments.get(player.id) ? `(${nationsAssignments.get(player.id)})` : '')
+  );
+
+  const splitLines = (players) => {
+    if (players.length > 3) {
+      const splitPoint = Math.ceil(players.length / 2);
+      return [players.slice(0, splitPoint), players.slice(splitPoint)];
+    }
+    return players.length > 0 ? [players] : [];
+  };
+
+  const team1Lines = splitLines(team1Players);
+  const team2Lines = splitLines(team2Players);
+
+  const team1String = team1Lines.map(line => `${team1ColorPrefix}${line.join(',')}`).join('\n');
+  const team2String = team2Lines.map(line => `${team2ColorPrefix}${line.join(',')}`).join('\n');
+
   const teamsText = [team1String, team2String]
     .filter(teamStr => teamStr.length > 0)
     .join('\n');
 
-  let result = teamsText.length > 0 ? `\n${teamsText}` : '';
-
-  if (withNations && (teams.team1.length > 0 || teams.team2.length > 0)) {
-    const nationsAssignments = generateNationsAssignments(teams);
-    if (nationsAssignments.length > 0) {
-      result += '\n' + nationsAssignments.join('\n');
-    }
-  }
-
-  return result;
+  return teamsText.length > 0 ? `\n${teamsText}` : '';
 };
 
-// Utility function to copy teams to clipboard - exported for use in other components
-export const copyTeamsToClipboard = (teams, withNations = false) => {
-  const clipboardText = generateClipboardText(teams, withNations);
+// Utility function to copy teams to clipboard
+export const copyTeamsToClipboard = (teams, nationsAssignments = null) => {
+  const clipboardText = generateClipboardText(teams, nationsAssignments);
   navigator.clipboard.writeText(clipboardText);
   return clipboardText;
 };
 
 const TeamCopyText = ({ teams, autocopied = false }) => {
-
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
-  const [withNations, setWithNations] = useState(false);
-  const [nationsAssignments, setNationsAssignments] = useState([]);
+  // MODIFIED: State holds a Map now, not an array.
+  const [nationsAssignments, setNationsAssignments] = useState(new Map());
 
+  // When teams change, clear the nations map.
   useEffect(() => {
-    setWithNations(false);
-    setNationsAssignments([]);
+    setNationsAssignments(new Map());
   }, [teams]);
 
   const handleCopy = () => {
-    copyTeamsToClipboard(teams, withNations);
+    // MODIFIED: Check map size instead of array length.
+    copyTeamsToClipboard(teams, nationsAssignments.size > 0 ? nationsAssignments : null);
     setCopied(true);
-
-    // Reset copied state after 2 seconds
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleAddNations = () => {
     const newNationsAssignments = generateNationsAssignments(teams);
-    console.log(newNationsAssignments);
-    const translatedAssignments = newNationsAssignments.map(pair => {
-      // Split the pair into player and nation
-      const [nation, player] = pair.split(' - ');
-      return t('nations.' + nation.toLowerCase()) + ' - ' + player;
-    });
-    setNationsAssignments(translatedAssignments);
-    setWithNations(true);
-
-    // Automatically copy to clipboard with nations
-    copyTeamsToClipboard(teams, true);
+    setNationsAssignments(newNationsAssignments);
+    copyTeamsToClipboard(teams, newNationsAssignments);
     setCopied(true);
-
-    // Reset copied state after 2 seconds
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  // Use either manual copy state or auto-copied state from props
   const isCopied = copied || autocopied;
+
+  // --- START of JSX rendering logic ---
+  const hasNations = nationsAssignments.size > 0;
+
+  // Helper function to create the display strings for a team's players
+  const createPlayerDisplayStrings = (teamPlayers, teamNumber) => {
+    return teamPlayers.map(player => {
+      const nation = hasNations ? nationsAssignments.get(player.id) : null;
+      // Translate nation for display, fallback to original name if no translation
+      const translatedNation = nation ? t(`nations.${nation.toLowerCase()}`, nation) : '';
+      return `${player.nickname}-${teamNumber}${translatedNation ? `(${translatedNation})` : ''}`;
+    });
+  };
+
+  // Helper function to split players into multiple lines for display
+  const getDisplayLines = (players) => {
+    if (players.length > 3) {
+      const splitPoint = Math.ceil(players.length / 2);
+      return [players.slice(0, splitPoint), players.slice(splitPoint)];
+    }
+    return players.length > 0 ? [players] : [];
+  };
+
+  const team1DisplayLines = getDisplayLines(createPlayerDisplayStrings(teams.team1, 1));
+  const team2DisplayLines = getDisplayLines(createPlayerDisplayStrings(teams.team2, 2));
+  // --- END of JSX rendering logic ---
 
   return (
     <div className="copy-container">
@@ -144,40 +156,23 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
       <div className="copy-text-box">
         <div className="clipboard-section">
           <strong>{t('teams.format')}</strong><br />
+          {/* MODIFIED: This section now dynamically renders lines and inline nations */}
           <div className="team-format">
-            {/* Display newline at the beginning */}
             <div className="newline-indicator">↵</div>
-
-            {/* Display Team 1 */}
-            {teams.team1.length > 0 && (
-              <div className="team-line team1-line">
+            {team1DisplayLines.map((line, index) => (
+              <div key={`t1-line-${index}`} className="team-line team1-line">
                 <span className="color-prefix team1-color">%color(2196F3)%</span>
-                {teams.team1.map(player => `${player.nickname}-1`).join(',')}
+                {line.join(',')}
               </div>
-            )}
-
-            {/* Display Team 2 */}
-            {teams.team2.length > 0 && (
-              <div className="team-line team2-line">
+            ))}
+            {team2DisplayLines.map((line, index) => (
+              <div key={`t2-line-${index}`} className="team-line team2-line">
                 <span className="color-prefix team2-color">%color(FFC107)%</span>
-                {teams.team2.map(player => `${player.nickname}-2`).join(',')}
+                {line.join(',')}
               </div>
-            )}
-
-            {/* Show message if no teams */}
+            ))}
             {teams.team1.length === 0 && teams.team2.length === 0 && (
               <div>{t('teams.noPlayers')}</div>
-            )}
-
-            {/* Display nations assignments if they exist */}
-            {withNations && nationsAssignments.length > 0 && (
-              <div className="nations-section">
-                {nationsAssignments.map((assignment, index) => (
-                  <div key={index} className="nation-assignment">
-                    {assignment}
-                  </div>
-                ))}
-              </div>
             )}
           </div>
         </div>
@@ -187,17 +182,9 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
         className={`copy-button ${isCopied ? 'copied' : ''}`}
       >
         {isCopied ? (
-          <>
-            <span className="checkmark"></span>
-            {autocopied ? t('teams.teamsAutoCopied') : t('teams.copied')}
-          </>
+          <><span className="checkmark"></span> {autocopied ? t('teams.teamsAutoCopied') : t('teams.copied')}</>
         ) : (
-          <>
-            <svg className="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="white"/>
-            </svg>
-            {t('teams.copyToClipboard')}
-          </>
+          <><svg className="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="white"/></svg> {t('teams.copyToClipboard')}</>
         )}
       </button>
     </div>
