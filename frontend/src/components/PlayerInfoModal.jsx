@@ -109,7 +109,7 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
       return date;
     }).reduce((chartData, date) => {
       const { wins = 0, losses = 0 } = statsByDay.get(toYMD(date)) || {};
-      chartData.labels.push(date.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' }));
+      chartData.labels.push(`${date.getDate()}/${date.getMonth() + 1}`);
       chartData.wins.push(wins);
       chartData.losses.push(losses);
       return chartData;
@@ -150,7 +150,7 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
     });
     
     return {
-      labels: chartDates.map(d => d.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })),
+      labels: chartDates.map(d => `${d.getDate()}/${d.getMonth() + 1}`),
       winRates,
     };
   };
@@ -294,7 +294,7 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
                             acc[`rankChange${index}`] = {
                               type: 'point',
                               xValue: labelIndex,
-                              yValue: Math.max(...dailyActivity.wins, ...dailyActivity.losses) + 1,
+                              yValue: 0,
                               backgroundColor: change.change_type === 'promotion' ? 'rgba(76, 175, 80, 0.8)' : 'rgba(244, 67, 54, 0.8)',
                               borderColor: change.change_type === 'promotion' ? 'rgba(76, 175, 80, 1)' : 'rgba(244, 67, 54, 1)',
                               borderWidth: 2,
