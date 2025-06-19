@@ -10,6 +10,8 @@ const NATIONS_POOL = [
   'Switzerland', 'Scotland'
 ];
 
+const SPLIT_LINE_THRESHOLD = 2;
+
 // Utility function to generate random nations assignments as a Map
 export const generateNationsAssignments = (teams) => {
   const team1Shuffled = [...teams.team1].sort(() => Math.random() - 0.5);
@@ -44,6 +46,15 @@ export const generateNationsAssignments = (teams) => {
   return assignments;
 };
 
+export const localizeNations = (nationsAssignments, t) => {
+  const localizedAssignments = new Map();
+  for (const [playerId, nation] of nationsAssignments) {
+    const translatedNation = t(`nations.${nation.toLowerCase()}`, nation);
+    localizedAssignments.set(playerId, translatedNation);
+  }
+  return localizedAssignments;
+};
+
 // Utility function to generate clipboard text with inline nations
 export const generateClipboardText = (teams, nationsAssignments = null) => {
   const team1ColorPrefix = "%color(2196F3)%";
@@ -60,7 +71,7 @@ export const generateClipboardText = (teams, nationsAssignments = null) => {
   );
 
   const splitLines = (players) => {
-    if (players.length > 3) {
+    if (players.length > SPLIT_LINE_THRESHOLD) {
       const splitPoint = Math.ceil(players.length / 2);
       return [players.slice(0, splitPoint), players.slice(splitPoint)];
     }
@@ -100,7 +111,7 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
 
   const handleCopy = () => {
     // MODIFIED: Check map size instead of array length.
-    copyTeamsToClipboard(teams, nationsAssignments.size > 0 ? nationsAssignments : null);
+    copyTeamsToClipboard(teams, nationsAssignments.size > 0 ? localizeNations(nationsAssignments, t) : null);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -108,7 +119,7 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
   const handleAddNations = () => {
     const newNationsAssignments = generateNationsAssignments(teams);
     setNationsAssignments(newNationsAssignments);
-    copyTeamsToClipboard(teams, newNationsAssignments);
+    copyTeamsToClipboard(teams, localizeNations(newNationsAssignments, t));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -130,7 +141,7 @@ const TeamCopyText = ({ teams, autocopied = false }) => {
 
   // Helper function to split players into multiple lines for display
   const getDisplayLines = (players) => {
-    if (players.length > 3) {
+    if (players.length > SPLIT_LINE_THRESHOLD) {
       const splitPoint = Math.ceil(players.length / 2);
       return [players.slice(0, splitPoint), players.slice(splitPoint)];
     }
