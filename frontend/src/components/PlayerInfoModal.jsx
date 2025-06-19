@@ -173,8 +173,6 @@ const PlayerInfoModal = ({ isOpen, onClose, playerData, isLoading, error, nickna
     );
   }
 
-  console.log('playerData', playerData)
-
   if (isLoading) {
     return (
       <div className="player-info-modal-overlay">

@@ -29,7 +29,6 @@ const Confetti = ({ isActive, duration = 3000 }) => {
       
       // Hide confetti after duration
       const timer = setTimeout(() => {
-        console.log('reset')
         setIsVisible(false);
         setParticles([]);
       }, duration);
