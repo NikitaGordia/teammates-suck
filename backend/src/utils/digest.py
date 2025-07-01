@@ -641,11 +641,12 @@ def generate(
     no_plots: bool = typer.Option(
         False, "-np", "--no-plots", help="Don't generate plots"
     ),
+    ignore: str = typer.Option(
+        "", "-ig", "--ignore", help="Players to ignore (comma-separated)"
+    ),
 ):
     start, end = get_last_month_date_range(days_shift)
     print(f"Digest for {start} to {end} period...")
-
-    digest_dir = get_digest_dir(start, end)
 
     top_players = get_top_active_players(start, end, top_n=10)
     admin_contributions = get_top_admins_by_contribution(start, end, top_n=10)
@@ -656,13 +657,18 @@ def generate(
     monthly_activity = get_game_activity_by_day_of_month(
         start, end, hours_shift=late_night_shift
     )
-    players_for_status_change = get_player_promotion_demotion_candidates(
-        min_games_threshold=10,
-        promotion_win_rate_pct=60.0,
-        demotion_win_rate_pct=40.0,
-        start_date_str=start,
-        end_date_str=end,
-    )
+    ignore_ids = [int(i) for i in ignore.split(",")] if len(ignore) > 0 else []
+    players_for_status_change = [
+        player
+        for player in get_player_promotion_demotion_candidates(
+            min_games_threshold=10,
+            promotion_win_rate_pct=60.0,
+            demotion_win_rate_pct=40.0,
+            start_date_str=start,
+            end_date_str=end,
+        )
+        if player["player_id"] not in ignore_ids
+    ]
 
     print("\n--- Raw Data ---")
     print("Top Players:")
@@ -679,44 +685,52 @@ def generate(
     print(monthly_activity)
     print("--- End of Raw Data ---\n")
 
-    if not no_plots:
-        print("--- Generating Plots ---")
-        plot_top_players(top_players, digest_dir, start, end)
-        plot_top_admins(admin_contributions, digest_dir, start, end)
-        plot_hourly_activity(hourly_activity, digest_dir, start, end)
-        plot_weekly_activity(weekly_activity, digest_dir, start, end)
-        plot_monthly_activity(monthly_activity, digest_dir, start, end)
-        print("--- Plot Generation Complete ---")
+    confirmed = typer.confirm("Save new digest?")
+    if confirmed:
+        digest_dir = get_digest_dir(start, end)
 
-    raw_digest = {
-        "metadata": {
-            "generated_on": datetime.now().isoformat(),
-            "period_start_date": start,
-            "period_end_date": end,
-        },
-        "top_players": top_players,
-        "top_admins": admin_contributions,
-        "players_for_status_change": players_for_status_change,
-        "hourly_activity": hourly_activity,
-        "weekly_activity_by_day": weekly_activity,
-        "total_activity_by_day_of_month": monthly_activity,
-    }
+        raw_digest = {
+            "metadata": {
+                "generated_on": datetime.now().isoformat(),
+                "period_start_date": start,
+                "period_end_date": end,
+            },
+            "top_players": top_players,
+            "top_admins": admin_contributions,
+            "players_for_status_change": players_for_status_change,
+            "hourly_activity": hourly_activity,
+            "weekly_activity_by_day": weekly_activity,
+            "total_activity_by_day_of_month": monthly_activity,
+        }
 
-    json_filepath = digest_dir / "raw_digest.json"
-    try:
-        with open(json_filepath, "w") as f:
-            json.dump(raw_digest, f, indent=4)
-        print(f"\n🗂️  Aggregated data report saved to: {json_filepath}")
-    except IOError as e:
-        print(f"Error saving data to JSON file {json_filepath}: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred while saving JSON to {json_filepath}: {e}")
+        if not no_plots:
+            print("--- Generating Plots ---")
+            plot_top_players(top_players, digest_dir, start, end)
+            plot_top_admins(admin_contributions, digest_dir, start, end)
+            plot_hourly_activity(hourly_activity, digest_dir, start, end)
+            plot_weekly_activity(weekly_activity, digest_dir, start, end)
+            plot_monthly_activity(monthly_activity, digest_dir, start, end)
+            print("--- Plot Generation Complete ---")
 
-    games = get_all_unique_games(start, end)
-    df = pd.DataFrame(games)
-    games_path = digest_dir / "games.xls"
-    df.to_excel(games_path)
-    print(f"👾 All games from {start} to {end} is saved to {games_path}")
+        json_filepath = digest_dir / "raw_digest.json"
+        try:
+            with open(json_filepath, "w") as f:
+                json.dump(raw_digest, f, indent=4)
+            print(f"\n🗂️  Aggregated data report saved to: {json_filepath}")
+        except IOError as e:
+            print(f"Error saving data to JSON file {json_filepath}: {e}")
+        except Exception as e:
+            print(
+                f"An unexpected error occurred while saving JSON to {json_filepath}: {e}"
+            )
+
+        games = get_all_unique_games(start, end)
+        df = pd.DataFrame(games)
+        games_path = digest_dir / "games.xls"
+        df.to_excel(games_path)
+        print(f"👾 All games from {start} to {end} is saved to {games_path}")
+    else:
+        print("Aborted.")
 
 
 def get_latest_digest_dir() -> Path:
